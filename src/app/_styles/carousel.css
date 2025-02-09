@@ -127,13 +127,11 @@
 
 .textEmbla__dots {
   z-index: 1;
-  /* bottom: 1.2rem; */
   position: absolute;
-  bottom: 16;
+  bottom: -32;
   right: 0;
   left: 0;
   display: flex;
-  /* flex-direction: column; */
   justify-content: center;
   align-items: center;
 }

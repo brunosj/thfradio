@@ -17,7 +17,6 @@ const useShowFilter = ({ items, selectedTag }: UseShowFilterProps) => {
     let filteredItems = items;
 
     if (selectedTag) {
-      const normalizedTag = normalizeTagName(selectedTag.name);
       filteredItems = items.filter((item) => {
         if (item.tags && item.tags.length > 0) {
           const matchingTags = item.tags.filter((tag) =>

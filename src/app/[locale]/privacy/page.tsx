@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { createMetadata } from '@/utils/metadata';
 import type { PageTypes } from '@/types/ResponsesInterface';
+
 async function getPrivacyPageData(locale: string = 'en') {
   const pagesResponse = await fetch(
     `${process.env.STRAPI_PUBLIC_API_URL}pages?locale=${locale}&populate=*`,

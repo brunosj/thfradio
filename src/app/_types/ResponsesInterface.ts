@@ -1,9 +1,5 @@
 export interface PageTypes {
-  attributes: {
-    title: string;
-    slug: string;
-    description: string;
-  };
+  attributes: PageComponent;
   id: number;
 }
 
@@ -71,6 +67,7 @@ export interface NewsType {
         };
       };
     };
+    locale: string;
     shows?: ShowTypes[];
   };
 }
@@ -165,6 +162,7 @@ export interface Pictures {
 
 export interface HomepageTypes {
   attributes: {
+    page: PageComponent;
     heroText: string;
     heroPictures: {
       data: Array<{

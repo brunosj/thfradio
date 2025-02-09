@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import type {
   CloudShowTypes,
   TagsList,
@@ -30,10 +30,10 @@ const FeaturedShows = ({ shows, tagsList }: FeaturedShowsProps) => {
   });
 
   // Function to randomly select 5 items from allItems
-  const randomizeItems = () => {
+  const randomizeItems = useCallback(() => {
     const shuffled = [...allItems].sort(() => 0.5 - Math.random());
     setRandomizedItems(shuffled.slice(0, 4));
-  };
+  }, [allItems]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -62,7 +62,7 @@ const FeaturedShows = ({ shows, tagsList }: FeaturedShowsProps) => {
   useEffect(() => {
     // Re-randomize items whenever randomTag or allItems changes
     if (randomTag) randomizeItems();
-  }, [randomTag, allItems]);
+  }, [randomizeItems, randomTag, allItems]);
 
   return (
     <div className='layout sectionPy bg-orange-500'>

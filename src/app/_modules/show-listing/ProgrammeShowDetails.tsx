@@ -9,10 +9,10 @@ import {
   SlSocialTwitter,
 } from 'react-icons/sl';
 import { Link } from '@/i18n/routing';
-import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { Wave } from '@/common/assets/WaveSVG';
 import { CMS_URL } from '@/utils/constants';
+import { useLocale } from 'next-intl';
 
 interface ShowDetailsProps {
   currentContent: {
@@ -43,8 +43,7 @@ interface ShowDetailsProps {
 }
 
 const ShowDetails: React.FC<ShowDetailsProps> = ({ currentContent }) => {
-  const router = useRouter();
-  let locale = router.locale;
+  const locale = useLocale();
 
   const getGermanDay = (day: string): string => {
     if (locale === 'en') {

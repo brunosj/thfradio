@@ -1,11 +1,7 @@
 import WidgetBot from '@widgetbot/react-embed';
 import { useState } from 'react';
 import { useEffect } from 'react';
-import {
-  DISCORD_SERVER_ID,
-  DISCORD_CHANNEL_ID,
-  DISCORD_INVITE_URL,
-} from '@/utils/constants';
+import { DISCORD_SERVER_ID, DISCORD_CHANNEL_ID } from '@/utils/constants';
 
 export default function DiscordEmbed() {
   const [window, setWindow] = useState<boolean>(false);

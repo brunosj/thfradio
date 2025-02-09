@@ -5,7 +5,6 @@ import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import logo from '@/assets/logo_white.png';
 import AudioPlayer from '@/modules/live-radio/AudioPlayer';

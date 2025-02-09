@@ -1,5 +1,4 @@
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import type { NewsType } from '@/types/ResponsesInterface';
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
@@ -11,7 +10,6 @@ interface NewsProps {
 }
 
 const NewsChild: React.FC<NewsProps> = ({ item }) => {
-  const router = useRouter();
   const formattedDate = formatDate(item.attributes.date);
 
   return (

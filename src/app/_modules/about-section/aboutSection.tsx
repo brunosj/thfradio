@@ -1,10 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import Image from 'next/image';
-import { CMS_URL } from '@/utils/constants';
 import Button from '@/common/ui/UIButton';
-import { useRouter } from 'next/navigation';
-import { useTranslation } from 'next-i18next';
-import clsx from 'clsx';
 import type { AboutSection } from '@/types/ResponsesInterface';
 
 const AboutSection = ({
@@ -14,8 +9,6 @@ const AboutSection = ({
   links,
   acceptApplications,
 }: AboutSection) => {
-  const { t } = useTranslation();
-
   return (
     <section className='layout bg-dark-blue sectionPy space-y-12'>
       <h1 className='text-white'>{title}</h1>

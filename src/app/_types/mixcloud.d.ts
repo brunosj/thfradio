@@ -5,28 +5,28 @@ export declare function PlayerWidget(
 export interface PlayerWidgetReturnType {
   events: {
     buffering: {
-      on: (e: any) => void;
-      off: (e: any) => void;
+      on: (e: unknown) => void;
+      off: (e: unknown) => void;
     };
     ended: {
-      on: (e: any) => void;
-      off: (e: any) => void;
+      on: (e: unknown) => void;
+      off: (e: unknown) => void;
     };
     error: {
-      on: (e: any) => void;
-      off: (e: any) => void;
+      on: (e: unknown) => void;
+      off: (e: unknown) => void;
     };
     pause: {
-      on: (e: any) => void;
-      off: (e: any) => void;
+      on: (e: unknown) => void;
+      off: (e: unknown) => void;
     };
     play: {
-      on: (e: any) => void;
-      off: (e: any) => void;
+      on: (e: unknown) => void;
+      off: (e: unknown) => void;
     };
     progress: {
-      on: (e: any) => void;
-      off: (e: any) => void;
+      on: (e: unknown) => void;
+      off: (e: unknown) => void;
     };
   };
   load: (cloudcastKey: string, startPlaying: boolean) => Promise<unknown>;

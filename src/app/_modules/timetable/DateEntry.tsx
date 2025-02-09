@@ -1,7 +1,7 @@
 // File: DateEntry.tsx
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import CalendarEntry from './CalendarEntry';
+import { useLocale } from 'next-intl';
 import type { CalendarEntry as CalendarEntryProps } from '@/types/ResponsesInterface';
 
 interface DateEntryProps {
@@ -10,8 +10,7 @@ interface DateEntryProps {
 }
 
 const DateEntry = ({ date, entriesForDate }: DateEntryProps) => {
-  const router = useRouter();
-  const { locale = 'en' } = router;
+  const locale = useLocale();
 
   const startDate = new Date(date);
   const dayName = startDate.toLocaleString(locale, {

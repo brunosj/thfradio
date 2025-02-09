@@ -1,9 +1,4 @@
-import { useState } from 'react';
 import { Link } from '@/i18n/routing';
-import { DISCORD_INVITE_URL } from '@/utils/constants';
-import DiscordEmbed from './DiscordEmbed';
-import { XMarkIcon } from '@/common/assets/XMarkIcon';
-import { TbBrandDiscord } from 'react-icons/tb';
 
 export default function JoinChatMobile() {
   return (

@@ -3,12 +3,10 @@ import React from 'react';
 import type { CalendarEntry as CalendarEntryProps } from '@/types/ResponsesInterface';
 
 import { Wave } from '@/common/assets/WaveSVG';
-import { useRouter } from 'next/navigation';
-import { time } from 'console';
+import { useLocale } from 'next-intl';
 
 const CalendarEntry = ({ entry }: { entry: CalendarEntryProps }) => {
-  const router = useRouter();
-  const { locale = 'en' } = router;
+  const locale = useLocale();
 
   const entryStartDate = new Date(entry.start);
   const entryEndDate = new Date(entry.end);
@@ -30,8 +28,6 @@ const CalendarEntry = ({ entry }: { entry: CalendarEntryProps }) => {
   const summaryClass = isCurrentShow
     ? 'bg-orange-500 text-white font-bold px-1'
     : '';
-
-  const timeClass = isCurrentShow ? ' bg-orange-500 text-white' : '';
 
   return (
     <div className='flex flex-col lg:flex-row gap-0 lg:gap-12'>

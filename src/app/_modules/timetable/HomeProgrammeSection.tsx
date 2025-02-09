@@ -24,7 +24,7 @@ const HomeProgrammeSection = ({
   }, [calendarEntries]);
 
   return (
-    <section className='bg-thf-blue-500 sectionPb' id='programme'>
+    <section className='bg-thf-blue-500 sectionPb scroll-mt-24' id='programme'>
       <SectionHeader title={title} text={text} />
       <div className='flex justify-around m-auto'>
         {isLoading ? (

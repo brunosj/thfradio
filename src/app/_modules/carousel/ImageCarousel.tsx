@@ -37,24 +37,8 @@ const ImageCarousel: React.FC<PropType> = (props) => {
   const [emblaRef, emblaApi] = useEmblaCarousel(options?.opts, [
     autoplay.current,
   ]);
-  const [prevBtnEnabled, setPrevBtnEnabled] = useState(false);
-  const [nextBtnEnabled, setNextBtnEnabled] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
-
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) {
-      emblaApi.scrollPrev();
-      autoplay.current.reset();
-    }
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    if (emblaApi) {
-      emblaApi.scrollNext();
-      autoplay.current.reset();
-    }
-  }, [emblaApi]);
 
   const scrollTo = useCallback(
     (index: number) => {
@@ -75,8 +59,6 @@ const ImageCarousel: React.FC<PropType> = (props) => {
   const onSelect = useCallback((emblaApi: CarouselApi) => {
     if (emblaApi) {
       setSelectedIndex(emblaApi.selectedScrollSnap());
-      setPrevBtnEnabled(emblaApi.canScrollPrev());
-      setNextBtnEnabled(emblaApi.canScrollNext());
     }
   }, []);
 

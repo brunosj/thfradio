@@ -6,7 +6,6 @@ import type { NewsType, PageTypes } from '@/types/ResponsesInterface';
 
 export default function NewsContent({ page }: { page: PageTypes }) {
   const { news } = useData();
-  console.log(news);
 
   return (
     <div className='bg-thf-blue-500 relative pt-6 lg:pt-10'>

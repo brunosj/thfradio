@@ -4,6 +4,8 @@ import NewsContent from './page.client';
 import type { PageTypes } from '@/types/ResponsesInterface';
 import { setRequestLocale } from 'next-intl/server';
 
+type Params = Promise<{ locale: string }>;
+
 async function getNewsPageData(locale: string) {
   try {
     const pagesResponse = await fetch(
@@ -16,7 +18,6 @@ async function getNewsPageData(locale: string) {
     }
 
     const pages = await pagesResponse.json();
-    console.log(pages);
     const [page] = pages.data.filter(
       (page: PageTypes) => page.attributes.slug === 'news'
     );
@@ -35,9 +36,9 @@ async function getNewsPageData(locale: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: Params;
 }): Promise<Metadata> {
-  const locale = await params.locale;
+  const { locale } = await params;
   const page = await getNewsPageData(locale);
 
   if (!page) {
@@ -53,12 +54,8 @@ export async function generateMetadata({
   });
 }
 
-export default async function NewsPage({
-  params,
-}: {
-  params: { locale: string };
-}) {
-  const locale = await params.locale;
+export default async function NewsPage({ params }: { params: Params }) {
+  const { locale } = await params;
   setRequestLocale(locale);
 
   const page = await getNewsPageData(locale);

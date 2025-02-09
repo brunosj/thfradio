@@ -1,5 +1,4 @@
 import ReactMarkdown from 'react-markdown';
-import { ReactNode } from 'react';
 
 type SectionHeaderProps = {
   title: string;

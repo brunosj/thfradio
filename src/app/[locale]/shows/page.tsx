@@ -1,7 +1,8 @@
+import type { PageTypes } from '@/types/ResponsesInterface';
+
 import { Metadata } from 'next';
 import ProgrammeShows from '@/modules/show-listing/ProgrammeShows';
 import { createMetadata } from '@/utils/metadata';
-import type { PageTypes } from '@/types/ResponsesInterface';
 
 async function getShowsPageData(locale: string = 'en') {
   const pagesResponse = await fetch(
@@ -33,7 +34,7 @@ export default async function ShowsPage() {
           <h1 className='text-white'>{page.attributes.title}</h1>
         </div>
       </div>
-      <ProgrammeShows items={page.attributes.programmeShows} />
+      <ProgrammeShows />
     </>
   );
 }

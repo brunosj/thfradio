@@ -20,7 +20,7 @@ const HomeArchiveSection = ({ title, text, shows, tagsList }: ArchiveProps) => {
     }
   }, [shows]);
   return (
-    <section className='bg-dark-blue' id='latest'>
+    <section className='bg-dark-blue scroll-mt-24' id='latest'>
       <SectionHeader title={title} text={text} />
       <div className='flex w-full m-auto'>
         {isLoading ? (

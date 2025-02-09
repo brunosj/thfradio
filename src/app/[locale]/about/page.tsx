@@ -1,3 +1,4 @@
+import type { PageTypes } from '@/types/ResponsesInterface';
 import { Metadata } from 'next';
 import Image from 'next/image';
 import { createMetadata } from '@/utils/metadata';
@@ -17,7 +18,7 @@ async function getAboutPageData(locale: string = 'en') {
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getAboutPageData();
-  return generateMetadata({
+  return createMetadata({
     title: page.attributes.title,
     description: page.attributes.description,
   });

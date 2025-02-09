@@ -1,7 +1,8 @@
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export const useSmoothScroll = () => {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleAnchorLinkClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -9,7 +10,7 @@ export const useSmoothScroll = () => {
   ) => {
     e.preventDefault();
 
-    if (href.startsWith('/#') && router.pathname === '/') {
+    if (href.startsWith('/#') && pathname === '/') {
       const element = document.getElementById(href.slice(2));
 
       if (element) {

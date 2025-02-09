@@ -16,15 +16,16 @@ export default function usePlayerState({
   const activePlayerSet = useGlobalStore((state) => state.activePlayerSet);
 
   useEffect(() => {
+    const audio = audioRef?.current;
     const setStatePlaying = () => setIsPlaying(true);
     const setStatePaused = () => setIsPlaying(false);
 
-    audioRef?.current?.addEventListener('play', setStatePlaying);
-    audioRef?.current?.addEventListener('pause', setStatePaused);
+    audio?.addEventListener('play', setStatePlaying);
+    audio?.addEventListener('pause', setStatePaused);
 
     return () => {
-      audioRef?.current?.removeEventListener('play', setStatePlaying);
-      audioRef?.current?.removeEventListener('pause', setStatePaused);
+      audio?.removeEventListener('play', setStatePlaying);
+      audio?.removeEventListener('pause', setStatePaused);
     };
   }, [audioRef]);
 

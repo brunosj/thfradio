@@ -1,6 +1,5 @@
 import type { CloudShowTypes, ValidShow } from '@/types/ResponsesInterface';
 import { parse, toDate, isValid, format } from 'date-fns';
-import { formatDate } from './formatDate';
 
 export const getShowName = (item: CloudShowTypes): string | null => {
   if (!item.name.includes('//')) {

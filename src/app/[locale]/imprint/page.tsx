@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { createMetadata } from '@/utils/metadata';
+import { PageTypes } from '@/app/_types/ResponsesInterface';
 
 async function getImprintPageData(locale: string = 'en') {
   const pagesResponse = await fetch(
@@ -15,7 +16,7 @@ async function getImprintPageData(locale: string = 'en') {
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getImprintPageData();
-  return generateMetadata({
+  return createMetadata({
     title: page.attributes.title,
     description: page.attributes.description,
   });

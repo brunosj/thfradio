@@ -1,27 +1,24 @@
 'use client';
 
-import { useState, useRef, useEffect, createRef } from 'react';
+import { useRef, useEffect, createRef } from 'react';
 import type { ShowTypes } from '@/types/ResponsesInterface';
 
 interface RefsObject {
-  [key: string]: React.RefObject<HTMLDivElement>;
+  [key: string]: React.RefObject<HTMLDivElement | null>;
 }
 
 const useShowListings = (
   items: ShowTypes[]
-): [RefsObject, string, (letter: string) => void] => {
-  const [activeLetter, setActiveLetter] = useState<string>('');
+): [RefsObject, (letter: string) => void] => {
   const refs = useRef<RefsObject>({});
 
   useEffect(() => {
     items.forEach((item) => {
-      refs.current[item.id] = createRef();
+      refs.current[item.id] = createRef<HTMLDivElement>();
     });
   }, [items]);
 
   const scrollToShow = (letter: string) => {
-    setActiveLetter(letter);
-
     const showsWithLetter = items.filter(
       (item) => item.attributes.title[0].toLowerCase() === letter.toLowerCase()
     );
@@ -43,7 +40,7 @@ const useShowListings = (
     }
   };
 
-  return [refs.current, activeLetter, scrollToShow];
+  return [refs.current, scrollToShow];
 };
 
 export default useShowListings;

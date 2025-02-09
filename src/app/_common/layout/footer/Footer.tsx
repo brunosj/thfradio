@@ -47,7 +47,7 @@ const Footer = () => {
           {followMenuKeys.map((key) => {
             const menuItem = t
               .raw('followMenu')
-              .find((item: any) => item.name === key);
+              .find((item: { name: string }) => item.name === key);
             if (!menuItem) return null;
 
             return (
@@ -71,7 +71,9 @@ const Footer = () => {
           {contactMenuKeys.map((key) => {
             const menuItem = t
               .raw('contactMenu')
-              .find((item: any) => item.name.toLowerCase().includes(key));
+              .find((item: { name: string }) =>
+                item.name.toLowerCase().includes(key)
+              );
             if (!menuItem) return null;
 
             return (
@@ -93,7 +95,9 @@ const Footer = () => {
           {extraMenuKeys.map((key) => {
             const menuItem = t
               .raw('extraMenu')
-              .find((item: any) => item.path.includes(key));
+              .find((item: { path: string; name: string }) =>
+                item.path.includes(key)
+              );
             if (!menuItem) return null;
 
             return (

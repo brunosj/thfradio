@@ -9,9 +9,6 @@ const CodeOfConductSection = ({ textSlides }: Props) => {
   return (
     <section className='sectionPy bg-orange-500'>
       <div className='text-white text-center'>
-        <h1 className='text-thf-blue-500 uppercase tracking-wider'>
-          Code of Conduct
-        </h1>
         <TextCarousel slides={textSlides} />
       </div>
     </section>

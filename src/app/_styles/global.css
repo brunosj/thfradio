@@ -64,6 +64,10 @@
   font-display: swap;
 }
 
+/* * {
+  outline: 1px solid gray;
+} */
+
 h1 {
   @apply text-3xl font-bold lg:text-4xl mb-6 last:mb-0;
 }

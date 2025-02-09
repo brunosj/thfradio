@@ -1,9 +1,12 @@
+import type { HomepageTypes } from '@/types/ResponsesInterface';
 import { Metadata } from 'next';
 import { createMetadata } from '@/utils/metadata';
 import HomeContent from './page.client';
 import { setRequestLocale } from 'next-intl/server';
 
-async function getHomePageData(locale: string) {
+type Params = Promise<{ locale: string }>;
+
+async function getHomePageData(locale: string): Promise<HomepageTypes | null> {
   try {
     const pagesResponse = await fetch(
       `${process.env.STRAPI_PUBLIC_API_URL}homepage?locale=${locale}&populate=*`,
@@ -32,9 +35,9 @@ async function getHomePageData(locale: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: Params;
 }): Promise<Metadata> {
-  const locale = await params.locale;
+  const { locale } = await params;
   const page = await getHomePageData(locale);
 
   if (!page) {
@@ -45,17 +48,13 @@ export async function generateMetadata({
   }
 
   return createMetadata({
-    title: page.attributes.title,
-    description: page.attributes.description,
+    title: page.attributes.page.title,
+    description: page.attributes.page.description,
   });
 }
 
-export default async function HomePage({
-  params,
-}: {
-  params: { locale: string };
-}) {
-  const locale = await params.locale;
+export default async function HomePage({ params }: { params: Params }) {
+  const { locale } = await params;
   setRequestLocale(locale);
 
   const page = await getHomePageData(locale);

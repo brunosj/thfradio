@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { CloudShowTypes, TagTypes, TagsList } from '@/types/ResponsesInterface';
-import { useRouter } from 'next/navigation';
 import useShowFilter from '@/hooks/useShowFilter';
 import CloudShowsList from './CloudShowsList';
 import CloudShowsFilter from './CloudShowsFilter';
-import { useTranslation } from 'next-i18next';
 import Pagination from '@/common/ui/Pagination';
 
 interface ShowCardProps {
@@ -16,9 +14,6 @@ const ITEMS_PER_PAGE = 28;
 
 const CloudShowsComponent = ({ items, tagsList }: ShowCardProps) => {
   // i18n
-  const router = useRouter();
-  const { t } = useTranslation();
-  let locale = router.locale;
 
   // State variables
   const [selectedTag, setSelectedTag] = useState<TagTypes | null>(null);

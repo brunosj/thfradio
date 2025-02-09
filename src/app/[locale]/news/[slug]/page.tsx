@@ -1,77 +1,76 @@
 import { Metadata } from 'next';
-import Image from 'next/image';
 import { createMetadata } from '@/utils/metadata';
 import { CMS_URL } from '@/utils/constants';
-import { formatDate } from '@/utils/formatDate';
+import { setRequestLocale } from 'next-intl/server';
+import type { NewsType } from '@/types/ResponsesInterface';
+import NewsContent from './page.client';
 
-async function getNewsArticle(slug: string) {
+async function getNewsArticle(slug: string, locale: string) {
   const res = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}news?locale=all&populate=*`,
+    `${process.env.STRAPI_PUBLIC_API_URL}news?locale=${locale}&filters[slug][$eq]=${slug}&populate=*`,
     { next: { revalidate: 10 } }
   );
   const initial = await res.json();
-  const currentLocaleEntry = initial.data.find(
-    (entry: NewsTypes) =>
-      entry.attributes.slug === slug && entry.attributes.locale === 'en'
-  );
-  return currentLocaleEntry;
+  return initial.data[0];
 }
+
+type Params = Promise<{ slug: string; locale: string }>;
 
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Params;
 }): Promise<Metadata> {
-  const article = await getNewsArticle(params.slug);
+  const { locale, slug } = await params;
+  const article = await getNewsArticle(slug, locale);
   const image = article.attributes.picture?.data?.attributes.url || '';
 
-  return generateMetadata({
+  return createMetadata({
     title: article.attributes.title,
     description: article.attributes.description,
     image: `${CMS_URL}${image}`,
   });
 }
 
-export default async function NewsArticlePage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const article = await getNewsArticle(params.slug);
+export default async function NewsArticlePage({ params }: { params: Params }) {
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
 
-  return (
-    <article className='min-h-screen'>
-      {article.attributes.picture?.data && (
-        <div className='relative h-[50vh] w-full'>
-          <Image
-            src={`${CMS_URL}${article.attributes.picture.data.attributes.url}`}
-            alt={article.attributes.title}
-            fill
-            className='object-cover'
-          />
-        </div>
-      )}
-      <div className='layout py-8 lg:py-16'>
-        <h1>{article.attributes.title}</h1>
-        <time className='text-sm text-gray-500 block mt-2'>
-          {formatDate(article.attributes.date)}
-        </time>
-        <div
-          className='prose prose-lg mt-8'
-          dangerouslySetInnerHTML={{ __html: article.attributes.content }}
-        />
-      </div>
-    </article>
-  );
+  const article = await getNewsArticle(slug, locale);
+
+  if (!article) {
+    return <div>Failed to load article. Please try again later.</div>;
+  }
+
+  return <NewsContent article={article} />;
 }
 
 export async function generateStaticParams() {
-  const res = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}news?locale=all&populate=localizations`
-  );
-  const items = await res.json();
+  try {
+    const res = await fetch(
+      `${process.env.STRAPI_PUBLIC_API_URL}news?locale=all&populate=localizations`
+    );
 
-  return items.data.map((item: NewsTypes) => ({
-    slug: item.attributes.slug,
-  }));
+    if (!res.ok) {
+      console.error('Failed to fetch news data for static params');
+      return [];
+    }
+
+    const items = await res.json();
+
+    if (!items?.data) {
+      console.error('No data in news response for static params');
+      return [];
+    }
+
+    return (
+      items.data.map((item: NewsType) => ({
+        slug: item.attributes.slug,
+        locale: item.attributes.locale,
+      })) || []
+    );
+  } catch (error) {
+    console.error('Error generating static params for news:', error);
+    return [];
+  }
 }

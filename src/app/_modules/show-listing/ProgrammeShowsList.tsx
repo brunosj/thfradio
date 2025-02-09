@@ -49,6 +49,7 @@ const ProgrammeShowsList: React.FC<ProgrammeShowsListProps> = ({
                   key={letter}
                   onClick={() => scrollToShow(letter)}
                   aria-label={letter}
+                  className='hover:cursor-pointer'
                 >
                   {letter}
                 </button>
@@ -67,7 +68,7 @@ const ProgrammeShowsList: React.FC<ProgrammeShowsListProps> = ({
       )}
 
       {!isActive && <div className='bg-thf-blue-500 opacity-90 py-3' />}
-      <div className='layout py-12 bg-orange-500 grid grid-cols-1 gap-3 lg:gap-6'>
+      <div className='layout py-12 min-h-[60vh] bg-orange-500 grid grid-cols-1 gap-3 lg:gap-6'>
         {isLoading ? (
           <div className='m-auto text-center'>
             <BarsSpinner color='#1200ff' />
