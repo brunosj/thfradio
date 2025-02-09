@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { createMetadata } from '@/utils/metadata';
 import { CMS_URL } from '@/utils/constants';
 import { setRequestLocale } from 'next-intl/server';
-import type { NewsType } from '@/types/ResponsesInterface';
+// import type { NewsType } from '@/types/ResponsesInterface';
 import NewsContent from './page.client';
 
 async function getNewsArticle(slug: string, locale: string) {
@@ -45,32 +45,32 @@ export default async function NewsArticlePage({ params }: { params: Params }) {
   return <NewsContent article={article} />;
 }
 
-export async function generateStaticParams() {
-  try {
-    const res = await fetch(
-      `${process.env.STRAPI_PUBLIC_API_URL}news?locale=all&populate=localizations`
-    );
+// export async function generateStaticParams() {
+//   try {
+//     const res = await fetch(
+//       `${process.env.STRAPI_PUBLIC_API_URL}news?locale=all&populate=localizations`
+//     );
 
-    if (!res.ok) {
-      console.error('Failed to fetch news data for static params');
-      return [];
-    }
+//     if (!res.ok) {
+//       console.error('Failed to fetch news data for static params');
+//       return [];
+//     }
 
-    const items = await res.json();
+//     const items = await res.json();
 
-    if (!items?.data) {
-      console.error('No data in news response for static params');
-      return [];
-    }
+//     if (!items?.data) {
+//       console.error('No data in news response for static params');
+//       return [];
+//     }
 
-    return (
-      items.data.map((item: NewsType) => ({
-        slug: item.attributes.slug,
-        locale: item.attributes.locale,
-      })) || []
-    );
-  } catch (error) {
-    console.error('Error generating static params for news:', error);
-    return [];
-  }
-}
+//     return (
+//       items.data.map((item: NewsType) => ({
+//         slug: item.attributes.slug,
+//         locale: item.attributes.locale,
+//       })) || []
+//     );
+//   } catch (error) {
+//     console.error('Error generating static params for news:', error);
+//     return [];
+//   }
+// }

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { routing } from '@/i18n/routing';
+// import { routing } from '@/i18n/routing';
 import ClientLayout from './ClientLayout';
 import { DataProviderWrapper } from '@/app/_context/DataProviderWrapper';
 import LiveTicker from '@/modules/live-ticker/LiveTicker';
@@ -10,6 +10,15 @@ import JoinChat from '@/modules/chat/JoinChat';
 import Footer from '@/app/_common/layout/footer/Footer';
 import '@/styles/global.css';
 import '@/styles/carousel.css';
+
+type Params = Promise<{ locale: string }>;
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+type Props = {
+  children: React.ReactNode;
+  params: Params;
+  searchParams: SearchParams;
+};
 
 export const metadata: Metadata = {
   title: 'Your Site Title',
@@ -32,24 +41,18 @@ export const metadata: Metadata = {
   },
 };
 
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
+// export function generateStaticParams() {
+//   return routing.locales.map((locale) => ({ locale }));
+// }
 
-export default async function LocaleLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: { locale: string };
-}) {
-  const locale = await params.locale;
+export default async function LocaleLayout({ children, params }: Props) {
+  const { locale } = await params;
   // Enable static rendering
   const messages = await getMessages();
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
-      <DataProviderWrapper>
+      <DataProviderWrapper locale={locale}>
         <LiveTicker />
         <ClientLayout>
           <article>{children}</article>

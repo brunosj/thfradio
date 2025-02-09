@@ -1,6 +1,6 @@
 import ReactMarkdown from 'react-markdown';
 import Button from '@/common/ui/UIButton';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import clsx from 'clsx';
 import ImageCarousel from '../carousel/ImageCarousel';
 import type { Pictures } from '@/types/ResponsesInterface';
@@ -19,7 +19,7 @@ const Hero = ({
   showButtons,
   picturePosition,
 }: HeroProps) => {
-  const { t } = useTranslation();
+  const t = useTranslations();
   const handleAnchorLinkClick = useSmoothScroll();
 
   return (

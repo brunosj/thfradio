@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import type { ShowTypes } from '@/types/ResponsesInterface';
 import { CMS_URL } from '@/utils/constants';
 
@@ -13,7 +13,7 @@ const ProgrammeShowsChild = React.forwardRef<
   HTMLDivElement,
   ProgrammeShowsProps
 >(function ShowListingChild({ item }, ref) {
-  const { t } = useTranslation();
+  const t = useTranslations();
   const hasPicture = item.attributes.picture.data;
   const showContentClass = hasPicture
     ? 'pr-3 pl-4 lg:pl-12 space-y-2'

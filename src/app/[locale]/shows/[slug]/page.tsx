@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { createMetadata } from '@/utils/metadata';
 import ShowContent from './page.client';
 import { setRequestLocale } from 'next-intl/server';
-import type { ShowTypes } from '@/types/ResponsesInterface';
+// import type { ShowTypes } from '@/types/ResponsesInterface';
 import { CMS_URL } from '@/utils/constants';
 
 async function getShowData(slug: string, locale: string) {
@@ -35,17 +35,17 @@ export async function generateMetadata({
   });
 }
 
-export async function generateStaticParams() {
-  const res = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}shows?locale=all&populate=localizations`
-  );
-  const items = await res.json();
+// export async function generateStaticParams() {
+//   const res = await fetch(
+//     `${process.env.STRAPI_PUBLIC_API_URL}shows?locale=all&populate=localizations`
+//   );
+//   const items = await res.json();
 
-  return items.data.map((item: ShowTypes) => ({
-    slug: item.attributes.slug,
-    locale: item.attributes.locale,
-  }));
-}
+//   return items.data.map((item: ShowTypes) => ({
+//     slug: item.attributes.slug,
+//     locale: item.attributes.locale,
+//   }));
+// }
 
 export default async function ShowPage({ params }: { params: Params }) {
   const { locale, slug } = await params;

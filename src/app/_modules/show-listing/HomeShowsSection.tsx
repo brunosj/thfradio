@@ -1,7 +1,7 @@
 import SectionHeader from '@/common/layout/section/SectionHeader';
 import type { ShowTypes, PictureType } from '@/types/ResponsesInterface';
 import Button from '@/common/ui/UIButton';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import ImageGallery from '../image-gallery/imageGallery';
 
 interface ShowsProps {
@@ -12,7 +12,7 @@ interface ShowsProps {
 }
 
 const HomeShowSection = ({ title, pictures, text }: ShowsProps) => {
-  const { t } = useTranslation();
+  const t = useTranslations();
 
   return (
     <section className='bg-orange-500 sectionPb'>
