@@ -1,18 +1,9 @@
 import { Metadata } from 'next';
 import { createMetadata } from '@/utils/metadata';
 import ShowContent from './page.client';
-import { setRequestLocale } from 'next-intl/server';
-// import type { ShowTypes } from '@/types/ResponsesInterface';
+// import type { LocalizationType, ShowTypes } from '@/types/ResponsesInterface';
 import { CMS_URL } from '@/utils/constants';
-
-async function getShowData(slug: string, locale: string) {
-  const res = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}shows?locale=${locale}&filters[slug][$eq]=${slug}&populate=*`,
-    { next: { revalidate: 10 } }
-  );
-  const initial = await res.json();
-  return initial.data[0];
-}
+import { fetchShowBySlug } from '@/lib/shows';
 
 type Params = Promise<{ slug: string; locale: string }>;
 
@@ -22,7 +13,7 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const content = await getShowData(slug, locale);
+  const content = await fetchShowBySlug(slug, locale);
   const image =
     content.attributes.pictureFullWidth?.data?.attributes.url ||
     content.attributes.picture?.data?.attributes.url ||
@@ -36,22 +27,48 @@ export async function generateMetadata({
 }
 
 // export async function generateStaticParams() {
-//   const res = await fetch(
-//     `${process.env.STRAPI_PUBLIC_API_URL}shows?locale=all&populate=localizations`
-//   );
-//   const items = await res.json();
+//   try {
+//     const res = await fetch(
+//       `${process.env.STRAPI_PUBLIC_API_URL}shows?locale=all&populate=localizations`
+//     );
 
-//   return items.data.map((item: ShowTypes) => ({
-//     slug: item.attributes.slug,
-//     locale: item.attributes.locale,
-//   }));
+//     if (!res.ok) {
+//       console.error('Failed to fetch shows data for static params');
+//       return [];
+//     }
+
+//     const items = await res.json();
+
+//     if (!items?.data) {
+//       console.error('No data in shows response for static params');
+//       return [];
+//     }
+
+//     // Generate params for all locales and slugs
+//     const params = items.data.flatMap((item: ShowTypes) => {
+//       const localizations = item.attributes.localizations?.data || [];
+//       return [
+//         {
+//           slug: item.attributes.slug,
+//           locale: item.attributes.locale,
+//         },
+//         ...localizations.map((l: LocalizationType) => ({
+//           slug: l.attributes.slug,
+//           locale: l.attributes.locale,
+//         })),
+//       ];
+//     });
+
+//     return params;
+//   } catch (error) {
+//     console.error('Error generating static params for shows:', error);
+//     return [];
+//   }
 // }
 
 export default async function ShowPage({ params }: { params: Params }) {
   const { locale, slug } = await params;
-  setRequestLocale(locale);
-
-  const content = await getShowData(slug, locale);
+  const content = await fetchShowBySlug(slug, locale);
 
   if (!content) {
     return <div>Failed to load show content. Please try again later.</div>;

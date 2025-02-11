@@ -1,5 +1,9 @@
 export interface PageTypes {
-  attributes: PageComponent;
+  attributes: PageComponent & {
+    localizations?: {
+      data: LocalizationType[];
+    };
+  };
   id: number;
 }
 
@@ -69,6 +73,9 @@ export interface NewsType {
     };
     locale: string;
     shows?: ShowTypes[];
+    localizations?: {
+      data: LocalizationType[];
+    };
   };
 }
 
@@ -106,6 +113,9 @@ export interface ShowTypes {
           url: string;
         };
       };
+    };
+    localizations?: {
+      data: LocalizationType[];
     };
   };
   id: number;
@@ -162,7 +172,11 @@ export interface Pictures {
 
 export interface HomepageTypes {
   attributes: {
-    page: PageComponent;
+    page: PageComponent & {
+      localizations?: {
+        data: LocalizationType[];
+      };
+    };
     heroText: string;
     heroPictures: {
       data: Array<{
@@ -182,12 +196,19 @@ export interface HomepageTypes {
         };
       }>;
     };
+    localizations?: {
+      data: LocalizationType[];
+    };
   };
 }
 
 export interface AboutTypes {
   attributes: {
-    page: PageComponent;
+    page: PageComponent & {
+      localizations?: {
+        data: LocalizationType[];
+      };
+    };
     heroText: string;
     heroPictures: {
       data: Array<{
@@ -207,6 +228,9 @@ export interface AboutTypes {
       };
     };
     codeOfConduct: TextSlide[];
+    localizations?: {
+      data: LocalizationType[];
+    };
   };
 }
 
@@ -220,4 +244,12 @@ export interface PageComponent {
 export interface TextSlide {
   heading: string;
   text: string;
+}
+
+export interface LocalizationType {
+  id: number;
+  attributes: {
+    slug: string;
+    locale: string;
+  };
 }

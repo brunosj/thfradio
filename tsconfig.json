@@ -31,7 +31,8 @@
       "@/layout/*": ["./src/app/_common/layout/*"],
       "@/hooks/*": ["./src/app/_hooks/*"],
       "@/i18n/*": ["./src/i18n/*"],
-      "@/styles/*": ["./src/app/_styles/*"]
+      "@/styles/*": ["./src/app/_styles/*"],
+      "@/lib/*": ["./src/app/_lib/*"]
     }
   },
   "include": [

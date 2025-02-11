@@ -6,10 +6,15 @@ import HomeShowSection from '@/modules/show-listing/HomeShowsSection';
 import HomeProgrammeSection from '@/modules/timetable/HomeProgrammeSection';
 import HomeArchiveSection from '@/modules/archive/HomeArchiveSection';
 import HomeNewsSection from '@/modules/news/HomeNewsSection';
-import type { HomepageTypes } from '@/types/ResponsesInterface';
+import type { HomepageTypes, NewsType } from '@/types/ResponsesInterface';
 
-export default function HomeContent({ page }: { page: HomepageTypes }) {
-  const { cloudShows, calendarEntries, programmeShows, tagsList } = useData();
+interface HomeContentProps {
+  page: HomepageTypes;
+  latestNews: NewsType[];
+}
+
+export default function HomeContent({ page, latestNews }: HomeContentProps) {
+  const { cloudShows, calendarEntries, tagsList } = useData();
 
   if (!page) {
     return <div>Loading...</div>;
@@ -33,6 +38,7 @@ For any issues or dev-related questions, please get in touch at contact@landozon
       <HomeNewsSection
         title={page.attributes.news.title}
         text={page.attributes.news.text}
+        newsItems={latestNews}
       />
       <HomeProgrammeSection
         title={page.attributes.programme.title}
@@ -42,7 +48,6 @@ For any issues or dev-related questions, please get in touch at contact@landozon
       <HomeShowSection
         title={page.attributes.shows.title}
         text={page.attributes.shows.text}
-        showListings={programmeShows}
         pictures={page.attributes.pictureGallery.data}
       />
       <HomeArchiveSection

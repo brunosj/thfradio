@@ -2,43 +2,34 @@ import { DataProvider } from './DataContext';
 import type {
   CalendarEntry,
   CloudShowTypes,
-  CloudShows,
-  NewsType,
   TagsList,
   ShowTypes,
+  NewsType,
 } from '@/types/ResponsesInterface';
-
-type TagsListResponse = {
-  data: TagsList;
-};
-
-type CloudShowsResponse = {
-  data: CloudShows;
-};
-
-type NewsResponse = {
-  data: NewsType[];
-};
+import { fetchCalendar } from '@/lib/calendar';
+import { fetchCloudShows, fetchProgrammeShows } from '@/lib/shows';
+import { fetchNews } from '@/lib/news';
+import { fetchTags } from '@/lib/tags';
 
 async function fetchInitialData(locale: string) {
   try {
-    // Fetch calendar data
-    const calendarData = await fetchCalendar();
-
-    // Fetch cloud shows
-    const cloudShows = await fetchCloudShows();
-
-    // Fetch Strapi data
-    const [tagsList, programmeShows, news] = await Promise.all([
-      fetchTags(),
-      fetchProgrammeShows(locale),
+    // Fetch locale-dependent data
+    const [news, programmeShows] = await Promise.all([
       fetchNews(locale),
+      fetchProgrammeShows(locale),
+    ]);
+
+    // Fetch locale-independent data
+    const [calendarData, cloudShows, tagsList] = await Promise.all([
+      fetchCalendar(),
+      fetchCloudShows(),
+      fetchTags(),
     ]);
 
     return {
       cloudShows: Array.isArray(cloudShows) ? cloudShows : [],
-      tagsList: tagsList || {},
-      calendarEntries: Array.isArray(calendarData) ? calendarData : [],
+      tagsList: tagsList || { attributes: { tag: [] } },
+      calendarEntries: calendarData,
       programmeShows: Array.isArray(programmeShows) ? programmeShows : [],
       news: Array.isArray(news) ? news : [],
     };
@@ -54,61 +45,6 @@ async function fetchInitialData(locale: string) {
   }
 }
 
-async function fetchCalendar(): Promise<CalendarEntry[]> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/fetchCalendar`);
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('Error fetching calendar:', error);
-    return [];
-  }
-}
-
-async function fetchCloudShows(): Promise<CloudShowTypes[]> {
-  const limit = 100;
-  const totalItems = 1500;
-  const pages = Math.ceil(totalItems / limit);
-  const promises = [];
-
-  for (let i = 0; i < pages; i++) {
-    const promise = fetch(
-      `${process.env.MIXCLOUD_API}?offset=${i * limit}&limit=${limit}`
-    )
-      .then((res) => res.json())
-      .then((data) => data.data);
-    promises.push(promise);
-  }
-
-  const results = await Promise.all(promises);
-  return results.flat().slice(0, totalItems);
-}
-
-async function fetchTags() {
-  const response = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}tag-list?populate[tag][populate]=*`
-  );
-  const data = (await response.json()) as TagsListResponse;
-  return data.data;
-}
-
-async function fetchProgrammeShows(locale: string) {
-  const response = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}shows?locale=${locale}&populate=*`
-  );
-  const data = (await response.json()) as CloudShowsResponse;
-  return data.data;
-}
-
-async function fetchNews(locale: string) {
-  const response = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}news-items?locale=${locale}&populate=*`
-  );
-  const data = (await response.json()) as NewsResponse;
-  return data.data;
-}
-
 export async function DataProviderWrapper({
   children,
   locale = 'en',
@@ -116,8 +52,6 @@ export async function DataProviderWrapper({
   children: React.ReactNode;
   locale?: string;
 }) {
-  // Always fetch fresh data when locale changes since this is server-side
   const initialData = await fetchInitialData(locale);
-
   return <DataProvider initialData={initialData}>{children}</DataProvider>;
 }

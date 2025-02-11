@@ -1,18 +1,9 @@
 import { Metadata } from 'next';
 import { createMetadata } from '@/utils/metadata';
 import { CMS_URL } from '@/utils/constants';
-import { setRequestLocale } from 'next-intl/server';
-// import type { NewsType } from '@/types/ResponsesInterface';
+// import type { NewsType, LocalizationType } from '@/types/ResponsesInterface';
 import NewsContent from './page.client';
-
-async function getNewsArticle(slug: string, locale: string) {
-  const res = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}news?locale=${locale}&filters[slug][$eq]=${slug}&populate=*`,
-    { next: { revalidate: 10 } }
-  );
-  const initial = await res.json();
-  return initial.data[0];
-}
+import { fetchNewsArticle } from '@/lib/news';
 
 type Params = Promise<{ slug: string; locale: string }>;
 
@@ -22,21 +13,19 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const article = await getNewsArticle(slug, locale);
+  const article = await fetchNewsArticle(slug, locale);
   const image = article.attributes.picture?.data?.attributes.url || '';
 
   return createMetadata({
     title: article.attributes.title,
-    description: article.attributes.description,
+    description: article.attributes.summary,
     image: `${CMS_URL}${image}`,
   });
 }
 
 export default async function NewsArticlePage({ params }: { params: Params }) {
   const { locale, slug } = await params;
-  setRequestLocale(locale);
-
-  const article = await getNewsArticle(slug, locale);
+  const article = await fetchNewsArticle(slug, locale);
 
   if (!article) {
     return <div>Failed to load article. Please try again later.</div>;
@@ -63,12 +52,21 @@ export default async function NewsArticlePage({ params }: { params: Params }) {
 //       return [];
 //     }
 
-//     return (
-//       items.data.map((item: NewsType) => ({
-//         slug: item.attributes.slug,
-//         locale: item.attributes.locale,
-//       })) || []
-//     );
+//     const params = items.data.flatMap((item: NewsType) => {
+//       const localizations = item.attributes.localizations?.data || [];
+//       return [
+//         {
+//           slug: item.attributes.slug,
+//           locale: item.attributes.locale,
+//         },
+//         ...localizations.map((l: LocalizationType) => ({
+//           slug: l.attributes.slug,
+//           locale: l.attributes.locale,
+//         })),
+//       ];
+//     });
+
+//     return params;
 //   } catch (error) {
 //     console.error('Error generating static params for news:', error);
 //     return [];

@@ -1,12 +1,11 @@
 import SectionHeader from '@/common/layout/section/SectionHeader';
-import type { ShowTypes, PictureType } from '@/types/ResponsesInterface';
+import type { PictureType } from '@/types/ResponsesInterface';
 import Button from '@/common/ui/UIButton';
 import { useTranslations } from 'next-intl';
 import ImageGallery from '../image-gallery/imageGallery';
 
 interface ShowsProps {
   title: string;
-  showListings?: ShowTypes[];
   pictures: PictureType[];
   text: string;
 }

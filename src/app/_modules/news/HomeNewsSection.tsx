@@ -1,35 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { useData } from '@/app/_context/DataContext';
 import type { NewsType } from '@/types/ResponsesInterface';
 import SectionHeader from '@/common/layout/section/SectionHeader';
 import Button from '@/common/ui/UIButton';
 import NewsCarousel from '../carousel/NewsCarousel';
 import BarsSpinner from '@/common/ui/BarsSpinner';
+import { useTranslations } from 'next-intl';
 
 interface NewsProps {
   title: string;
   text: string;
+  newsItems: NewsType[];
 }
 
-export default function HomeNewsSection({ title, text }: NewsProps) {
-  const { news } = useData();
+export default function HomeNewsSection({ title, text, newsItems }: NewsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const t = useTranslations();
 
   useEffect(() => {
-    if (news && news.length > 0) {
+    if (newsItems && newsItems.length > 0) {
       setIsLoading(false);
     }
-  }, [news]);
-
-  const newsArray = news.sort(
-    (a: NewsType, b: NewsType) =>
-      new Date(b.attributes.date).getTime() -
-      new Date(a.attributes.date).getTime()
-  );
+  }, [newsItems]);
 
   return (
     <section className='bg-dark-blue sectionPb'>
@@ -40,7 +33,7 @@ export default function HomeNewsSection({ title, text }: NewsProps) {
             <BarsSpinner color='#1200ff' />
           </div>
         ) : (
-          <NewsCarousel slides={newsArray} />
+          <NewsCarousel slides={newsItems} />
         )}
       </div>
       <div className='pt-12 flex justify-center'>

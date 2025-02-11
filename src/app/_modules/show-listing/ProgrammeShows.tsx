@@ -1,28 +1,43 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ProgrammeShowsList from './ProgrammeShowsList';
 import { useLocale } from 'next-intl';
-import { useData } from '@/app/_context/DataContext';
+import BarsSpinner from '@/common/ui/BarsSpinner';
+import type { ShowTypes } from '@/types/ResponsesInterface';
 
-const ProgrammeShows: React.FC = () => {
-  const { programmeShows } = useData();
+interface ProgrammeShowsProps {
+  shows: ShowTypes[];
+}
+
+const ProgrammeShows: React.FC<ProgrammeShowsProps> = ({ shows }) => {
   const locale = useLocale();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  return (
-    <>
-      <ProgrammeShowsList
-        items={programmeShows}
-        isActive={true}
-        locale={locale}
-      />
-      {/* <ProgrammeShowsList
-        items={inactiveShows}
-        isActive={false}
-        locale={locale}
-      /> */}
-    </>
-  );
+  useEffect(() => {
+    setIsLoading(true);
+    if (shows && shows.length > 0) {
+      setIsLoading(false);
+      setError(null);
+    } else {
+      setError('Failed to load shows. Please try again later.');
+    }
+  }, [shows]);
+
+  if (error) {
+    return <div className='layout py-12 text-center text-white'>{error}</div>;
+  }
+
+  if (isLoading) {
+    return (
+      <div className='layout py-12 flex justify-center'>
+        <BarsSpinner color='#ff6314' />
+      </div>
+    );
+  }
+
+  return <ProgrammeShowsList items={shows} isActive={true} locale={locale} />;
 };
 
 export default ProgrammeShows;

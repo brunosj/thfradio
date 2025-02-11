@@ -10,8 +10,9 @@ import {
 import type { CalendarEntry } from '@/types/ResponsesInterface';
 import type { CalendarComponent, VEvent } from 'node-ical';
 
-export const dynamic = 'force-dynamic'; // Disable static optimization
-export const revalidate = 0; // Disable cache
+// Set revalidation period to 5 minutes
+export const revalidate = 300;
+
 type CalendarEntries = { [key: string]: CalendarComponent };
 
 export async function GET() {
@@ -58,7 +59,8 @@ export async function GET() {
     return NextResponse.json(upcomingShows, {
       status: 200,
       headers: {
-        'Cache-Control': 'no-store',
+        // Set cache control to allow caching with revalidation
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -76,7 +78,8 @@ export async function GET() {
       {
         status: 500,
         headers: {
-          'Cache-Control': 'no-store',
+          // Even errors can be cached briefly to prevent hammering the server
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
           'Access-Control-Allow-Origin': '*',
         },
       }

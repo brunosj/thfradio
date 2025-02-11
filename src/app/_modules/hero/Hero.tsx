@@ -72,10 +72,10 @@ const Hero = ({
           </div>
           <div className='hidden lg:flex justify-center order-4 pb-6 lg:pb-0'>
             <Button
-              path='/#latest'
+              path='#latest'
               color='white-orange'
               ariaLabel={`Navigate to Latest shows`}
-              onClick={(e) => handleAnchorLinkClick(e, '/#latest')}
+              onClick={(e) => handleAnchorLinkClick(e, '#latest')}
             >
               {t('latestShows')}
             </Button>

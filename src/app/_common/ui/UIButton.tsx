@@ -2,6 +2,7 @@ import { useRouter } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import type { Button as ButtonProps } from '@/types/uiInterface';
 import clsx from 'clsx';
+import { useParams } from 'next/navigation';
 
 const Button = ({
   children,
@@ -14,17 +15,22 @@ const Button = ({
   onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }) => {
   const isExternal = path.slice(0, 4) === 'http';
-  const isAnchor = path.startsWith('/#');
+  const isAnchor = path.startsWith('#');
   const router = useRouter();
+  const { locale } = useParams();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (onClick) {
       onClick(e);
     } else if (!isExternal && !isAnchor) {
       e.preventDefault();
-      router.push(path);
+      const localizedPath = path.startsWith('/') ? `/${locale}${path}` : path;
+      router.push(localizedPath);
     }
   };
+
+  // Prepare the path for the Link component
+  const linkPath = path.startsWith('/') ? `/${locale}${path}` : path;
 
   return (
     <button
@@ -50,9 +56,10 @@ const Button = ({
       ) : isAnchor ? (
         children
       ) : (
-        <Link href={path}>{children}</Link>
+        <Link href={linkPath}>{children}</Link>
       )}
     </button>
   );
 };
+
 export default Button;
