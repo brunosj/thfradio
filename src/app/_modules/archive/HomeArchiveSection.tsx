@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import SectionHeader from '@/common/layout/section/SectionHeader';
 import type { CloudShowTypes, TagsList } from '@/types/ResponsesInterface';
-import CloudShowsArchive from './CloudShowsArchive';
 import BarsSpinner from '@/common/ui/BarsSpinner';
-
+import { processShows } from '@/utils/showUtils';
+import CloudShowsComponent from './CloudShowsComponent';
 interface ArchiveProps {
   title: string;
   text: string;
@@ -19,6 +19,9 @@ const HomeArchiveSection = ({ title, text, shows, tagsList }: ArchiveProps) => {
       setIsLoading(false);
     }
   }, [shows]);
+
+  const sortedShows = processShows(shows);
+
   return (
     <section className='bg-dark-blue scroll-mt-24' id='latest'>
       <SectionHeader title={title} text={text} />
@@ -28,7 +31,7 @@ const HomeArchiveSection = ({ title, text, shows, tagsList }: ArchiveProps) => {
             <BarsSpinner color='#1200ff' />
           </div>
         ) : (
-          <CloudShowsArchive shows={shows} tagsList={tagsList} />
+          <CloudShowsComponent items={sortedShows} tagsList={tagsList} />
         )}
       </div>
     </section>

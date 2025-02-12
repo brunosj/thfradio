@@ -1,26 +1,35 @@
 import type { CloudShowTypes, ShowTypes } from '@/types/ResponsesInterface';
+import { fetchMixcloudShows } from './mixcloud';
+import { fetchSoundcloudShows } from './soundcloud';
 
 type ShowsType = {
   data: ShowTypes[];
 };
 
 export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
-  const limit = 100;
-  const totalItems = 1500;
-  const pages = Math.ceil(totalItems / limit);
-  const promises = [];
+  // Fetch Mixcloud shows first
+  const mixcloudShows = await fetchMixcloudShows().catch((error) => {
+    console.error('Error fetching Mixcloud shows:', error);
+    return [];
+  });
 
-  for (let i = 0; i < pages; i++) {
-    const promise = fetch(
-      `${process.env.MIXCLOUD_API}?offset=${i * limit}&limit=${limit}`
-    )
-      .then((res) => res.json())
-      .then((data) => data.data);
-    promises.push(promise);
+  // Then try to fetch Soundcloud shows, but don't let it break the response
+  let soundcloudShows: CloudShowTypes[] = [];
+  try {
+    soundcloudShows = await fetchSoundcloudShows();
+  } catch (error) {
+    console.error('Error fetching Soundcloud shows:', error);
+    // Continue with empty Soundcloud shows
   }
 
-  const results = await Promise.all(promises);
-  return results.flat().slice(0, totalItems);
+  console.log('Shows fetched:', {
+    mixcloud: mixcloudShows.length,
+    soundcloud: soundcloudShows.length,
+    total: mixcloudShows.length + soundcloudShows.length,
+  });
+
+  // Always return Mixcloud shows, with Soundcloud shows if available
+  return [...mixcloudShows, ...soundcloudShows];
 }
 
 export async function fetchProgrammeShows(locale: string) {

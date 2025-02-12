@@ -6,6 +6,7 @@ import ClientLayout from './ClientLayout';
 import { DataProviderWrapper } from '@/app/_context/DataProviderWrapper';
 import LiveTicker from '@/modules/live-ticker/LiveTicker';
 import MixcloudWidget from '@/modules/mixcloud/MixcloudWidget';
+import SoundcloudWidget from '@/modules/soundcloud/SoundcloudWidget';
 import JoinChat from '@/modules/chat/JoinChat';
 import Footer from '@/app/_common/layout/footer/Footer';
 import '@/styles/global.css';
@@ -59,6 +60,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         </ClientLayout>
         <Footer />
         <MixcloudWidget />
+        <SoundcloudWidget />
         <JoinChat />
       </DataProviderWrapper>
     </NextIntlClientProvider>

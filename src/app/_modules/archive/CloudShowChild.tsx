@@ -17,11 +17,20 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
   // Store state functionality
   const activePlayer = useGlobalStore((state) => state.activePlayer);
   const showKeySet = useGlobalStore((state) => state.showKeySet);
+  const trackIdSet = useGlobalStore((state) => state.trackIdSet);
   const setCurrentShowUrl = useGlobalStore((state) => state.setCurrentShowUrl);
   const currentShowUrl = useGlobalStore((state) => state.currentShowUrl);
 
   const onClick = () => {
-    showKeySet(getMixcloudKey(item.url));
+    if (item.platform === 'mixcloud') {
+      showKeySet(getMixcloudKey(item.url));
+    } else {
+      // Extract track ID from Soundcloud URL
+      const trackId = item.url.split('/').pop();
+      if (trackId) {
+        trackIdSet(trackId);
+      }
+    }
     setCurrentShowUrl(item.url);
   };
 
@@ -35,6 +44,14 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
   const name = getShowName(item);
   const formattedDate = getFormattedDateString(item);
 
+  // Rest of the component remains the same
+  // Just update the condition for showing the spinner:
+  const isPlaying =
+    currentShowUrl === item.url &&
+    ((item.platform === 'mixcloud' && activePlayer === ActivePlayer.MIXCLOUD) ||
+      (item.platform === 'soundcloud' &&
+        activePlayer === ActivePlayer.SOUNDCLOUD));
+
   return (
     <button
       className='flex flex-row w-full md:w-[48%] lg:w-[29%] xl:w-[22%]  border border-dark-blue bg-white font-mono duration-200 lg:flex-col rounded-xl p-4 group items-center '
@@ -42,7 +59,7 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
       aria-label={`Play ${item.name}`}
     >
       {/* Image */}
-      <div className='group relative flex justify-around items-center'>
+      <div className='group relative flex justify-around items-center hover:cursor-pointer'>
         <div className={`w-24 lg:w-40 xl:w-56`}>
           <Image
             quality={50}
@@ -55,14 +72,10 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
         </div>
         <div
           className={`absolute inset-0 m-auto flex w-1/3 items-center justify-center duration-300 opacity-0 group-hover:opacity-100 ${
-            currentShowUrl === item.url &&
-            activePlayer === ActivePlayer.MIXCLOUD
-              ? 'opacity-100'
-              : ' '
+            isPlaying ? 'opacity-100' : ' '
           }`}
         >
-          {currentShowUrl === item.url &&
-          activePlayer === ActivePlayer.MIXCLOUD ? (
+          {isPlaying ? (
             <BarsSpinner color='#1200ff' />
           ) : (
             <Play className='' fill='#1200ff' />

@@ -26,14 +26,38 @@ export interface CalendarEntry {
   summary: string;
 }
 
-export interface CloudShowTypes {
+// Platform-specific types
+export interface MixcloudShowType {
   name: string;
   url: string;
   key: string;
   pictures: {
     extra_large: string;
   };
-  slug: string;
+  tags: Array<{
+    key: string;
+    name: string;
+    url: string;
+  }>;
+}
+
+export interface SoundcloudShowType {
+  title: string;
+  permalink_url: string;
+  id: string;
+  artwork_url: string;
+  tags: string;
+}
+
+// Combined type for frontend use
+export interface CloudShowTypes {
+  name: string;
+  url: string;
+  key: string;
+  platform: 'mixcloud' | 'soundcloud';
+  pictures: {
+    extra_large: string;
+  };
   tags: Array<{
     key: string;
     name: string;
