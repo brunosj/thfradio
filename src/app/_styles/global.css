@@ -32,44 +32,12 @@
   --breakpoint-lg: 67.5rem; /* 1080px */
 }
 
-@font-face {
-  font-family: 'NeueMachina';
-  src: url('./fonts/NeueMachina-Regular.ttf');
-  font-weight: 450;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'NeueMachina';
-  src: url('./fonts/NeueMachina-Ultrabold.ttf');
-  font-weight: 600;
-  font-style: bold;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'SpaceMono';
-  src: url('./fonts/SpaceMono-Regular.ttf');
-  font-weight: 450;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'SpaceMono';
-  src: url('./fonts/SpaceMono-Regular.ttf');
-  font-weight: 300;
-  font-style: light;
-  font-display: swap;
-}
-
 /* * {
   outline: 1px solid gray;
 } */
 
 h1 {
-  @apply text-3xl font-bold lg:text-4xl mb-6 last:mb-0;
+  @apply text-3xl lg:text-4xl mb-6 last:mb-0;
 }
 
 h2 {

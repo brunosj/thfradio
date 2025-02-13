@@ -30,7 +30,7 @@ const Hero = ({
           'hidden border-2 border-white lg:flex h-full items-center rounded-xl'
         )}
       >
-        <div className='lg:px-12 lg:py-16 xl:py-24 px-6 py-12 text-center text-white markdown'>
+        <div className='lg:px-12 lg:py-16 xl:py-24 px-6 py-12 text-center text-white markdown font-semibold'>
           <ReactMarkdown>{description}</ReactMarkdown>
         </div>
       </div>

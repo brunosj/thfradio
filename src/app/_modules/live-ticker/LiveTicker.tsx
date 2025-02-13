@@ -1,30 +1,42 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import Marquee from 'react-fast-marquee';
 import { format, isWithinInterval, parseISO } from 'date-fns';
 import { enUS, de } from 'date-fns/locale';
-import { useData } from '@/app/_context/DataContext';
 import { ArrowRightLong } from '@/common/assets/ArrowRightLong';
 import AudioPlayer from '@/modules/live-radio/AudioPlayer';
 import LiveCircle from '@/common/assets/LiveCircle';
+import { fetchCalendar } from '@/lib/calendar';
+import type { CalendarEntry } from '@/types/ResponsesInterface';
 
 export default function LiveTicker() {
   const t = useTranslations();
   const pathname = usePathname();
   const locale = pathname?.startsWith('/de') ? 'de' : 'en';
   const localeModule = locale === 'de' ? de : enUS;
-  const { calendarEntries, refreshCalendar } = useData();
+  const [calendarEntries, setCalendarEntries] = useState<CalendarEntry[]>([]);
+
+  const refreshCalendar = async () => {
+    try {
+      const data = await fetchCalendar();
+      setCalendarEntries(data);
+    } catch (error) {
+      console.error('Error refreshing calendar:', error);
+      setCalendarEntries([]);
+    }
+  };
 
   useEffect(() => {
+    refreshCalendar();
     // Refresh calendar every minute
     const interval = setInterval(() => {
       refreshCalendar();
     }, 60000);
     return () => clearInterval(interval);
-  }, [refreshCalendar, calendarEntries]);
+  }, []);
 
   const getCurrentShowName = () => {
     const now = new Date();

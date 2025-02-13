@@ -14,7 +14,7 @@ interface HomeContentProps {
 }
 
 export default function HomeContent({ page, latestNews }: HomeContentProps) {
-  const { cloudShows, calendarEntries, tagsList } = useData();
+  const { cloudShows, tagsList } = useData();
 
   if (!page) {
     return <div>Loading...</div>;
@@ -43,7 +43,6 @@ For any issues or dev-related questions, please get in touch at contact@landozon
       <HomeProgrammeSection
         title={page.attributes.programme.title}
         text={page.attributes.programme.text}
-        calendarEntries={calendarEntries}
       />
       <HomeShowSection
         title={page.attributes.shows.title}

@@ -1,5 +1,6 @@
 import localFont from 'next/font/local';
 import { setRequestLocale } from 'next-intl/server';
+import { DataProviderWrapper } from './_context/DataProviderWrapper';
 
 import '@/styles/global.css';
 import '@/styles/carousel.css';
@@ -12,6 +13,11 @@ const NeueMachina = localFont({
       path: '../app/_styles/fonts/NeueMachina-Regular.ttf',
       weight: '400',
       style: 'normal',
+    },
+    {
+      path: '../app/_styles/fonts/NeueMachina-Light.ttf',
+      weight: '300',
+      style: 'light',
     },
     {
       path: '../app/_styles/fonts/NeueMachina-Ultrabold.ttf',
@@ -46,7 +52,9 @@ export default async function RootLayout({
       className={`${SpaceMono.variable} ${NeueMachina.variable}`}
       lang={locale}
     >
-      <body>{children}</body>
+      <body>
+        <DataProviderWrapper>{children}</DataProviderWrapper>
+      </body>
     </html>
   );
 }

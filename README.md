@@ -6,14 +6,14 @@ This repo contains the website of [THF Radio](https://thfradio.de), a community 
 
 ## Technologies
 
-The site is a [Next.js](https://nextjs.org/) project deployed on [Vercel](https://vercel.com/). Data is sourced from [Strapi](https://strapi.io/) and styling is done with [Tailwind CSS](https://tailwindcss.com). It is a bilingual site (English and German), using <code>next-i18next</code> to handle localizations and translations.
+The site is an App Router [Next.js](https://nextjs.org/) project deployed on [Vercel](https://vercel.com/). Data is sourced from [Strapi](https://strapi.io/) and styling is done with [Tailwind CSS](https://tailwindcss.com). It is a bilingual site (English and German), using <code>next-intl</code> to handle localizations and translations.
 
 ## Installation
 
 1. Use the git CLI to close the repo
 
 ```
-gh repo clone brunosj/thfradio-nextjs
+gh repo clone brunosj/thfradio
 ```
 
 2. Install dependencies

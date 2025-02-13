@@ -11,7 +11,7 @@ const AboutSection = ({
 }: AboutSection) => {
   return (
     <section className='layout bg-dark-blue sectionPy space-y-12'>
-      <h1 className='text-white'>{title}</h1>
+      <h1 className='text-white font-semibold'>{title}</h1>
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-x-12 '>
         <div className='space-y-12'>
           <div className='text-white markdown'>

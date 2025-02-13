@@ -25,8 +25,6 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
     if (item.platform === 'mixcloud') {
       showKeySet(getMixcloudKey(item.url));
     } else {
-      // Use the key (which is the track ID) directly from the item
-      console.log('Setting Soundcloud track ID:', item.key);
       trackIdSet(item.key);
     }
     setCurrentShowUrl(item.url);

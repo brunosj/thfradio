@@ -3,7 +3,6 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 // import { routing } from '@/i18n/routing';
 import ClientLayout from './ClientLayout';
-import { DataProviderWrapper } from '@/app/_context/DataProviderWrapper';
 import LiveTicker from '@/modules/live-ticker/LiveTicker';
 import MixcloudWidget from '@/modules/mixcloud/MixcloudWidget';
 import SoundcloudWidget from '@/modules/soundcloud/SoundcloudWidget';
@@ -53,16 +52,14 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
-      <DataProviderWrapper locale={locale}>
-        <LiveTicker />
-        <ClientLayout>
-          <article>{children}</article>
-        </ClientLayout>
-        <Footer />
-        <MixcloudWidget />
-        <SoundcloudWidget />
-        <JoinChat />
-      </DataProviderWrapper>
+      <LiveTicker />
+      <ClientLayout>
+        <article>{children}</article>
+      </ClientLayout>
+      <Footer />
+      <MixcloudWidget />
+      <SoundcloudWidget />
+      <JoinChat />
     </NextIntlClientProvider>
   );
 }

@@ -48,8 +48,6 @@ export default function SoundcloudPlayer() {
     }
   };
 
-  console.log('SoundcloudWidget render:', { trackId, activePlayer });
-
   return (
     <>
       <Script

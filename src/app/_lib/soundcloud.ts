@@ -29,11 +29,11 @@ function normalizeSoundcloudShow(show: SoundcloudShowType): CloudShowTypes {
 async function getSoundcloudToken(): Promise<string | null> {
   try {
     if (tokenCache && tokenCache.expires > Date.now()) {
-      console.log('Using cached Soundcloud token');
+      // console.log('Using cached Soundcloud token');
       return tokenCache.token;
     }
 
-    console.log('Requesting new Soundcloud token...');
+    // console.log('Requesting new Soundcloud token...');
 
     const response = await fetch('https://api.soundcloud.com/oauth2/token', {
       method: 'POST',
@@ -56,7 +56,7 @@ async function getSoundcloudToken(): Promise<string | null> {
     const data = await response.json();
     tokenCache = {
       token: data.access_token,
-      expires: Date.now() + data.expires_in * 1000 - 60000, // Buffer of 1 minute
+      expires: Date.now() + data.expires_in * 1000 - 60000,
     };
 
     return data.access_token;
@@ -69,7 +69,7 @@ async function getSoundcloudToken(): Promise<string | null> {
 export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
   try {
     if (showsCache && showsCache.expires > Date.now()) {
-      console.log('Returning cached Soundcloud shows');
+      // console.log('Returning cached Soundcloud shows');
       return showsCache.shows;
     }
 
