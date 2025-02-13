@@ -10,20 +10,30 @@ export default function SoundcloudPlayer() {
   const activePlayer = useGlobalStore((state) => state.activePlayer);
   const widgetRef = useRef<ReturnType<typeof window.SC.Widget> | null>(null);
 
-  // Cleanup when component unmounts or player changes
+  // Cleanup function
+  const cleanup = () => {
+    if (widgetRef.current) {
+      widgetRef.current.pause();
+      widgetRef.current = null;
+    }
+    const iframe = document.getElementById(
+      'soundcloud-player'
+    ) as HTMLIFrameElement;
+    if (iframe) {
+      iframe.src = 'about:blank';
+    }
+  };
+
+  // Cleanup on unmount
   useEffect(() => {
-    return () => {
-      if (widgetRef.current) {
-        widgetRef.current.pause();
-        widgetRef.current = null;
-      }
-      const iframe = document.getElementById(
-        'soundcloud-player'
-      ) as HTMLIFrameElement;
-      if (iframe) {
-        iframe.src = 'about:blank';
-      }
-    };
+    return cleanup;
+  }, []);
+
+  // Handle player changes
+  useEffect(() => {
+    if (activePlayer !== ActivePlayer.SOUNDCLOUD) {
+      cleanup();
+    }
   }, [activePlayer]);
 
   const handleIframeLoad = async (
@@ -48,24 +58,24 @@ export default function SoundcloudPlayer() {
     }
   };
 
+  if (!trackId) return null;
+
   return (
     <>
       <Script
         src='https://w.soundcloud.com/player/api.js'
         strategy='beforeInteractive'
       />
-      {trackId && (
-        <div className='fixed bottom-0 left-0 w-full lg:w-5/6'>
-          <iframe
-            id='soundcloud-player'
-            height={120}
-            width='100%'
-            allow='autoplay'
-            onLoad={handleIframeLoad}
-            src={`https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${trackId}&color=%23ff5500&inverse=false&auto_play=true&show_user=true&visual=false&show_teaser=false&show_comments=false&show_reposts=false&show_artwork=false&sharing=false&download=false&origin=${encodeURIComponent(window.location.origin)}`}
-          />
-        </div>
-      )}
+      <div className='fixed bottom-0 left-0 w-full lg:w-5/6'>
+        <iframe
+          id='soundcloud-player'
+          height={120}
+          width='100%'
+          allow='autoplay'
+          onLoad={handleIframeLoad}
+          src={`https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${trackId}&color=%23ff5500&inverse=false&auto_play=true&show_user=true&visual=false&show_teaser=false&show_comments=false&show_reposts=false&show_artwork=false&sharing=false&download=false&origin=${encodeURIComponent(window.location.origin)}`}
+        />
+      </div>
     </>
   );
 }

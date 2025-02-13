@@ -20,7 +20,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   const handleLocaleChange = (newLocale: string) => {
     startTransition(() => {
-      router.replace(pathname, { locale: newLocale });
+      router.replace(pathname, { locale: newLocale, scroll: false });
       if (onMobileClick) onMobileClick();
     });
   };
