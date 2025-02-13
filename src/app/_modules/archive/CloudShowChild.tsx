@@ -25,19 +25,19 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
     if (item.platform === 'mixcloud') {
       showKeySet(getMixcloudKey(item.url));
     } else {
-      // Extract track ID from Soundcloud URL
-      const trackId = item.url.split('/').pop();
-      if (trackId) {
-        trackIdSet(trackId);
-      }
+      // Use the key (which is the track ID) directly from the item
+      console.log('Setting Soundcloud track ID:', item.key);
+      trackIdSet(item.key);
     }
     setCurrentShowUrl(item.url);
   };
 
   // Fixes inconsistencies between show title and images during loading after selecting tags
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(true);
   useEffect(() => {
-    setImageLoaded(false);
+    if (item) {
+      setImageLoaded(false);
+    }
   }, [item]);
 
   // Show info rendering
@@ -60,7 +60,9 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
     >
       {/* Image */}
       <div className='group relative flex justify-around items-center hover:cursor-pointer'>
-        <div className={`w-24 lg:w-40 xl:w-56`}>
+        <div
+          className={`w-24 lg:w-40 xl:w-56 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}`}
+        >
           <Image
             quality={50}
             src={item.pictures.extra_large}
@@ -83,32 +85,25 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
         </div>
       </div>
 
-      {imageLoaded && (
-        <div className='mt-3 lg:mt-6 flex h-full w-2/3 flex-grow flex-col lg:w-full px-6 text-left lg:text-center space-y-3 lg:space-y-6 mb-3 justify-center lg:justify-between'>
-          <div className='flex space-y-3 flex-col'>
-            <span className='font-light opacity-70 text-sm'>
-              {formattedDate}
-            </span>
-            <h4 className='group-hover:text-thf-blue-500 duration-300 lg:mb-6 font-bold over break-words '>
-              {name}
-            </h4>
-          </div>
-
-          {/* Tags */}
-          {item.tags && (
-            <ul className='flex mt-auto flex-wrap text-xs gap-2 justify-start lg:justify-center'>
-              {item.tags.map((item, i) => (
-                <li
-                  key={i}
-                  className='rounded-xl border-dark-blue border px-2 '
-                >
-                  {item.name}
-                </li>
-              ))}
-            </ul>
-          )}
+      <div className='mt-3 lg:mt-6 flex h-full w-2/3 flex-grow flex-col lg:w-full px-6 text-left lg:text-center space-y-3 lg:space-y-6 mb-3 justify-center lg:justify-between'>
+        <div className='flex space-y-3 flex-col'>
+          <span className='font-light opacity-70 text-sm'>{formattedDate}</span>
+          <h4 className='group-hover:text-thf-blue-500 duration-300 lg:mb-6 font-bold over break-words '>
+            {name}
+          </h4>
         </div>
-      )}
+
+        {/* Tags */}
+        {item.tags && (
+          <ul className='flex mt-auto flex-wrap text-xs gap-2 justify-start lg:justify-center'>
+            {item.tags.map((item, i) => (
+              <li key={i} className='rounded-xl border-dark-blue border px-2 '>
+                {item.name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </button>
   );
 };

@@ -1,3 +1,17 @@
+declare global {
+  interface Window {
+    Mixcloud: {
+      PlayerWidget: (iframe: HTMLIFrameElement) => {
+        ready: Promise<void>;
+        pause: () => void;
+        play: () => Promise<void>;
+      };
+    };
+  }
+}
+
+export {};
+
 export declare function PlayerWidget(
   target: HTMLIFrameElement
 ): PlayerWidgetReturnType;

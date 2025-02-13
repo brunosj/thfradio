@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@plaiceholder/next": "^3.0.0",
-    "@tailwindcss/postcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.6",
     "@types/ical": "^0.8.3",
     "@widgetbot/react-embed": "^1.9.0",
     "clsx": "^2.1.1",
@@ -18,7 +18,7 @@
     "embla-carousel-auto-height": "8.5.2",
     "embla-carousel-autoplay": "8.5.2",
     "embla-carousel-react": "8.5.2",
-    "next": "^15.1.6",
+    "next": "^15.1.7",
     "next-intl": "^3.26.3",
     "node-fetch": "^3.3.2",
     "node-ical": "^0.20.1",
@@ -33,15 +33,15 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@types/node": "22.10.9",
-    "@types/react": "19.0.7",
+    "@types/node": "22.13.1",
+    "@types/react": "19.0.8",
     "autoprefixer": "^10.4.20",
-    "eslint": "^9.18.0",
-    "eslint-config-next": "^15.1.6",
-    "postcss": "^8.5.1",
-    "prettier": "^3.4.2",
-    "prettier-plugin-tailwindcss": "^0.6.10",
-    "tailwindcss": "^4.0.0",
+    "eslint": "^9.20.1",
+    "eslint-config-next": "^15.1.7",
+    "postcss": "^8.5.2",
+    "prettier": "^3.5.0",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "tailwindcss": "^4.0.6",
     "typescript": "5.7.3"
   }
 }
