@@ -1,3 +1,5 @@
+'use client';
+
 import { useRouter } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import type { Button as ButtonProps } from '@/types/uiInterface';
