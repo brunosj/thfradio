@@ -1,10 +1,9 @@
 import { Metadata } from 'next';
-import { Suspense } from 'react';
 import ProgrammeShows from '@/modules/show-listing/ProgrammeShows';
 import { createMetadata } from '@/utils/metadata';
-import BarsSpinner from '@/common/ui/BarsSpinner';
 import { fetchPageBySlug } from '@/lib/pages';
 import { fetchProgrammeShows } from '@/lib/shows';
+import { notFound } from 'next/navigation';
 
 type Params = Promise<{ locale: string }>;
 
@@ -26,6 +25,10 @@ export default async function ShowsPage({ params }: { params: Params }) {
   const page = await fetchPageBySlug('shows', locale);
   const shows = await fetchProgrammeShows(locale);
 
+  if (!page) {
+    notFound();
+  }
+
   return (
     <>
       <div className='bg-dark-blue relative pt-6 lg:pt-10'>
@@ -33,15 +36,8 @@ export default async function ShowsPage({ params }: { params: Params }) {
           <h1 className='text-white'>{page.attributes.title}</h1>
         </div>
       </div>
-      <Suspense
-        fallback={
-          <div className='min-h-[60vh] flex items-center justify-center'>
-            <BarsSpinner color='#ff6314' />
-          </div>
-        }
-      >
-        <ProgrammeShows shows={shows} />
-      </Suspense>
+
+      <ProgrammeShows shows={shows} />
     </>
   );
 }

@@ -3,6 +3,7 @@ import { createMetadata } from '@/utils/metadata';
 import HomeContent from './page.client';
 import { fetchHomePage } from '@/lib/pages';
 import { fetchNews } from '@/lib/news';
+import { notFound } from 'next/navigation';
 
 type Params = Promise<{ locale: string }>;
 
@@ -33,7 +34,7 @@ export default async function HomePage({ params }: { params: Params }) {
   const latestNews = await fetchNews(locale);
 
   if (!page) {
-    return <div>Failed to load page content. Please try again later.</div>;
+    notFound();
   }
 
   return <HomeContent page={page} latestNews={latestNews} />;

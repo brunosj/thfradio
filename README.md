@@ -2,11 +2,11 @@
 
 ## Description
 
-This repo contains the website of [THF Radio](https://thfradio.de), a community radio based at the gatehouse of the former Tempelhof Airport in Berlin. It is a Next.js project using the App Router.
+This repo contains the website of [THF Radio](https://thfradio.de), a community radio based at the gatehouse of the former Tempelhof Airport in Berlin.
 
 ## Technologies
 
-The site is an App Router [Next.js](https://nextjs.org/) project deployed on [Vercel](https://vercel.com/). Data is sourced from [Strapi](https://strapi.io/) and styling is done with [Tailwind CSS](https://tailwindcss.com). It is a bilingual site (English and German), using <code>next-intl</code> to handle localizations and translations.
+The site is a [Next.js](https://nextjs.org/) project (App Router) deployed on [Vercel](https://vercel.com/). It sources data from [Strapi](https://strapi.io/) and uses [Tailwind CSS](https://tailwindcss.com) for styling. The site is bilingual (English and German), with `next-intl` handling localization and translations. It features automated individual show page generation, an automated schedule (fetched from a Teamup calendar RSS feed), and Discord chat integration.
 
 ## Installation
 

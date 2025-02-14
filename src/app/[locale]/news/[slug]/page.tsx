@@ -4,6 +4,7 @@ import { CMS_URL } from '@/utils/constants';
 // import type { NewsType, LocalizationType } from '@/types/ResponsesInterface';
 import NewsContent from './page.client';
 import { fetchNewsArticle } from '@/lib/news';
+import { notFound } from 'next/navigation';
 
 type Params = Promise<{ slug: string; locale: string }>;
 
@@ -28,7 +29,7 @@ export default async function NewsArticlePage({ params }: { params: Params }) {
   const article = await fetchNewsArticle(slug, locale);
 
   if (!article) {
-    return <div>Failed to load article. Please try again later.</div>;
+    notFound();
   }
 
   return <NewsContent article={article} />;

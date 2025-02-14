@@ -4,6 +4,7 @@ import ShowContent from './page.client';
 // import type { LocalizationType, ShowTypes } from '@/types/ResponsesInterface';
 import { CMS_URL } from '@/utils/constants';
 import { fetchShowBySlug } from '@/lib/shows';
+import { notFound } from 'next/navigation';
 
 type Params = Promise<{ slug: string; locale: string }>;
 
@@ -71,7 +72,7 @@ export default async function ShowPage({ params }: { params: Params }) {
   const content = await fetchShowBySlug(slug, locale);
 
   if (!content) {
-    return <div>Failed to load show content. Please try again later.</div>;
+    notFound();
   }
 
   return <ShowContent content={content} />;

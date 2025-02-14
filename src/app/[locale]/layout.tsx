@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 // import { routing } from '@/i18n/routing';
-import ClientLayout from './ClientLayout';
+import HeaderWithBlur from './HeaderWithBlur';
 import LiveTicker from '@/modules/live-ticker/LiveTicker';
-import MixcloudWidget from '@/modules/mixcloud/MixcloudWidget';
-import SoundcloudWidget from '@/modules/soundcloud/SoundcloudWidget';
 import JoinChat from '@/modules/chat/JoinChat';
 import Footer from '@/app/_common/layout/footer/Footer';
+import CloudPlayer from '@/modules/player/CloudPlayer';
+import { siteMetadata } from '@/utils/siteMetadata';
 import '@/styles/global.css';
 import '@/styles/carousel.css';
 
@@ -21,23 +21,23 @@ type Props = {
 };
 
 export const metadata: Metadata = {
-  title: 'Your Site Title',
-  description: 'Your site description',
+  title: siteMetadata.title,
+  description: siteMetadata.description,
   icons: {
     icon: '/favicon.ico',
   },
   openGraph: {
-    title: 'Your Site Title',
-    description: 'Your site description',
-    url: 'your-site-url',
-    images: ['your-default-image'],
+    title: siteMetadata.title,
+    description: siteMetadata.description,
+    url: siteMetadata.siteUrl,
+    images: [siteMetadata.image],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Your Site Title',
-    description: 'Your site description',
-    images: ['your-default-image'],
+    title: siteMetadata.title,
+    description: siteMetadata.description,
+    images: [siteMetadata.image],
   },
 };
 
@@ -53,12 +53,11 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <LiveTicker />
-      <ClientLayout>
+      <HeaderWithBlur>
         <article>{children}</article>
-      </ClientLayout>
+      </HeaderWithBlur>
       <Footer />
-      <MixcloudWidget />
-      <SoundcloudWidget />
+      <CloudPlayer />
       <JoinChat />
     </NextIntlClientProvider>
   );

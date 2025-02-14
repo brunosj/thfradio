@@ -4,9 +4,9 @@ import useEmblaCarousel, {
 } from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { DotButton } from './CarouselNavigation';
-import Image from 'next/image';
 import type { Pictures } from '@/types/ResponsesInterface';
 import { CMS_URL } from '@/utils/constants';
+import { ImageMedia } from '@/lib/image';
 
 type PropType = {
   options?: CarouselProps;
@@ -90,13 +90,13 @@ const ImageCarousel: React.FC<PropType> = (props) => {
               <div className='embla__slide' key={index}>
                 <div className='relative h-[30rem] w-full'>
                   <div className='absolute lg:hidden top-0 left-0 w-full h-full bg-black bg-opacity-30 z-50'></div>
-                  <Image
-                    quality={50}
+                  <ImageMedia
                     className='object-cover lg:rounded-lg'
                     src={imageByIndex(slides, index)}
                     alt='Your alt text'
                     fill
-                    priority={true}
+                    priority={index === 0}
+                    loading={index < 3 ? 'eager' : 'lazy'}
                   />
                 </div>
               </div>

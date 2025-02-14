@@ -59,7 +59,7 @@ export default function ShowContent({ content }: { content: ShowTypes }) {
         )}
       </div>
 
-      <div className='bg-darkBlue min-h-[30vh] lg:min-h-[40vh] layout lg:pt-60 pt-12 pb-6 lg:pb-12'>
+      <div className='bg-dark-blue min-h-[30vh] lg:min-h-[40vh] layout lg:pt-60 pt-12 pb-6 lg:pb-12'>
         <div
           className={`w-full flex flex-wrap gap-6 lg:gap-12 justify-around ${
             sortedShows && sortedShows.length >= 1 ? 'pb-6 lg:pb-12' : ''

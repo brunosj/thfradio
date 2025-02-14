@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Header from '@/layout/header/Header';
 
-export default function ClientLayout({
+export default function HeaderWithBlur({
   children,
 }: {
   children: React.ReactNode;

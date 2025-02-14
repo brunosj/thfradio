@@ -31,8 +31,8 @@ const ProgrammeShows: React.FC<ProgrammeShowsProps> = ({ shows }) => {
 
   if (isLoading) {
     return (
-      <div className='layout py-12 flex justify-center'>
-        <BarsSpinner color='#ff6314' />
+      <div className='min-h-[80vh] flex items-center justify-center bg-orange-500'>
+        <BarsSpinner color='thf-blue-500' />
       </div>
     );
   }

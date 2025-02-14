@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { createMetadata } from '@/utils/metadata';
 import { fetchPageBySlug } from '@/lib/pages';
-
+import { notFound } from 'next/navigation';
 type Params = Promise<{ locale: string }>;
 
 export async function generateMetadata({
@@ -20,6 +20,10 @@ export async function generateMetadata({
 export default async function AboutPage({ params }: { params: Params }) {
   const { locale } = await params;
   const page = await fetchPageBySlug('about', locale);
+
+  if (!page) {
+    notFound();
+  }
 
   return (
     <div className='bg-dark-blue'>

@@ -8,7 +8,7 @@ import { TbBrandDiscord } from 'react-icons/tb';
 
 export default function JoinChat() {
   return (
-    <div className='fixed bottom-4 right-4 hidden lg:block z-50'>
+    <div className='fixed bottom-16 right-4 hidden lg:block z-50'>
       <ChatRoom />
     </div>
   );

@@ -39,7 +39,7 @@ export default function NewsContent({
         <h1 className='text-white'>{page.attributes.title}</h1>
       </div>
       {isLoading ? (
-        <div className='layout py-12 flex justify-center'>
+        <div className='min-h-[80vh] flex items-center justify-center bg-dark-blue'>
           <BarsSpinner color='#ff6314' />
         </div>
       ) : (

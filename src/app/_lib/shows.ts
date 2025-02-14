@@ -19,7 +19,6 @@ export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
     soundcloudShows = await fetchSoundcloudShows();
   } catch (error) {
     console.error('Error fetching Soundcloud shows:', error);
-    // Continue with empty Soundcloud shows
   }
 
   console.log('Shows fetched:', {
@@ -28,7 +27,6 @@ export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
     total: mixcloudShows.length + soundcloudShows.length,
   });
 
-  // Always return Mixcloud shows, with Soundcloud shows if available
   return [...mixcloudShows, ...soundcloudShows];
 }
 

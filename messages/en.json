@@ -85,5 +85,10 @@
       "path": "/imprint",
       "lang": "en"
     }
-  ]
+  ],
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you are looking for doesn't exist or has been moved.",
+    "backHome": "Back to Home"
+  }
 }
