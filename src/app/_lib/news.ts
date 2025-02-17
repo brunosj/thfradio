@@ -6,7 +6,7 @@ type NewsItemsType = {
 
 export async function fetchNews(locale: string) {
   const response = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}news-items?locale=${locale}&populate=*`
+    `${process.env.STRAPI_PUBLIC_API_URL}news-items?locale=${locale}&populate=*&sort=createdAt:desc`
   );
   const data: NewsItemsType = await response.json();
   return data.data;

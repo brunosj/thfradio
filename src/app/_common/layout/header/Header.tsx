@@ -85,17 +85,20 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
           <nav className='hidden lg:flex items-center border-t'>
             {menuKeys.map((key) => {
               const isExternal = t(`menu.${key}.path`).slice(0, 4) === 'http';
+              const menuPath = t(`menu.${key}.path`);
+              // Remove locale from pathname for comparison
+              const currentPath = pathname.replace(/^\/[a-z]{2}\//, '/');
+              const comparePath = menuPath.replace(/^\/[a-z]{2}\//, '/');
+
               return (
                 <Link
                   key={key}
-                  href={t(`menu.${key}.path`)}
-                  onClick={(e) =>
-                    handleAnchorLinkClick(e, t(`menu.${key}.path`))
-                  }
+                  href={menuPath}
+                  onClick={(e) => handleAnchorLinkClick(e, menuPath)}
                   rel={isExternal ? 'noopener noreferrer' : ''}
                   target={isExternal ? '_blank' : ''}
-                  className={`border-l hover:bg-white hover:text-neutral-900 duration-300 ${
-                    pathname === t(`menu.${key}.path`)
+                  className={`border-l border-white hover:bg-white hover:text-neutral-900 duration-300 ${
+                    currentPath === comparePath
                       ? 'bg-white text-neutral-900'
                       : 'textHover'
                   }`}

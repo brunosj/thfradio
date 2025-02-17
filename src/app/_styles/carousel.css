@@ -142,7 +142,9 @@
   display: flex;
   align-items: center;
   margin: 0.5rem;
+  cursor: pointer;
 }
+
 .textEmbla__dot:after {
   background: #1200ff;
   border-radius: 50%;
