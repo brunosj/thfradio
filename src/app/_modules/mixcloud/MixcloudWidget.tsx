@@ -71,7 +71,7 @@ export default function MixcloudPlayer() {
         id='mixcloud-player'
         height={60}
         className='fixed bottom-0 left-0 w-full lg:w-5/6'
-        src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&autoplay=1&dark=1&mini=1&feed=${showKey}`}
+        src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&autoplay=1&dark=1&mini=1&feed=${showKey}&origin=${typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : ''}`}
       />
     </>
   );

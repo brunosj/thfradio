@@ -62,6 +62,7 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
           className={`w-24 lg:w-40 xl:w-56 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}`}
         >
           <Image
+            unoptimized
             quality={50}
             src={item.pictures.extra_large}
             height={600}

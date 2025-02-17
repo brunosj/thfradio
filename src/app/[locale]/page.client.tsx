@@ -1,6 +1,5 @@
 'use client';
 
-import { useData } from '@/app/_context/DataContext';
 import Hero from '@/modules/hero/Hero';
 import HomeShowSection from '@/modules/show-listing/HomeShowsSection';
 import HomeProgrammeSection from '@/modules/timetable/HomeProgrammeSection';
@@ -14,8 +13,6 @@ interface HomeContentProps {
 }
 
 export default function HomeContent({ page, latestNews }: HomeContentProps) {
-  const { cloudShows, tagsList } = useData();
-
   if (!page) {
     return <div>Loading...</div>;
   }
@@ -52,8 +49,6 @@ For any issues or dev-related questions, please get in touch at contact@landozon
       <HomeArchiveSection
         title={page.attributes.archive.title}
         text={page.attributes.archive.text}
-        shows={cloudShows}
-        tagsList={tagsList}
       />
     </>
   );

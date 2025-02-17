@@ -55,7 +55,7 @@ const Pagination: React.FC<PaginationProps> = ({
           className={`bg-white rounded-l-md border-r border-thf-blue-500  ${
             currentPage === 1
               ? 'opacity-50 cursor-default'
-              : 'hover:bg-blue-200'
+              : 'hover:opacity-90 hover:cursor-pointer'
           }`}
           disabled={currentPage === 1}
           onClick={() => handlePageChange(currentPage - 1)}
@@ -67,13 +67,14 @@ const Pagination: React.FC<PaginationProps> = ({
           typeof pageNumber === 'number' ? (
             <button
               key={i}
-              className={`px-3 hover:opacity-80 border-r border-thf-blue-500 ${
+              className={`px-3  border-r border-thf-blue-500  ${
                 currentPage === pageNumber
                   ? 'bg-thf-blue-500 text-white'
-                  : 'bg-white'
+                  : 'bg-white  hover:cursor-pointer hover:opacity-80'
               }`}
               aria-label={`Go to page number ${pageNumber}`}
               onClick={() => handlePageChange(pageNumber)}
+              disabled={currentPage === pageNumber}
             >
               {pageNumber}
             </button>
@@ -88,7 +89,9 @@ const Pagination: React.FC<PaginationProps> = ({
         )}
         <button
           className={`bg-white rounded-r-md ${
-            currentPage === totalPages ? 'opacity-50 cursor-default' : ''
+            currentPage === totalPages
+              ? 'opacity-50 cursor-default'
+              : 'hover:opacity-90 hover:cursor-pointer'
           }`}
           disabled={currentPage === totalPages}
           onClick={() => handlePageChange(currentPage + 1)}

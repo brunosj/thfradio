@@ -1,32 +1,54 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import SectionHeader from '@/common/layout/section/SectionHeader';
-import type { CloudShowTypes, TagsList } from '@/types/ResponsesInterface';
 import BarsSpinner from '@/common/ui/BarsSpinner';
 import { processShows } from '@/utils/showUtils';
 import CloudShowsComponent from './CloudShowsComponent';
+import { useData } from '@/context/DataContext';
+
 interface ArchiveProps {
   title: string;
   text: string;
-  shows: CloudShowTypes[];
-  tagsList: TagsList;
 }
 
-const HomeArchiveSection = ({ title, text, shows, tagsList }: ArchiveProps) => {
-  const [isLoading, setIsLoading] = useState(true);
+const HomeArchiveSection = ({ title, text }: ArchiveProps) => {
+  const { cloudShows, isLoadingShows, tagsList, loadCloudShows } = useData();
+  const [isVisible, setIsVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (shows && shows.length > 0) {
-      setIsLoading(false);
-    }
-  }, [shows]);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          loadCloudShows().catch((err) => {
+            setError('Failed to load shows. Please try again later.');
+            console.error('Error loading shows:', err);
+          });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
 
-  const sortedShows = processShows(shows);
+    const element = document.getElementById('shows');
+    if (element) {
+      observer.observe(element);
+    }
+
+    return () => observer.disconnect();
+  }, [loadCloudShows]);
+
+  const sortedShows = cloudShows ? processShows(cloudShows) : [];
 
   return (
     <section className='bg-dark-blue scroll-mt-24' id='latest'>
       <SectionHeader title={title} text={text} />
       <div className='flex w-full m-auto'>
-        {isLoading ? (
+        {error ? (
+          <div className='m-auto text-center pb-12 text-red-500'>{error}</div>
+        ) : !isVisible || isLoadingShows || !cloudShows ? (
           <div className='m-auto text-center pb-12'>
             <BarsSpinner color='#1200ff' />
           </div>

@@ -4,6 +4,7 @@ import { createMetadata } from '@/utils/metadata';
 import { fetchPageBySlug } from '@/lib/pages';
 import { fetchProgrammeShows } from '@/lib/shows';
 import { notFound } from 'next/navigation';
+import type { PageTypes, ShowTypes } from '@/types/ResponsesInterface';
 
 type Params = Promise<{ locale: string }>;
 
@@ -13,7 +14,7 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const page = await fetchPageBySlug('shows', locale);
+  const page: PageTypes = await fetchPageBySlug('shows', locale);
   return createMetadata({
     title: page.attributes.title,
     description: page.attributes.description,
@@ -22,8 +23,8 @@ export async function generateMetadata({
 
 export default async function ShowsPage({ params }: { params: Params }) {
   const { locale } = await params;
-  const page = await fetchPageBySlug('shows', locale);
-  const shows = await fetchProgrammeShows(locale);
+  const page: PageTypes = await fetchPageBySlug('shows', locale);
+  const shows: ShowTypes[] = await fetchProgrammeShows(locale);
 
   if (!page) {
     notFound();

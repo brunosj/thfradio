@@ -4,7 +4,7 @@ import HomeContent from './page.client';
 import { fetchHomePage } from '@/lib/pages';
 import { fetchNews } from '@/lib/news';
 import { notFound } from 'next/navigation';
-
+import type { HomepageTypes } from '@/types/ResponsesInterface';
 type Params = Promise<{ locale: string }>;
 
 export async function generateMetadata({
@@ -13,7 +13,7 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const page = await fetchHomePage(locale);
+  const page: HomepageTypes | null = await fetchHomePage(locale);
 
   if (!page) {
     return createMetadata({
@@ -30,7 +30,7 @@ export async function generateMetadata({
 
 export default async function HomePage({ params }: { params: Params }) {
   const { locale } = await params;
-  const page = await fetchHomePage(locale);
+  const page: HomepageTypes | null = await fetchHomePage(locale);
   const latestNews = await fetchNews(locale);
 
   if (!page) {

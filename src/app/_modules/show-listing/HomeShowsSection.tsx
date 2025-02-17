@@ -14,7 +14,7 @@ const HomeShowSection = ({ title, pictures, text }: ShowsProps) => {
   const t = useTranslations();
 
   return (
-    <section className='bg-orange-500 sectionPb'>
+    <section className='bg-orange-500 sectionPb' id='shows'>
       <SectionHeader title={title} text={text} />
       <div className='layout'>
         <ImageGallery items={pictures} />
