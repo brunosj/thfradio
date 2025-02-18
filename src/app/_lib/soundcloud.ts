@@ -154,12 +154,13 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
     }
 
     const data = await tracksResponse.json();
+
     const shows = data.map(normalizeSoundcloudShow);
 
     // Extend cache duration during rate limits
     showsCache = {
       shows,
-      expires: Date.now() + 60 * 60 * 1000, // Cache for 1 hour normally
+      expires: Date.now() + 60 * 60 * 1000,
     };
 
     return shows;

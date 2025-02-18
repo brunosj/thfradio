@@ -32,7 +32,7 @@ const HomeArchiveSection = ({ title, text }: ArchiveProps) => {
       { threshold: 0.1 }
     );
 
-    const element = document.getElementById('shows');
+    const element = document.getElementById('programme');
     if (element) {
       observer.observe(element);
     }

@@ -12,7 +12,7 @@ function normalizeMixcloudShow(show: MixcloudShowType): CloudShowTypes {
 
 export async function fetchMixcloudShows(): Promise<CloudShowTypes[]> {
   const limit = 100;
-  const totalItems = 1500;
+  const totalItems = 3000;
   const pages = Math.ceil(totalItems / limit);
   const promises = [];
 
