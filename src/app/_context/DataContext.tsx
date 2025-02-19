@@ -2,6 +2,7 @@
 
 import React, { createContext, useState, useContext } from 'react';
 import type { CloudShowTypes, TagsList } from '@/types/ResponsesInterface';
+import { fetchCloudShowsCached } from '@/lib/shows';
 
 interface DataContextProps {
   children: React.ReactNode;
@@ -27,11 +28,7 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
 
     setIsLoadingShows(true);
     try {
-      const response = await fetch('/api/cloudShows');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const shows = await response.json();
+      const shows = await fetchCloudShowsCached();
       setCloudShows(Array.isArray(shows) ? shows : []);
     } catch (error) {
       console.error('Error loading cloud shows:', error);

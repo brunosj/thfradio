@@ -7,13 +7,13 @@ type ShowsType = {
 };
 
 export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
-  // Fetch Mixcloud shows first
+  // Fetch Mixcloud shows first with caching
   const mixcloudShows = await fetchMixcloudShows().catch((error) => {
     console.error('Error fetching Mixcloud shows:', error);
     return [];
   });
 
-  // Then try to fetch Soundcloud shows, but don't let it break the response
+  // Then try to fetch Soundcloud shows with caching
   let soundcloudShows: CloudShowTypes[] = [];
   try {
     soundcloudShows = await fetchSoundcloudShows();
@@ -21,13 +21,29 @@ export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
     console.error('Error fetching Soundcloud shows:', error);
   }
 
+  const shows = [...mixcloudShows, ...soundcloudShows];
+
   console.log('Shows fetched:', {
     mixcloud: mixcloudShows.length,
     soundcloud: soundcloudShows.length,
-    total: mixcloudShows.length + soundcloudShows.length,
+    total: shows.length,
   });
 
-  return [...mixcloudShows, ...soundcloudShows];
+  return shows;
+}
+
+// Add a new cached version of the function
+export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
+  const shows = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/cloudShows`,
+    {
+      next: {
+        revalidate: 86400, // 24 hours in seconds
+      },
+    }
+  ).then((res) => res.json());
+
+  return Array.isArray(shows) ? shows : [];
 }
 
 export async function fetchProgrammeShows(locale: string) {

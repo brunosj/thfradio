@@ -2,34 +2,9 @@ import type {
   CloudShowTypes,
   SoundcloudShowType,
 } from '@/types/ResponsesInterface';
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
 
-const TOKEN_CACHE_FILE = join(process.cwd(), '.soundcloud-token-cache.json');
-
-// Load token from file system
-function loadTokenCache() {
-  try {
-    const data = readFileSync(TOKEN_CACHE_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch {
-    return null;
-  }
-}
-
-// Save token to file system
-function saveTokenCache(token: string, expires: number) {
-  try {
-    writeFileSync(TOKEN_CACHE_FILE, JSON.stringify({ token, expires }));
-  } catch (error) {
-    console.error('Failed to save token cache:', error);
-  }
-}
-
-// Initialize tokenCache from file
-let tokenCache = loadTokenCache();
-
-// Cache for shows
+// In-memory cache
+let tokenCache: { token: string; expires: number } | null = null;
 let showsCache: { shows: CloudShowTypes[]; expires: number } | null = null;
 
 // Helper function to normalize Soundcloud show data
@@ -90,9 +65,6 @@ async function getSoundcloudToken(): Promise<string | null> {
       token: data.access_token,
       expires: Date.now() + data.expires_in * 1000,
     };
-
-    // Save to file system
-    saveTokenCache(tokenCache.token, tokenCache.expires);
 
     return data.access_token;
   } catch (error) {
@@ -157,7 +129,7 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
 
     const shows = data.map(normalizeSoundcloudShow);
 
-    // Extend cache duration during rate limits
+    // Cache for 1 hour
     showsCache = {
       shows,
       expires: Date.now() + 60 * 60 * 1000,

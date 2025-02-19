@@ -18,7 +18,7 @@ const CloudShowsFilter = ({
         {sortedTags.map((tag) => (
           <button
             key={tag.name}
-            className={`border-dark-blue border text-xs font-mono rounded-xl px-2 hover:bg-thf-blue-500 hover:text-white duration-300  ${
+            className={`border-dark-blue border text-xs font-mono rounded-xl px-2 hover:bg-thf-blue-500 hover:text-white duration-300 hover:cursor-pointer  ${
               tag.name === selectedTag?.name
                 ? 'bg-thf-blue-500 text-white'
                 : 'bg-white'
