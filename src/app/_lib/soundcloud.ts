@@ -1,6 +1,7 @@
 import type {
   CloudShowTypes,
   SoundcloudShowType,
+  CloudShowTag,
 } from '@/types/ResponsesInterface';
 
 // In-memory cache
@@ -17,6 +18,75 @@ const rateLimitInfo = {
 
 // Helper function to normalize Soundcloud show data
 function normalizeSoundcloudShow(show: SoundcloudShowType): CloudShowTypes {
+  // Process tags from string to array of tag objects
+  let formattedTags: CloudShowTag[] = [];
+
+  if (show.tag_list && show.tag_list.trim() !== '') {
+    try {
+      // Clean up the tag list string first
+      const cleanTagList = show.tag_list
+        .trim()
+        // Fix malformed quotes - ensure all quotes are properly paired
+        .replace(/"+/g, '"')
+        // Remove trailing quotes at the end
+        .replace(/"$/g, '');
+
+      // Handle quoted multi-word tags and normal tags
+      const tagMatches = [];
+      let inQuote = false;
+      let currentTag = '';
+
+      // Manual parsing to handle edge cases better
+      for (let i = 0; i < cleanTagList.length; i++) {
+        const char = cleanTagList[i];
+
+        if (char === '"') {
+          inQuote = !inQuote;
+          if (!inQuote && currentTag.trim()) {
+            // End of quoted tag
+            tagMatches.push(currentTag.trim());
+            currentTag = '';
+          }
+        } else if (char === ' ' && !inQuote) {
+          // Space outside quotes - tag separator
+          if (currentTag.trim()) {
+            tagMatches.push(currentTag.trim());
+            currentTag = '';
+          }
+        } else {
+          currentTag += char;
+        }
+      }
+
+      // Add the last tag if there is one
+      if (currentTag.trim()) {
+        tagMatches.push(currentTag.trim());
+      }
+
+      // Filter out system tags and format tags
+      formattedTags = tagMatches
+        .filter(
+          (tag) => tag && !tag.includes('soundcloud:') && !tag.includes('geo:')
+        )
+        .map((tag) => {
+          // Clean up any remaining quotes or commas
+          const cleanTag = tag.replace(/[",]/g, '').trim();
+          return {
+            key: cleanTag.toLowerCase(),
+            name: cleanTag,
+            url: `tag/${cleanTag.toLowerCase().replace(/\s+/g, '-')}`,
+          };
+        });
+
+      // Debug
+      console.debug(
+        `Parsed ${formattedTags.length} tags for "${show.title}". Raw: "${show.tag_list}"`
+      );
+    } catch (error) {
+      console.error('Error parsing tags:', error);
+    }
+  }
+
   return {
     name: show.title,
     url: show.permalink_url,
@@ -25,12 +95,7 @@ function normalizeSoundcloudShow(show: SoundcloudShowType): CloudShowTypes {
     pictures: {
       extra_large: show.artwork_url?.replace('-large', '-t500x500') || '',
     },
-    tags:
-      show.tags?.split(',').map((tag) => ({
-        key: tag.trim(),
-        name: tag.trim(),
-        url: `tag/${tag.trim()}`,
-      })) || [],
+    tags: formattedTags,
   };
 }
 

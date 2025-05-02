@@ -31,7 +31,7 @@ const HomeProgrammeSection = () => {
   return (
     <section className='bg-dark-blue sectionPy scroll-mt-24' id='programme'>
       {/* <SectionHeader title={title} text={text} /> */}
-      <div className='pt-6 flex justify-around m-auto'>
+      <div className='pt-6 lg:pt-12 flex justify-around m-auto min-h-[60lvh]'>
         {isLoading ? (
           <div className='m-auto text-center'>
             <BarsSpinner color='#ff6314' />

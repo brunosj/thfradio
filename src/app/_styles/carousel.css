@@ -15,6 +15,7 @@
 
 .embla__viewport {
   overflow: hidden;
+  border-radius: 0.5rem;
 }
 
 .embla__container {
@@ -31,6 +32,7 @@
   min-width: 0;
   padding-left: var(--slide-spacing);
   position: relative;
+  overflow: hidden;
 }
 
 .embla__marginRight {

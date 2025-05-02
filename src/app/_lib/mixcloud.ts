@@ -1,12 +1,33 @@
 import type {
   CloudShowTypes,
   MixcloudShowType,
+  CloudShowTag,
 } from '@/types/ResponsesInterface';
 
 function normalizeMixcloudShow(show: MixcloudShowType): CloudShowTypes {
+  // Ensure the tags array is properly formatted
+  let formattedTags: CloudShowTag[] = [];
+
+  if (show.tags && Array.isArray(show.tags) && show.tags.length > 0) {
+    formattedTags = show.tags.map((tag) => {
+      // Make sure tags follow the same format as the Soundcloud tags
+      // for consistency across platforms
+      return {
+        key: tag.key.toLowerCase(),
+        name: tag.name,
+        // Replace spaces with hyphens in the URL path for consistency
+        url: `tag/${tag.key.toLowerCase().replace(/\s+/g, '-')}`,
+      };
+    });
+  }
+
   return {
-    ...show,
+    name: show.name,
+    url: show.url,
+    key: show.key,
     platform: 'mixcloud',
+    pictures: show.pictures,
+    tags: formattedTags,
   };
 }
 

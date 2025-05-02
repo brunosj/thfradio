@@ -88,10 +88,9 @@ const ImageCarousel: React.FC<PropType> = (props) => {
           <div className='embla__container'>
             {slides.data.map((slide, index) => (
               <div className='embla__slide' key={index}>
-                <div className='relative h-[30rem] w-full'>
-                  <div className='absolute lg:hidden top-0 left-0 w-full h-full bg-black bg-opacity-30 z-50'></div>
+                <div className='relative h-[30rem] w-full overflow-hidden rounded-lg'>
                   <ImageMedia
-                    className='object-cover lg:rounded-lg'
+                    imgClassName='object-cover'
                     src={imageByIndex(slides, index)}
                     alt='Your alt text'
                     fill

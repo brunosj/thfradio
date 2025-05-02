@@ -8,7 +8,7 @@ import { TbBrandDiscord } from 'react-icons/tb';
 
 export default function JoinChat() {
   return (
-    <div className='fixed bottom-4 animate-bounce right-4 hidden lg:block z-50'>
+    <div className='fixed bottom-2  right-2 hidden lg:block z-50'>
       <ChatRoom />
     </div>
   );
@@ -37,7 +37,7 @@ const ChatRoom = () => {
     return (
       <button
         onClick={() => setOpenChat(true)}
-        className='inline-flex items-center p-3 rounded-xl bg-orange-500 text-white focus:outline-none focus:ring-4 font-mono font-semibold border border-white hover:cursor-pointer hover:scale-105 duration-300'
+        className='inline-flex items-center p-3 rounded-xl bg-orange-500 text-white focus:outline-none focus:ring-4 font-mono font-semibold border border-white hover:cursor-pointer hover:scale-105 duration-300 animate-bounce'
       >
         <span className='hidden lg:inline '>Join the chat!</span>
       </button>

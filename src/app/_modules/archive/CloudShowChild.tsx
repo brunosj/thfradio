@@ -42,6 +42,18 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
   const name = getShowName(item);
   const formattedDate = getFormattedDateString(item);
 
+  // Limit the number of displayed tags
+  const MAX_VISIBLE_TAGS = 5;
+
+  // Filter and sort tags - sort alphabetically for consistent display
+  const sortedTags = item.tags
+    ? [...item.tags].sort((a, b) => a.name.localeCompare(b.name))
+    : [];
+
+  const visibleTags = sortedTags.slice(0, MAX_VISIBLE_TAGS);
+  const hasMoreTags = sortedTags.length > MAX_VISIBLE_TAGS;
+  const hiddenTagsCount = sortedTags.length - MAX_VISIBLE_TAGS;
+
   // Rest of the component remains the same
   // Just update the condition for showing the spinner:
   const isPlaying =
@@ -93,14 +105,31 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
         </div>
 
         {/* Tags */}
-        {item.tags && (
-          <ul className='flex mt-auto flex-wrap text-xs gap-2 justify-start lg:justify-center'>
-            {item.tags.map((item, i) => (
-              <li key={i} className='rounded-xl border-dark-blue border px-2 '>
-                {item.name}
-              </li>
-            ))}
-          </ul>
+        {sortedTags.length > 0 && (
+          <div className='relative'>
+            <ul className='flex mt-auto flex-wrap text-xs gap-2 justify-start lg:justify-center'>
+              {visibleTags.map((tag, i) => (
+                <li
+                  key={i}
+                  className='rounded-xl border-dark-blue border px-2 py-1'
+                  title={tag.name}
+                >
+                  {tag.name}
+                </li>
+              ))}
+              {hasMoreTags && (
+                <li
+                  className='rounded-xl border-dark-blue border px-2 py-1 bg-gray-100'
+                  title={`${hiddenTagsCount} more: ${sortedTags
+                    .slice(MAX_VISIBLE_TAGS)
+                    .map((t) => t.name)
+                    .join(', ')}`}
+                >
+                  +{hiddenTagsCount}
+                </li>
+              )}
+            </ul>
+          </div>
         )}
       </div>
     </button>

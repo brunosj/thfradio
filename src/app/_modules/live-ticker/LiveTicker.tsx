@@ -1,16 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import Marquee from 'react-fast-marquee';
 import { format, isWithinInterval, parseISO } from 'date-fns';
 import { enUS, de } from 'date-fns/locale';
 import { ArrowRightLong } from '@/common/assets/ArrowRightLong';
-import AudioPlayer from '@/modules/live-radio/AudioPlayer';
+import AudioPlayer, { AudioPlayerRef } from '@/modules/live-radio/AudioPlayer';
 import LiveCircle from '@/common/assets/LiveCircle';
 import { fetchCalendar } from '@/lib/calendar';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
+import { ActivePlayer, useGlobalStore } from '@/hooks/useStore';
 
 export default function LiveTicker() {
   const t = useTranslations();
@@ -18,6 +19,10 @@ export default function LiveTicker() {
   const locale = pathname?.startsWith('/de') ? 'de' : 'en';
   const localeModule = locale === 'de' ? de : enUS;
   const [calendarEntries, setCalendarEntries] = useState<CalendarEntry[]>([]);
+  const audioPlayerRef = useRef<AudioPlayerRef>(null);
+
+  // Get the active player from global store
+  const activePlayer = useGlobalStore((state) => state.activePlayer);
 
   const refreshCalendar = async () => {
     try {
@@ -37,6 +42,17 @@ export default function LiveTicker() {
     }, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  // Effect to pause LiveTicker audio when Mixcloud or Soundcloud players are active
+  useEffect(() => {
+    if (
+      audioPlayerRef.current &&
+      (activePlayer === ActivePlayer.MIXCLOUD ||
+        activePlayer === ActivePlayer.SOUNDCLOUD)
+    ) {
+      audioPlayerRef.current.pause();
+    }
+  }, [activePlayer]);
 
   const getCurrentShowName = () => {
     const now = new Date();
@@ -147,6 +163,7 @@ export default function LiveTicker() {
         </div>
         <div className='hidden lg:block ml-auto'>
           <AudioPlayer
+            ref={audioPlayerRef}
             iconClassName='w-6 h-6 lg:w-10 lg:h-10'
             iconFill='#1200ff'
             audioSrc={

@@ -8,6 +8,7 @@ export default function CloudPlayer() {
   const showKey = useGlobalStore((state) => state.showKey);
   const trackId = useGlobalStore((state) => state.trackId);
   const activePlayer = useGlobalStore((state) => state.activePlayer);
+  const activePlayerSet = useGlobalStore((state) => state.activePlayerSet);
 
   const mixcloudRef = useRef<ReturnType<
     typeof window.Mixcloud.PlayerWidget
@@ -96,6 +97,9 @@ export default function CloudPlayer() {
         return;
       }
 
+      // Ensure active player is set to Mixcloud
+      activePlayerSet(ActivePlayer.MIXCLOUD);
+
       const widget = window.Mixcloud.PlayerWidget(event.currentTarget);
       await widget.ready;
       mixcloudRef.current = widget;
@@ -120,6 +124,9 @@ export default function CloudPlayer() {
         console.error('Soundcloud API not loaded');
         return;
       }
+
+      // Ensure active player is set to Soundcloud
+      activePlayerSet(ActivePlayer.SOUNDCLOUD);
 
       const widget = window.SC.Widget(event.currentTarget);
       soundcloudRef.current = widget;

@@ -43,7 +43,7 @@ const HomeArchiveSection = ({ title, text }: ArchiveProps) => {
   const sortedShows = cloudShows ? processShows(cloudShows) : [];
 
   return (
-    <section className='bg-dark-blue scroll-mt-24' id='latest'>
+    <section className='bg-thf-blue-500 scroll-mt-24' id='latest'>
       <SectionHeader title={title} text={text} />
       <div className='flex w-full m-auto'>
         {error ? (

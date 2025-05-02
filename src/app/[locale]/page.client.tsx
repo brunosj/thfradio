@@ -33,6 +33,10 @@ For any issues or dev-related questions, please get in touch at contact@landozon
         showButtons={true}
         picturePosition='right'
       />
+      <HomeArchiveSection
+        title={page.attributes.archive.title}
+        text={page.attributes.archive.text}
+      />
       <HomeNewsSection
         title={page.attributes.news.title}
         text={page.attributes.news.text}
@@ -42,10 +46,6 @@ For any issues or dev-related questions, please get in touch at contact@landozon
         title={page.attributes.shows.title}
         text={page.attributes.shows.text}
         pictures={page.attributes.pictureGallery.data}
-      />
-      <HomeArchiveSection
-        title={page.attributes.archive.title}
-        text={page.attributes.archive.text}
       />
     </>
   );

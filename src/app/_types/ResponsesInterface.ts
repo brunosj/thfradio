@@ -46,7 +46,7 @@ export interface SoundcloudShowType {
   permalink_url: string;
   id: string;
   artwork_url: string;
-  tags: string;
+  tag_list: string;
 }
 
 // Combined type for frontend use

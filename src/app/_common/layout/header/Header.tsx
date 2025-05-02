@@ -75,12 +75,20 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   };
 
   return (
-    <header className='sticky w-full z-50 top-0 pt-4  bg-thf-blue-500 text-white pb-4 lg:pb-0 opacity-100 h-16'>
-      <div className={`layout flex items-center justify-between `}>
-        <Link className='w-24 lg:w-32 pb-2 lg:pb-4' href='/' aria-label='logo'>
-          <Image quality={50} src={logo} alt='THF Radio Logo' />
-        </Link>
-        <div className=''>
+    <header className='sticky w-full z-50 top-0 pt-4 bg-thf-blue-500 text-white pb-4 lg:pb-0 opacity-100 h-16'>
+      <div className='layout flex items-center justify-between'>
+        {/* Logo (left aligned) */}
+        <div className='flex items-center'>
+          <Link
+            className='w-24 lg:w-32 pb-2 lg:pb-4 block'
+            href='/'
+            aria-label='logo'
+          >
+            <Image quality={50} src={logo} alt='THF Radio Logo' />
+          </Link>
+        </div>
+
+        <div>
           {/* Desktop Menu */}
           <nav className='hidden lg:flex items-center border-t'>
             {menuKeys.map((key) => {
@@ -109,32 +117,32 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
             })}
             <LanguageSwitcher />
           </nav>
-          {/* Mobile Menu */}
-          <nav className={'block lg:hidden '}>
-            <div className='flex space-x-3'>
-              <AudioPlayer
-                iconFill='white'
-                iconClassName='w-6 h-6'
-                audioSrc={
-                  process.env.LIVE_RADIO_STREAM ||
-                  'https://thfradio2.out.airtime.pro/thfradio2_a'
-                }
-              />
-              <button
-                onClick={handleToggleMenu}
-                className='text-white'
-                aria-label='Menu'
-              >
-                {isOpen ? <XMarkIcon /> : <Bars3Icon />}{' '}
-              </button>
-            </div>
-            <LanguageSwitcher isMobile onMobileClick={() => setIsOpen(false)} />
-          </nav>
+
+          {/* Mobile Menu Controls (right side) */}
+          <div className='lg:hidden flex items-center space-x-3'>
+            <AudioPlayer
+              iconFill='white'
+              iconClassName='w-6 h-6'
+              audioSrc={
+                process.env.LIVE_RADIO_STREAM ||
+                'https://thfradio2.out.airtime.pro/thfradio2_a'
+              }
+            />
+            <button
+              onClick={handleToggleMenu}
+              className='text-white'
+              aria-label='Menu'
+            >
+              {isOpen ? <XMarkIcon /> : <Bars3Icon />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
       <div
         ref={menuRef}
-        className={`fixed top-12 right-0 h-full bg-thf-blue-500 text-white w-4/5 overflow-auto  transform  duration-700 ease-in-out z-50 ${
+        className={`fixed top-12 right-0 h-full bg-thf-blue-500 text-white w-4/5 overflow-auto transform duration-700 ease-in-out z-50 ${
           isOpen ? 'translate-x-0' : `translate-x-full`
         } transition-transform`}
       >

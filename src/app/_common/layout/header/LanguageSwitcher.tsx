@@ -52,7 +52,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   return (
     <button
       onClick={() => handleLocaleChange(locale === 'en' ? 'de' : 'en')}
-      className='hover:bg-white hover:text-neutral-900 duration-300 border-r border-l hover:cursor-pointer'
+      className='hover:bg-white hover:text-neutral-900 duration-300 lg:border-r lg:border-l hover:cursor-pointer'
       aria-label='change language'
       disabled={isPending}
     >
