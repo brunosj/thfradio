@@ -6,7 +6,7 @@ import DiscordEmbed from '@/modules/chat/DiscordEmbed';
 
 export default function ChatContent() {
   return (
-    <div className='relative'>
+    <div className='relative pt-6'>
       <div className='absolute left-0 w-full bg-orange-500 text-white h-[63px] px-4'>
         <div className='flex space-x-4 items-center h-full'>
           <span className='flex-grow'>

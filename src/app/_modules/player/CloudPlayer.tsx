@@ -156,7 +156,7 @@ export default function CloudPlayer() {
 
       {/* Players */}
       {showKey && activePlayer === ActivePlayer.MIXCLOUD && (
-        <div className='fixed bottom-0 left-0 w-3/4'>
+        <div className='fixed bottom-0 left-0 w-full lg:w-3/4 z-50'>
           <iframe
             allow='autoplay'
             onLoad={handleMixcloudLoad}
@@ -169,7 +169,7 @@ export default function CloudPlayer() {
       )}
 
       {trackId && activePlayer === ActivePlayer.SOUNDCLOUD && (
-        <div className='fixed bottom-0 left-0 w-3/4 bg-white p-3'>
+        <div className='fixed bottom-0 left-0 w-full lg:w-3/4 bg-white p-4 z-50'>
           <iframe
             id='soundcloud-player'
             height={20}

@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import logo from '@/assets/logo_white.png';
 import AudioPlayer from '@/modules/live-radio/AudioPlayer';
-
+import { SlSpeech } from 'react-icons/sl';
 import { Bars3Icon } from '@/common/assets/Bars3Icon';
 import { XMarkIcon } from '@/common/assets/XMarkIcon';
 import JoinChatMobile from '@/modules/chat/JoinChatMobile';
@@ -78,13 +78,16 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
     <header className='sticky w-full z-50 top-0 pt-4 bg-thf-blue-500 text-white pb-4 lg:pb-0 opacity-100 h-16'>
       <div className='layout flex items-center justify-between'>
         {/* Logo (left aligned) */}
-        <div className='flex items-center'>
+        <div className='flex items-center gap-6'>
           <Link
-            className='w-24 lg:w-32 pb-2 lg:pb-4 block'
+            className='w-24 lg:w-32 mt-1 lg:mt-0pb-2 lg:pb-4 block'
             href='/'
             aria-label='logo'
           >
-            <Image quality={50} src={logo} alt='THF Radio Logo' />
+            <Image quality={75} src={logo} alt='THF Radio Logo' />
+          </Link>
+          <Link href='/chat' className='block lg:hidden'>
+            <SlSpeech className='w-6 h-6 ' />
           </Link>
         </div>
 

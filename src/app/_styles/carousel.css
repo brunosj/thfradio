@@ -18,6 +18,12 @@
   border-radius: 0.5rem;
 }
 
+@media (max-width: 1024px) {
+  .embla__viewport {
+    border-radius: 0;
+  }
+}
+
 .embla__container {
   backface-visibility: hidden;
   display: flex;
