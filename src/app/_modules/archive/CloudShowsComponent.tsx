@@ -27,8 +27,12 @@ const CloudShowsComponent = ({ items, tagsList }: ShowCardProps) => {
   // Use hook
   const allFilteredItems = useShowFilter({ items, selectedTag });
 
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
+  // If we have 8 or fewer items, just show them all without pagination
+  const isLimitedView = items.length <= 8;
+
+  // Only slice items for pagination if we're not in limited view
+  const startIndex = isLimitedView ? 0 : (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = isLimitedView ? items.length : startIndex + ITEMS_PER_PAGE;
   const itemsToDisplay = allFilteredItems.slice(startIndex, endIndex);
 
   // Genre tags
@@ -80,23 +84,28 @@ const CloudShowsComponent = ({ items, tagsList }: ShowCardProps) => {
 
   return (
     <div className='relative w-full' ref={topRef}>
-      <div className='block lg:sticky top-[6.5rem] z-50 opacity-100 lg:flex pb-12  '>
-        <CloudShowsFilter
-          sortedTags={sortedTags}
-          selectedTag={selectedTag}
-          handleTagClick={handleTagClick}
-        />
-      </div>
+      {/* Only show filters and pagination if we're not in limited view */}
+      {!isLimitedView && (
+        <div className='block lg:sticky top-[6.5rem] z-50 opacity-100 lg:flex pb-12'>
+          <CloudShowsFilter
+            sortedTags={sortedTags}
+            selectedTag={selectedTag}
+            handleTagClick={handleTagClick}
+          />
+        </div>
+      )}
       <div className='layout'>
         <div className='flex items-start gap-6'>
           <CloudShowsList items={itemsToDisplay} />
         </div>
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          handlePageChange={handlePageChange}
-          className='py-12'
-        />
+        {!isLimitedView && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            handlePageChange={handlePageChange}
+            className='py-12'
+          />
+        )}
       </div>
     </div>
   );

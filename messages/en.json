@@ -17,6 +17,7 @@
   "footerDescription": "We are a non-profit community radio at the former Tempelhof airport",
   "menuTitle": "Menu",
   "contactTitle": "Contact",
+  "viewAllShows": "View all shows",
   "navigation": {
     "toNews": "Go to news section",
     "toShows": "Go to shows section",
@@ -38,7 +39,7 @@
     },
     "latest": {
       "name": "Latest",
-      "path": "/#latest"
+      "path": "/latest"
     },
     "info": {
       "name": "Info",
@@ -90,5 +91,11 @@
     "title": "Page Not Found",
     "description": "The page you are looking for doesn't exist or has been moved.",
     "backHome": "Back to Home"
+  },
+  "Latest": {
+    "pageTitle": "Latest Shows | THF Radio",
+    "pageDescription": "Explore the latest shows from THF Radio",
+    "title": "Latest Shows",
+    "description": "Browse through our complete archive of radio shows"
   }
 }
