@@ -46,9 +46,12 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
   const MAX_VISIBLE_TAGS = 5;
 
   // Filter and sort tags - sort alphabetically for consistent display
-  const sortedTags = item.tags
-    ? [...item.tags].sort((a, b) => a.name.localeCompare(b.name))
-    : [];
+  const sortedTags =
+    item.tags && Array.isArray(item.tags)
+      ? [...item.tags]
+          .filter((tag) => tag && typeof tag === 'object' && tag.name)
+          .sort((a, b) => a.name.localeCompare(b.name))
+      : [];
 
   const visibleTags = sortedTags.slice(0, MAX_VISIBLE_TAGS);
   const hasMoreTags = sortedTags.length > MAX_VISIBLE_TAGS;

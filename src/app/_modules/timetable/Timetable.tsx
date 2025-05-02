@@ -1,5 +1,5 @@
 // File: Timetable.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import groupByDate from './groupByDate';
 import DateEntry from './DateEntry';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
@@ -9,7 +9,11 @@ interface TimetableProps {
 }
 
 const Timetable = ({ calendarEntries }: TimetableProps) => {
-  const groupedEntries = groupByDate(calendarEntries);
+  // Memoize grouped entries to prevent unnecessary recalculations
+  const groupedEntries = useMemo(
+    () => groupByDate(calendarEntries),
+    [calendarEntries]
+  );
 
   return (
     <div className='layout space-y-3 lg:space-y-6 w-full max-w-full xl:max-w-[80%] '>
@@ -20,4 +24,5 @@ const Timetable = ({ calendarEntries }: TimetableProps) => {
   );
 };
 
-export default Timetable;
+// Memoize the entire component to prevent re-renders when props haven't changed
+export default React.memo(Timetable);
