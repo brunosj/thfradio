@@ -18,6 +18,8 @@ interface GlobalStore {
 
   currentShowUrl: string | undefined;
   setCurrentShowUrl: (url: string) => void;
+
+  resetPlayer: () => void;
 }
 
 export const useGlobalStore = create<GlobalStore>((set) => ({
@@ -40,4 +42,12 @@ export const useGlobalStore = create<GlobalStore>((set) => ({
 
   currentShowUrl: undefined,
   setCurrentShowUrl: (url) => set({ currentShowUrl: url }),
+
+  resetPlayer: () =>
+    set({
+      activePlayer: undefined,
+      showKey: undefined,
+      trackId: undefined,
+      // Keep currentShowUrl for history purposes
+    }),
 }));

@@ -26,6 +26,7 @@ For any issues or dev-related questions, please get in touch at contact@landozon
 
   return (
     <>
+      <HomeProgrammeSection />
       <Hero
         description={page.attributes.heroText}
         images={page.attributes.heroPictures}
@@ -36,10 +37,6 @@ For any issues or dev-related questions, please get in touch at contact@landozon
         title={page.attributes.news.title}
         text={page.attributes.news.text}
         newsItems={latestNews}
-      />
-      <HomeProgrammeSection
-        title={page.attributes.programme.title}
-        text={page.attributes.programme.text}
       />
       <HomeShowSection
         title={page.attributes.shows.title}

@@ -13,7 +13,6 @@ export const Layout = ({ children }: Props) => {
           isMobileMenuOpen ? 'filter blur-sm duration-700 ease-in-out' : ''
         }
       >
-        {/* <LiveTicker /> */}
         <article>{children}</article>
       </main>
       <Footer />

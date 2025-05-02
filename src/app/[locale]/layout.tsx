@@ -6,10 +6,8 @@ import HeaderWithBlur from './HeaderWithBlur';
 import LiveTicker from '@/modules/live-ticker/LiveTicker';
 import JoinChat from '@/modules/chat/JoinChat';
 import Footer from '@/app/_common/layout/footer/Footer';
-import CloudPlayer from '@/modules/player/CloudPlayer';
 import { siteMetadata } from '@/utils/siteMetadata';
-import '@/styles/global.css';
-import '@/styles/carousel.css';
+import CloudPlayer from '@/app/_modules/player/CloudPlayer';
 
 type Params = Promise<{ locale: string }>;
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -58,6 +56,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       </HeaderWithBlur>
       <Footer />
       <CloudPlayer />
+      {/* <CustomAudioPlayer /> */}
       <JoinChat />
     </NextIntlClientProvider>
   );

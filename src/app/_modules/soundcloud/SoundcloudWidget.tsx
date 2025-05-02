@@ -75,12 +75,12 @@ export default function SoundcloudPlayer() {
       />
       <iframe
         id='soundcloud-player'
-        height={20}
+        height={120}
         width='100%'
         allow='autoplay'
         onLoad={handleIframeLoad}
         src={`https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${trackId}&color=%23ff5500&inverse=false&auto_play=true&show_user=true&visual=false&show_teaser=false&show_comments=false&show_reposts=false&show_artwork=false&sharing=false&download=false&origin=${typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : ''}`}
-        className='fixed bottom-0 left-0 w-full bg-white p-3 '
+        className='fixed bottom-0 left-0 w-3/4 bg-white p-3 '
       />
     </>
   );

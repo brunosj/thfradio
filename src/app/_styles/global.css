@@ -259,3 +259,43 @@ input[type='range']:focus::-ms-fill-upper {
 .bar:nth-child(4) {
   animation-delay: 0.1s;
 }
+
+/* Custom Audio Player Styles */
+.thf-audio-player {
+  --rap-play-btn-color: #1200ff;
+  --rap-progress-bar-color: #1200ff;
+  --rap-volume-bar-color: #1200ff;
+  --rap-volume-btn-color: #1200ff;
+  --rap-time-font-color: #333333;
+  --rap-background-color: transparent;
+  --rap-border-color: transparent;
+  --rap-time-font-size: 14px;
+
+  width: 100%;
+  max-width: 100%;
+  border-radius: 0;
+  padding: 0;
+}
+
+.thf-audio-player button {
+  @apply transition-transform duration-200;
+}
+
+.thf-audio-player button:hover {
+  @apply scale-110;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .thf-audio-player {
+    --rap-time-font-size: 12px;
+  }
+
+  .thf-audio-player .rap-controls {
+    @apply gap-1;
+  }
+
+  .thf-audio-player .rap-volume-container {
+    @apply hidden;
+  }
+}

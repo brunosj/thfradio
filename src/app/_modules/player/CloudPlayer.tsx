@@ -17,6 +17,12 @@ export default function CloudPlayer() {
   );
   const [isSoundcloudLoaded, setIsSoundcloudLoaded] = useState(false);
 
+  // Get origin for widget URL
+  const getOrigin = () => {
+    if (typeof window === 'undefined') return '';
+    return encodeURIComponent(window.location.origin);
+  };
+
   // Cleanup function for Mixcloud
   const cleanupMixcloud = async () => {
     try {
@@ -28,6 +34,7 @@ export default function CloudPlayer() {
         'mixcloud-player'
       ) as HTMLIFrameElement;
       if (iframe) {
+        iframe.src = 'about:blank';
         iframe.remove();
       }
     } catch (error) {
@@ -46,6 +53,7 @@ export default function CloudPlayer() {
         'soundcloud-player'
       ) as HTMLIFrameElement;
       if (iframe) {
+        iframe.src = 'about:blank';
         iframe.remove();
       }
     } catch (error) {
@@ -141,27 +149,27 @@ export default function CloudPlayer() {
 
       {/* Players */}
       {showKey && activePlayer === ActivePlayer.MIXCLOUD && (
-        <div className='fixed bottom-0 left-0 w-full'>
+        <div className='fixed bottom-0 left-0 w-3/4'>
           <iframe
             allow='autoplay'
             onLoad={handleMixcloudLoad}
             id='mixcloud-player'
             height={60}
             className='w-full'
-            src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&autoplay=1&dark=1&mini=1&feed=${showKey}`}
+            src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&autoplay=1&dark=1&mini=1&feed=${showKey}&origin=${getOrigin()}`}
           />
         </div>
       )}
 
       {trackId && activePlayer === ActivePlayer.SOUNDCLOUD && (
-        <div className='fixed bottom-0 left-0 w-full bg-white p-3'>
+        <div className='fixed bottom-0 left-0 w-3/4 bg-white p-3'>
           <iframe
             id='soundcloud-player'
             height={20}
             width='100%'
             allow='autoplay'
             onLoad={handleSoundcloudLoad}
-            src={`https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${trackId}&color=%23ff5500&inverse=false&auto_play=true&show_user=true&visual=false&show_teaser=false&show_comments=false&show_reposts=false&show_artwork=false&sharing=false&download=false&origin=${typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : ''}`}
+            src={`https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${trackId}&color=%23ff5500&inverse=false&auto_play=true&show_user=true&visual=false&show_teaser=false&show_comments=false&show_reposts=false&show_artwork=false&sharing=false&download=false&origin=${getOrigin()}`}
           />
         </div>
       )}
