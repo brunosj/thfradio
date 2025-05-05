@@ -1,7 +1,8 @@
 import { fetchCloudShows } from '@/lib/shows';
 import { NextResponse } from 'next/server';
 
-export const revalidate = 3600; // 1 hour in seconds
+// Set to 12 hours for better caching
+export const revalidate = 43200; // 12 hours in seconds
 
 export async function GET() {
   try {
@@ -10,11 +11,12 @@ export async function GET() {
     return NextResponse.json(shows, {
       status: 200,
       headers: {
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200',
+        // Longer cache times with stale-while-revalidate approach
+        'Cache-Control': 'public, max-age=43200, stale-while-revalidate=86400',
       },
     });
   } catch (error) {
     console.error('Error in cloud shows API route:', error);
-    return NextResponse.json([], { status: 500 });
+    return NextResponse.json([], { status: 200 }); // Return empty array with 200 status to not break UI
   }
 }

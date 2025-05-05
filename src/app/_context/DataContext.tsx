@@ -12,10 +12,8 @@ interface DataContextProps {
 interface DataContextValue {
   cloudShows: CloudShowTypes[] | null;
   isLoadingShows: boolean;
-  hasError: boolean;
   tagsList: TagsList;
   loadCloudShows: () => Promise<void>;
-  retryLoadingShows: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | undefined>(undefined);
@@ -23,7 +21,6 @@ const DataContext = createContext<DataContextValue | undefined>(undefined);
 export function DataProvider({ children, initialTagsList }: DataContextProps) {
   const [cloudShows, setCloudShows] = useState<CloudShowTypes[] | null>(null);
   const [isLoadingShows, setIsLoadingShows] = useState(false);
-  const [hasError, setHasError] = useState(false);
   const [tagsList] = useState(initialTagsList);
 
   const loadCloudShows = async () => {
@@ -31,7 +28,6 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
     if (isLoadingShows || (cloudShows && cloudShows.length > 0)) return;
 
     setIsLoadingShows(true);
-    setHasError(false);
 
     try {
       const shows = await fetchCloudShowsCached();
@@ -39,27 +35,14 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
         setCloudShows(shows);
       } else {
         console.warn('Fetched shows array is empty or invalid');
-        setHasError(true);
         setCloudShows([]);
       }
     } catch (error) {
       console.error('Error loading cloud shows:', error);
-      setHasError(true);
       setCloudShows([]);
     } finally {
       setIsLoadingShows(false);
     }
-  };
-
-  const retryLoadingShows = async () => {
-    // Force a fresh reload by clearing localStorage cache
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('cloudShowsCache');
-      localStorage.removeItem('cloudShowsCacheTime');
-    }
-
-    setCloudShows(null);
-    await loadCloudShows();
   };
 
   // Load from cache immediately on mount
@@ -72,10 +55,8 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
       value={{
         cloudShows,
         isLoadingShows,
-        hasError,
         tagsList,
         loadCloudShows,
-        retryLoadingShows,
       }}
     >
       {children}
