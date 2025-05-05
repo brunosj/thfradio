@@ -2,9 +2,6 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin();
 
-// Define isDevelopment variable
-// const isDevelopment = process.env.NODE_ENV === 'development';
-
 const allowedOrigins = [
   'https://thfradio.com',
   'https://www.thfradio.com',
@@ -70,36 +67,32 @@ const nextConfig = {
       style-src 'self' 'unsafe-inline';
     `,
   },
-  // async headers() {
-  //   return [
-  //     {
-  //       source: '/(.*)',
-  //       headers: [
-  //         {
-  //           key: 'Access-Control-Allow-Credentials',
-  //           value: 'true',
-  //         },
-  //         {
-  //           key: 'Access-Control-Allow-Origin',
-  //           value: isDevelopment ? '*' : process.env.NEXT_PUBLIC_FRONTEND_URL,
-  //         },
-  //         {
-  //           key: 'Access-Control-Allow-Methods',
-  //           value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
-  //         },
-  //         {
-  //           key: 'Access-Control-Allow-Headers',
-  //           value:
-  //             'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Origin, Cache-Control',
-  //         },
-  //         {
-  //           key: 'Content-Security-Policy',
-  //           value: cspHeader.replace(/\n/g, ''),
-  //         },
-  //       ],
-  //     },
-  //   ];
-  // },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value:
+              'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Origin, Cache-Control',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
