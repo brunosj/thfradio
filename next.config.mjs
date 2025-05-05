@@ -14,22 +14,22 @@ const allowedOrigins = [
   'https://*.thfradio.de',
 ];
 
-// const cspHeader = `
-//     default-src 'self';
-//     script-src 'self' 'unsafe-eval' 'unsafe-inline' ${allowedOrigins.join(' ')};
-//     style-src 'self' 'unsafe-inline' ${allowedOrigins.join(' ')};
-//     img-src 'self' data: blob: ${allowedOrigins.join(' ')};
-//     frame-src 'self' ${allowedOrigins.join(' ')};
-//     font-src 'self';
-//     object-src 'none';
-//     base-uri 'self';
-//     form-action 'self' ${allowedOrigins.join(' ')};
-//     frame-ancestors 'none';
-//     connect-src 'self' ${isDevelopment ? '*' : allowedOrigins.join(' ')};
-//     ${isDevelopment ? '' : 'upgrade-insecure-requests;'}
-// `
-//   .replace(/\s{2,}/g, ' ')
-//   .trim();
+const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' ${allowedOrigins.join(' ')};
+    style-src 'self' 'unsafe-inline' ${allowedOrigins.join(' ')};
+    img-src 'self' data: blob: ${allowedOrigins.join(' ')};
+    frame-src 'self' ${allowedOrigins.join(' ')};
+    font-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self' ${allowedOrigins.join(' ')};
+    frame-ancestors 'none';
+    connect-src 'self' ${isDevelopment ? '*' : allowedOrigins.join(' ')};
+    ${isDevelopment ? '' : 'upgrade-insecure-requests;'}
+`
+  .replace(/\s{2,}/g, ' ')
+  .trim();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -78,7 +78,7 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Origin',
-            value: '*',
+            value: allowedOrigins.join(','),
           },
           {
             key: 'Access-Control-Allow-Methods',
@@ -88,6 +88,10 @@ const nextConfig = {
             key: 'Access-Control-Allow-Headers',
             value:
               'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Origin, Cache-Control',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader.replace(/\n/g, ''),
           },
         ],
       },
