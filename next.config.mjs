@@ -1,14 +1,8 @@
 import createNextIntlPlugin from 'next-intl/plugin';
+import cors from './src/app/config/cors.js';
+const { allowedOrigins } = cors;
 
 const withNextIntl = createNextIntlPlugin();
-
-const allowedOrigins = [
-  'https://thfradio.com',
-  'https://www.thfradio.com',
-  'https://ics.teamup.com',
-  'https://*.mixcloud.com',
-  'https://*.soundcloud.com',
-];
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

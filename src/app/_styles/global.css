@@ -68,6 +68,10 @@ h6 {
   @apply pb-12 lg:pb-20;
 }
 
+.sectionPt {
+  @apply pt-12 lg:pt-20;
+}
+
 .layout {
   @apply px-6 lg:px-16;
 }

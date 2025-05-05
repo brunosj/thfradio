@@ -21,6 +21,7 @@ export default function InfoContent({ page }: { page: AboutTypes }) {
         button={page.attributes.radioSection.button}
         links={page.attributes.radioSection.links}
         acceptApplications={page.attributes.acceptApplications}
+        className='pt-12 lg:pt-0'
       />
       <CodeOfConductSection textSlides={page.attributes.codeOfConduct} />
       <ImageBanner
@@ -32,6 +33,7 @@ export default function InfoContent({ page }: { page: AboutTypes }) {
         description={page.attributes.torhausSection.description}
         button={page.attributes.torhausSection.button}
         links={page.attributes.torhausSection.links}
+        className='sectionPt'
       />
     </>
   );

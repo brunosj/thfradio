@@ -88,7 +88,7 @@ const ImageCarousel: React.FC<PropType> = (props) => {
           <div className='embla__container'>
             {slides.data.map((slide, index) => (
               <div className='embla__slide' key={index}>
-                <div className='relative h-[30rem] w-full overflow-hidden rounded-lg'>
+                <div className='relative h-[30rem] w-full overflow-hidden lg:rounded-lg'>
                   <ImageMedia
                     imgClassName='object-cover'
                     src={imageByIndex(slides, index)}
@@ -97,6 +97,8 @@ const ImageCarousel: React.FC<PropType> = (props) => {
                     priority={index === 0}
                     loading={index < 3 ? 'eager' : 'lazy'}
                   />
+                  {/* Dark overlay for mobile devices */}
+                  <div className='absolute inset-0 bg-black/20 '></div>
                 </div>
               </div>
             ))}

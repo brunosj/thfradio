@@ -9,18 +9,11 @@ import {
 } from 'date-fns';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
 import type { CalendarComponent, VEvent } from 'node-ical';
+import cors from '@/app/config/cors.js';
+const { allowedOrigins, isOriginAllowed } = cors;
 
 // Set revalidation period to 5 minutes
 export const revalidate = 300;
-
-// Define allowed origins (matching next.config.mjs)
-const allowedOrigins = [
-  'https://thfradio.com',
-  'https://www.thfradio.com',
-  'https://ics.teamup.com',
-  'https://*.mixcloud.com',
-  'https://*.soundcloud.com',
-];
 
 type CalendarEntries = { [key: string]: CalendarComponent };
 
@@ -28,15 +21,8 @@ export async function GET(request: Request) {
   // Get the origin from the request headers
   const origin = request.headers.get('origin') || '';
 
-  // Check if the origin is allowed (simple check for demo purposes)
-  // In production, you'd want to properly check wildcards
-  const isAllowedOrigin = allowedOrigins.some((allowed) => {
-    if (allowed.includes('*')) {
-      const pattern = allowed.replace('*', '.*');
-      return new RegExp(pattern).test(origin);
-    }
-    return origin === allowed;
-  });
+  // Check if the origin is allowed
+  const isAllowedOrigin = isOriginAllowed(origin);
 
   // Set the CORS header based on whether the origin is allowed
   const corsHeader = isAllowedOrigin ? origin : allowedOrigins[0];
@@ -120,13 +106,7 @@ export async function OPTIONS(request: Request) {
   const origin = request.headers.get('origin') || '';
 
   // Check if the origin is allowed
-  const isAllowedOrigin = allowedOrigins.some((allowed) => {
-    if (allowed.includes('*')) {
-      const pattern = allowed.replace('*', '.*');
-      return new RegExp(pattern).test(origin);
-    }
-    return origin === allowed;
-  });
+  const isAllowedOrigin = isOriginAllowed(origin);
 
   // Set the CORS header based on whether the origin is allowed
   const corsHeader = isAllowedOrigin ? origin : allowedOrigins[0];

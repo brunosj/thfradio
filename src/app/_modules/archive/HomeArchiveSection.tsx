@@ -68,7 +68,10 @@ const HomeArchiveSection = ({
   const sortedShows = showAll ? allSortedShows : allSortedShows.slice(0, 8);
 
   return (
-    <section className={`${backgroundColor} scroll-mt-24`} id='latest'>
+    <section
+      className={`${backgroundColor} scroll-mt-24 sectionPb`}
+      id='latest'
+    >
       <SectionHeader title={title} text={text} />
       <div className='flex w-full m-auto flex-col'>
         {error ? (
@@ -82,7 +85,7 @@ const HomeArchiveSection = ({
             <CloudShowsComponent items={sortedShows} tagsList={tagsList} />
 
             {!showAll && (
-              <div className='layout text-center py-12'>
+              <div className='layout text-center pt-12'>
                 <UIButton
                   path='/latest'
                   color='white-orange'

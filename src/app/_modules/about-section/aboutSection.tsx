@@ -2,15 +2,22 @@ import ReactMarkdown from 'react-markdown';
 import Button from '@/common/ui/UIButton';
 import type { AboutSection } from '@/types/ResponsesInterface';
 
+type AboutSectionProps = AboutSection & {
+  className?: string;
+};
+
 const AboutSection = ({
   title,
   description,
   button,
   links,
   acceptApplications,
-}: AboutSection) => {
+  className,
+}: AboutSectionProps) => {
   return (
-    <section className='layout bg-dark-blue sectionPy space-y-12'>
+    <section
+      className={`layout bg-dark-blue sectionPb space-y-12 ${className}`}
+    >
       <h1 className='text-white font-semibold'>{title}</h1>
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-x-12 '>
         <div className='space-y-12'>

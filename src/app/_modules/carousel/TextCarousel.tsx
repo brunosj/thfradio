@@ -56,7 +56,7 @@ const TextCarousel: React.FC<PropType> = (props) => {
           <div className='embla__container embla__adjustHeight'>
             {slides.map((slide, index) => (
               <div className='embla__slide' key={index}>
-                <div className='layout  w-full lg:w-1/2 m-auto  markdown pb-6'>
+                <div className='layout  w-full lg:w-2/3 m-auto  markdown pb-6'>
                   <h1 className='text-thf-blue-500 uppercase tracking-wider font-semibold'>
                     {slide.heading}
                   </h1>
