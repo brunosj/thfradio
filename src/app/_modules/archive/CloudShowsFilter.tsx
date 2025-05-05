@@ -14,7 +14,7 @@ const CloudShowsFilter = ({
 }: CloudShowsFilterProps) => {
   return (
     <div className='w-full bg-orange-500 '>
-      <div className='flex flex-wrap justify-center gap-x-2  max-w-6xl m-auto py-3 layout gap-y-3 '>
+      <div className='flex flex-wrap justify-center gap-x-2  max-w-6xl m-auto py-3 layout gap-y-2 lg:gap-y-3 '>
         {sortedTags.map((tag) => (
           <button
             key={tag.name}

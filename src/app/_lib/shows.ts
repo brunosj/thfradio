@@ -1,6 +1,6 @@
 import type { CloudShowTypes, ShowTypes } from '@/types/ResponsesInterface';
 import { fetchMixcloudShows } from './mixcloud';
-import { fetchSoundcloudShows } from './soundcloud';
+// import { fetchSoundcloudShows } from './soundcloud';
 
 type ShowsType = {
   data: ShowTypes[];
@@ -14,12 +14,13 @@ export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
   });
 
   // Then try to fetch Soundcloud shows with caching
-  let soundcloudShows: CloudShowTypes[] = [];
-  try {
-    soundcloudShows = await fetchSoundcloudShows();
-  } catch (error) {
-    console.error('Error fetching Soundcloud shows:', error);
-  }
+  const soundcloudShows: CloudShowTypes[] = [];
+  // let soundcloudShows: CloudShowTypes[] = [];
+  // try {
+  //   soundcloudShows = await fetchSoundcloudShows();
+  // } catch (error) {
+  //   console.error('Error fetching Soundcloud shows:', error);
+  // }
 
   const shows = [...mixcloudShows, ...soundcloudShows];
 
@@ -38,7 +39,7 @@ export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
     `${process.env.NEXT_PUBLIC_API_URL}/api/cloudShows`,
     {
       next: {
-        revalidate: 86400, // 24 hours in seconds
+        revalidate: 86400,
       },
     }
   ).then((res) => res.json());
