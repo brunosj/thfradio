@@ -18,6 +18,8 @@
   "menuTitle": "Menu",
   "contactTitle": "Contact",
   "viewAllShows": "View all shows",
+  "failedToLoadShows": "Failed to load shows. Please try again.",
+  "retry": "Retry",
   "navigation": {
     "toNews": "Go to news section",
     "toShows": "Go to shows section",

@@ -4,7 +4,7 @@ import type { CloudShowTypes } from '@/types/ResponsesInterface';
 import { Play } from '@/common/assets/PlayIcon';
 import { getShowName, getFormattedDateString } from '@/utils/showUtils';
 import BarsSpinner from '@/common/ui/BarsSpinner';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGlobalStore } from '@/hooks/useStore';
 import { getMixcloudKey } from '@/utils/getMixcloudKey';
 import { ActivePlayer } from '@/hooks/useStore';
@@ -30,13 +30,38 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
     setCurrentShowUrl(item.url);
   };
 
-  // Fixes inconsistencies between show title and images during loading after selecting tags
-  const [imageLoaded, setImageLoaded] = useState(true);
+  // Image loading state handling
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+
+  // Preload image when component mounts
   useEffect(() => {
-    if (item) {
-      setImageLoaded(false);
-    }
-  }, [item]);
+    if (!item?.pictures?.extra_large) return;
+
+    // Reset states for new image
+    setImageLoaded(false);
+    setImageError(false);
+
+    // Create new image object to preload
+    const img = new window.Image();
+    img.src = item.pictures.extra_large;
+
+    img.onload = () => {
+      setImageLoaded(true);
+    };
+
+    img.onerror = () => {
+      setImageError(true);
+      setImageLoaded(true); // Consider image "loaded" even if errored, to remove spinner
+    };
+
+    // Cleanup
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [item?.pictures?.extra_large]);
 
   // Show info rendering
   const name = getShowName(item);
@@ -57,33 +82,45 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
   const hasMoreTags = sortedTags.length > MAX_VISIBLE_TAGS;
   const hiddenTagsCount = sortedTags.length - MAX_VISIBLE_TAGS;
 
-  // Rest of the component remains the same
-  // Just update the condition for showing the spinner:
+  // Check if this show is currently playing
   const isPlaying =
     currentShowUrl === item.url &&
     ((item.platform === 'mixcloud' && activePlayer === ActivePlayer.MIXCLOUD) ||
       (item.platform === 'soundcloud' &&
         activePlayer === ActivePlayer.SOUNDCLOUD));
 
+  // Placeholder image URL for fallback
+  const placeholderImage = '/images/placeholder.jpg'; // Update this to your placeholder image path
+
   return (
     <button
-      className='flex flex-row w-full md:w-[48%] lg:w-[29%] xl:w-[22%]  border border-dark-blue bg-white font-mono duration-200 lg:flex-col rounded-xl p-4 group items-center '
+      className='flex flex-row w-full md:w-[48%] lg:w-[29%] xl:w-[22%] border border-dark-blue bg-white font-mono duration-200 lg:flex-col rounded-xl p-4 group items-center'
       onClick={onClick}
       aria-label={`Play ${item.name}`}
     >
       {/* Image */}
       <div className='group relative flex justify-around items-center hover:cursor-pointer'>
-        <div
-          className={`w-24 lg:w-40 xl:w-56 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}`}
-        >
+        <div className='w-24 lg:w-40 xl:w-56 transition-opacity duration-300 relative'>
+          {!imageLoaded && !imageError && (
+            <div className='absolute inset-0 flex items-center justify-center bg-gray-100'>
+              <BarsSpinner color='#1200ff' />
+            </div>
+          )}
+
           <Image
+            ref={imageRef}
             unoptimized
             quality={50}
-            src={item.pictures.extra_large}
+            src={imageError ? placeholderImage : item.pictures.extra_large}
             height={600}
             width={600}
-            alt=''
+            alt={name || item.name}
+            className={`transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageError(true);
+              setImageLoaded(true);
+            }}
           />
         </div>
         <div
