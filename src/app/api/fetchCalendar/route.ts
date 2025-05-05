@@ -9,24 +9,13 @@ import {
 } from 'date-fns';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
 import type { CalendarComponent, VEvent } from 'node-ical';
-import cors from '@/app/config/cors.js';
-const { allowedOrigins, isOriginAllowed } = cors;
 
 // Set revalidation period to 5 minutes
 export const revalidate = 300;
 
 type CalendarEntries = { [key: string]: CalendarComponent };
 
-export async function GET(request: Request) {
-  // Get the origin from the request headers
-  const origin = request.headers.get('origin') || '';
-
-  // Check if the origin is allowed
-  const isAllowedOrigin = isOriginAllowed(origin);
-
-  // Set the CORS header based on whether the origin is allowed
-  const corsHeader = isAllowedOrigin ? origin : allowedOrigins[0];
-
+export async function GET() {
   try {
     // Use promisified version of nodeIcal.fromURL
     const calendarEntries = await new Promise<CalendarEntries>(
@@ -72,10 +61,6 @@ export async function GET(request: Request) {
       headers: {
         // Set cache control to allow caching with revalidation
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
-        'Access-Control-Allow-Origin': corsHeader,
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        Vary: 'Origin', // Important when using dynamic CORS origin
       },
     });
   } catch (error) {
@@ -92,34 +77,8 @@ export async function GET(request: Request) {
         headers: {
           // Even errors can be cached briefly to prevent hammering the server
           'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
-          'Access-Control-Allow-Origin': corsHeader,
-          Vary: 'Origin',
         },
       }
     );
   }
-}
-
-// Handle OPTIONS request for CORS
-export async function OPTIONS(request: Request) {
-  // Get the origin from the request headers
-  const origin = request.headers.get('origin') || '';
-
-  // Check if the origin is allowed
-  const isAllowedOrigin = isOriginAllowed(origin);
-
-  // Set the CORS header based on whether the origin is allowed
-  const corsHeader = isAllowedOrigin ? origin : allowedOrigins[0];
-
-  return NextResponse.json(
-    {},
-    {
-      headers: {
-        'Access-Control-Allow-Origin': corsHeader,
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        Vary: 'Origin',
-      },
-    }
-  );
 }

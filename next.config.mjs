@@ -1,8 +1,36 @@
 import createNextIntlPlugin from 'next-intl/plugin';
-import cors from './src/app/config/cors.js';
-const { allowedOrigins } = cors;
 
 const withNextIntl = createNextIntlPlugin();
+
+// Define isDevelopment variable
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+const allowedOrigins = [
+  'https://thfradio.com',
+  'https://www.thfradio.com',
+  'https://thfradio.de',
+  'https://www.thfradio.de',
+  'https://ics.teamup.com',
+  'https://*.mixcloud.com',
+  'https://*.soundcloud.com',
+];
+
+const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' ${allowedOrigins.join(' ')};
+    style-src 'self' 'unsafe-inline' ${allowedOrigins.join(' ')};
+    img-src 'self' data: blob: ${allowedOrigins.join(' ')};
+    frame-src 'self' ${allowedOrigins.join(' ')};
+    font-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self' ${allowedOrigins.join(' ')};
+    frame-ancestors 'none';
+    connect-src 'self' ${isDevelopment ? '*' : allowedOrigins.join(' ')};
+    ${isDevelopment ? '' : 'upgrade-insecure-requests;'}
+`
+  .replace(/\s{2,}/g, ' ')
+  .trim();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -43,8 +71,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Apply these headers to all routes
-        source: '/:path*',
+        source: '/(.*)',
         headers: [
           {
             key: 'Access-Control-Allow-Credentials',
@@ -52,7 +79,7 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Origin',
-            value: '*', // In production, you may want to restrict this
+            value: isDevelopment ? '*' : process.env.NEXT_PUBLIC_FRONTEND_URL,
           },
           {
             key: 'Access-Control-Allow-Methods',
@@ -61,7 +88,11 @@ const nextConfig = {
           {
             key: 'Access-Control-Allow-Headers',
             value:
-              'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
+              'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Origin, Cache-Control',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader.replace(/\n/g, ''),
           },
         ],
       },
