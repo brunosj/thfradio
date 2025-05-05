@@ -69,7 +69,7 @@ const HomeArchiveSection = ({
 
   return (
     <section
-      className={`${backgroundColor} scroll-mt-24 sectionPb`}
+      className={`${backgroundColor} scroll-mt-24 sectionPb min-h-[60lvh]`}
       id='latest'
     >
       <SectionHeader title={title} text={text} />
