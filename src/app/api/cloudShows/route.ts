@@ -6,9 +6,8 @@ export const revalidate = 43200; // 12 hours in seconds
 
 export async function GET() {
   try {
-    console.log('API route: Fetching cloud shows...');
     const shows = await fetchCloudShows();
-    console.log(`API route: Successfully fetched ${shows.length} shows`);
+
     return NextResponse.json(shows, {
       status: 200,
       headers: {

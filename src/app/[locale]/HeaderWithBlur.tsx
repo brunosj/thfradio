@@ -13,13 +13,7 @@ export default function HeaderWithBlur({
   return (
     <div className='relative'>
       <Header isOpen={isMobileMenuOpen} setIsOpen={setMobileMenuOpen} />
-      <main
-        className={
-          isMobileMenuOpen ? 'filter blur-sm duration-700 ease-in-out' : ''
-        }
-      >
-        {children}
-      </main>
+      <main className={isMobileMenuOpen ? '' : ''}>{children}</main>
     </div>
   );
 }

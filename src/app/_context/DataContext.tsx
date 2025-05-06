@@ -31,24 +31,20 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
 
     // Skip if already loading
     if (isLoadingShows) {
-      console.log('Already loading shows, skipping duplicate request');
       return;
     }
 
     // If we have data already, don't reload unless forced
     if (cloudShows && cloudShows.length > 0) {
-      console.log('Shows already loaded, using cached data', cloudShows.length);
       return;
     }
 
-    console.log('Loading cloud shows...');
     setIsLoadingShows(true);
 
     try {
       const shows = await fetchCloudShowsCached();
 
       if (Array.isArray(shows) && shows.length > 0) {
-        console.log(`Successfully loaded ${shows.length} shows`);
         setCloudShows(shows);
       } else {
         const errorMsg = 'Fetched shows array is empty or invalid';

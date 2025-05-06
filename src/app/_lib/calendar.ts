@@ -14,7 +14,6 @@ export async function fetchCalendar(): Promise<CalendarEntry[]> {
     calendarCache.data &&
     now - calendarCache.timestamp < calendarCache.cacheTime
   ) {
-    console.log('Using cached calendar data');
     return calendarCache.data;
   }
 
@@ -43,7 +42,6 @@ export async function fetchCalendar(): Promise<CalendarEntry[]> {
     console.error('Error fetching calendar:', error);
     // Return cached data even if expired in case of error
     if (calendarCache.data) {
-      console.log('Using expired cache after fetch error');
       return calendarCache.data;
     }
     return [];

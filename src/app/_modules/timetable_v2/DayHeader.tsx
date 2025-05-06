@@ -19,7 +19,7 @@ export default function DayHeader({ date }: DayHeaderProps) {
   return (
     <div
       className={`w-full py-2 px-3 text-center border-r border-gray-700 h-full
-                ${isToday ? 'bg-blue-900/30' : ''}`}
+                ${isToday ? 'bg-thf-blue-500/20' : ''}`}
     >
       <div className='flex items-center justify-center space-x-2'>
         <p className='text-base  uppercase text-gray-400'>{dayName}</p>

@@ -27,7 +27,6 @@ For any issues or dev-related questions, please get in touch at contact@landozon
   return (
     <>
       <CalendarSchedule />
-
       <Hero
         description={page.attributes.heroText}
         images={page.attributes.heroPictures}

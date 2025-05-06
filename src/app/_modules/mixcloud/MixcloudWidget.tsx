@@ -48,7 +48,6 @@ export default function MixcloudPlayer() {
 
   // Function to handle close button click
   const handleClose = () => {
-    console.log('Closing Mixcloud player');
     cleanup();
     resetPlayer();
   };
@@ -73,7 +72,6 @@ export default function MixcloudPlayer() {
   }, []);
 
   const handleScriptLoad = () => {
-    console.log('Mixcloud API script loaded');
     setApiLoaded(true);
   };
 
@@ -103,8 +101,6 @@ export default function MixcloudPlayer() {
     try {
       // Wait for API to be loaded
       if (!apiLoaded) {
-        console.log('Waiting for Mixcloud API to load...');
-        // We'll handle this in the useEffect when apiLoaded changes
         return;
       }
 
@@ -114,7 +110,6 @@ export default function MixcloudPlayer() {
         return;
       }
 
-      console.log('Initializing Mixcloud widget');
       const widget = window.Mixcloud.PlayerWidget(event.currentTarget);
 
       // Listen for errors - use try/catch since TS doesn't know about events
@@ -129,7 +124,6 @@ export default function MixcloudPlayer() {
 
             // If we haven't tried reloading yet, try once
             if (!hasAttemptedReload) {
-              console.log('Attempting to reload widget');
               setHasAttemptedReload(true);
 
               const iframe = document.getElementById(
@@ -146,7 +140,6 @@ export default function MixcloudPlayer() {
       }
 
       await widget.ready;
-      console.log('Mixcloud widget ready');
       widgetRef.current = widget;
       if (activePlayer === ActivePlayer.MIXCLOUD) {
         await widget.play();
@@ -166,11 +159,9 @@ export default function MixcloudPlayer() {
     ) as HTMLIFrameElement;
     if (iframe && window.Mixcloud) {
       try {
-        console.log('Initializing Mixcloud widget from useEffect');
         const widget = window.Mixcloud.PlayerWidget(iframe);
         widget.ready
           .then(() => {
-            console.log('Mixcloud widget ready from useEffect');
             widgetRef.current = widget;
             if (activePlayer === ActivePlayer.MIXCLOUD) {
               widget.play().catch((err: unknown) => {

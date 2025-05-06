@@ -30,7 +30,7 @@ export default function CalendarEventItem({ event }: CalendarEventItemProps) {
   return (
     <div
       className={`w-full h-full p-2 overflow-hidden flex flex-col
-                ${isCurrentShow ? 'bg-orange-500 text-white  border border-orange-300' : 'bg-blue-800/70 text-white'}`}
+                ${isCurrentShow ? 'bg-orange-500 text-white  border border-orange-300' : 'bg-thf-blue-500/70 text-white'}`}
     >
       <div className='flex justify-between items-center mb-1'>
         <span

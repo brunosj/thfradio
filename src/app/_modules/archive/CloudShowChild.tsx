@@ -67,15 +67,6 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
   const name = getShowName(item);
   const formattedDate = getFormattedDateString(item);
 
-  // Debug tags - remove in production
-  if (item.platform === 'soundcloud') {
-    console.log(`[Debug] Rendering SoundCloud item:`, {
-      name: item.name,
-      tags: item.tags,
-      hasTags: item.tags && Array.isArray(item.tags) && item.tags.length > 0,
-    });
-  }
-
   // Limit the number of displayed tags
   const MAX_VISIBLE_TAGS = 15;
 
@@ -103,13 +94,13 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
 
   return (
     <button
-      className='flex flex-row w-full md:w-[48%] lg:w-[29%] xl:w-[22%] border border-dark-blue bg-white font-mono duration-200 lg:flex-col rounded-xl p-4 group items-center'
+      className='flex flex-col w-full md:w-[48%] lg:w-[29%] xl:w-[22%] border border-dark-blue bg-white font-mono duration-200 rounded-xl p-4 group'
       onClick={onClick}
       aria-label={`Play ${item.name}`}
     >
       {/* Image */}
-      <div className='group relative flex justify-around items-center hover:cursor-pointer'>
-        <div className='w-24 lg:w-40 xl:w-56 transition-opacity duration-300 relative'>
+      <div className='group relative flex justify-center items-center hover:cursor-pointer w-full mb-4'>
+        <div className='w-full max-w-[280px] mx-auto transition-opacity duration-300 relative aspect-square'>
           {!imageLoaded && !imageError && (
             <div className='absolute inset-0 flex items-center justify-center bg-gray-100'>
               <BarsSpinner color='#1200ff' />
@@ -124,7 +115,7 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
             height={600}
             width={600}
             alt={name || item.name}
-            className={`transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`transition-opacity duration-300 rounded-md ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImageLoaded(true)}
             onError={() => {
               setImageError(true);
@@ -145,10 +136,10 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
         </div>
       </div>
 
-      <div className='mt-3 lg:mt-6 flex h-full w-2/3 flex-grow flex-col lg:w-full px-6 text-left lg:text-center space-y-3 lg:space-y-6 mb-3 justify-center lg:justify-between'>
+      <div className='flex h-full w-full flex-col text-center space-y-3 lg:space-y-6 justify-between'>
         <div className='flex space-y-3 flex-col'>
           <span className='font-light opacity-70 text-sm'>{formattedDate}</span>
-          <h4 className='group-hover:text-thf-blue-500 duration-300 lg:mb-6 font-bold over break-words '>
+          <h4 className='group-hover:text-thf-blue-500 duration-300 lg:mb-6 font-bold over break-words'>
             {name}
           </h4>
         </div>
@@ -156,7 +147,7 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
         {/* Tags */}
         {sortedTags.length > 0 && (
           <div className='relative'>
-            <ul className='flex mt-auto flex-wrap text-xs gap-2 justify-start lg:justify-center'>
+            <ul className='flex mt-auto flex-wrap text-xs gap-2 justify-center'>
               {visibleTags.map((tag, i) => (
                 <li
                   key={i}

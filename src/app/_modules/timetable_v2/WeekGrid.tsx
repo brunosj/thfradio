@@ -72,7 +72,7 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
                   <div
                     key={`${dayIndex}-${hourIndex}`}
                     className={`w-[280px] flex-shrink-0 border-b border-r border-gray-700 relative
-                              ${isCurrentHour ? 'bg-blue-900/20' : ''}`}
+                              ${isCurrentHour ? 'bg-thf-blue-500/20' : ''}`}
                     style={{ height: `${HOUR_HEIGHT}px` }}
                   >
                     {/* This is just the grid cell */}

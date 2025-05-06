@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import type { Button as ButtonProps } from '@/types/uiInterface';
 import clsx from 'clsx';
-import { useParams } from 'next/navigation';
 
 const Button = ({
   children,
@@ -19,25 +18,20 @@ const Button = ({
   const isExternal = path.slice(0, 4) === 'http';
   const isAnchor = path.startsWith('#');
   const router = useRouter();
-  const { locale } = useParams();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (onClick) {
       onClick(e);
     } else if (!isExternal && !isAnchor) {
       e.preventDefault();
-      const localizedPath = path.startsWith('/') ? `/${locale}${path}` : path;
-      router.push(localizedPath);
+      router.push(path);
     }
   };
-
-  // Prepare the path for the Link component
-  const linkPath = path.startsWith('/') ? `/${locale}${path}` : path;
 
   return (
     <button
       className={clsx(
-        'flex font-mono rounded-xl text-sm shadow-sm border border-dark-blue px-4 py-2',
+        'flex font-mono rounded-xl text-sm shadow-sm border border-dark-blue px-4 py-2 cursor-pointer',
         className,
         {
           'bg-white duration-300 hover:bg-orange-500 hover:text-white':
@@ -58,7 +52,7 @@ const Button = ({
       ) : isAnchor ? (
         children
       ) : (
-        <Link href={linkPath}>{children}</Link>
+        <Link href={path}>{children}</Link>
       )}
     </button>
   );

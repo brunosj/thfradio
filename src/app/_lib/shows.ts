@@ -8,14 +8,12 @@ type ShowsType = {
 
 export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
   // Fetch Mixcloud shows first with caching
-  console.log('Fetching Mixcloud shows...');
   const mixcloudShows = await fetchMixcloudShows().catch((error) => {
     console.error('Error fetching Mixcloud shows:', error);
     return [];
   });
 
   // Then try to fetch Soundcloud shows with caching
-  console.log('Fetching SoundCloud shows...');
   let soundcloudShows: CloudShowTypes[] = [];
   try {
     // Check if SoundCloud environment variables are set
@@ -24,51 +22,15 @@ export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
       !process.env.SOUNDCLOUD_CLIENT_SECRET ||
       !process.env.SOUNDCLOUD_USER_ID
     ) {
-      console.error('SoundCloud environment variables missing: ', {
-        clientId: process.env.SOUNDCLOUD_CLIENT_ID ? 'Set' : 'Missing',
-        clientSecret: process.env.SOUNDCLOUD_CLIENT_SECRET ? 'Set' : 'Missing',
-        userId: process.env.SOUNDCLOUD_USER_ID ? 'Set' : 'Missing',
-      });
+      console.error('SoundCloud environment variables missing');
     }
 
     soundcloudShows = await fetchSoundcloudShows();
-    console.log(
-      `SoundCloud fetch successful: ${soundcloudShows.length} shows retrieved`
-    );
-
-    // Debug - verify the shows have the expected format
-    if (soundcloudShows.length > 0) {
-      // Check first show format
-      const sampleShow = soundcloudShows[0];
-      console.log('Sample SoundCloud show:', {
-        name: sampleShow.name,
-        platform: sampleShow.platform,
-        tagCount: sampleShow.tags?.length || 0,
-        hasPicture: !!sampleShow.pictures?.extra_large,
-      });
-
-      // Check for any shows without tags
-      const showsWithoutTags = soundcloudShows.filter(
-        (show) =>
-          !show.tags || !Array.isArray(show.tags) || show.tags.length === 0
-      );
-      if (showsWithoutTags.length > 0) {
-        console.warn(
-          `${showsWithoutTags.length} SoundCloud shows have no tags`
-        );
-      }
-    }
   } catch (error) {
     console.error('Error fetching Soundcloud shows:', error);
   }
 
   const shows = [...mixcloudShows, ...soundcloudShows];
-
-  console.log('Shows fetched:', {
-    mixcloud: mixcloudShows.length,
-    soundcloud: soundcloudShows.length,
-    total: shows.length,
-  });
 
   return shows;
 }
@@ -80,8 +42,6 @@ export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
     const apiBaseUrl =
       process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     const apiUrl = `${apiBaseUrl}/api/cloudShows`;
-
-    console.log(`Fetching cloud shows from: ${apiUrl}`);
 
     // Use Next.js cache instead of localStorage
     const response = await fetch(apiUrl, {
@@ -100,18 +60,12 @@ export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
 
     // Handle the new response format which might include error information
     if (data.error) {
-      console.error(
-        'API returned error:',
-        data.error,
-        'timestamp:',
-        data.timestamp
-      );
+      console.error('API returned error:', data.error);
       return data.shows || [];
     }
 
     // Handle the original array format
     const shows = Array.isArray(data) ? data : data.shows || [];
-    console.log(`Successfully fetched ${shows.length} shows`);
 
     return shows;
   } catch (error) {
