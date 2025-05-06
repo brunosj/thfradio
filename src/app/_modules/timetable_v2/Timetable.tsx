@@ -31,7 +31,7 @@ export default function TimetableV2({
 
     return (
       <div
-        className={`w-full py-2 px-3 text-center border-r border-gray-700 h-10
+        className={`w-full py-2 px-3 text-center border-r border-gray-700 h-10 border-b
                 ${isToday ? 'bg-blue-900' : 'bg-dark-blue'}`}
       >
         <div className='flex items-center justify-center space-x-2'>
@@ -55,9 +55,9 @@ export default function TimetableV2({
       >
         <div className='flex flex-col'>
           {/* Headers row */}
-          <div className='flex z-30 border-b border-gray-700 shadow-md transition-shadow duration-200'>
+          <div className='flex z-30  border-gray-700 shadow-md transition-shadow duration-200'>
             {/* Empty corner for time column - sticky in both directions */}
-            <div className='w-16 h-10 flex-shrink-0 sticky left-0 z-40 bg-dark-blue border-r border-gray-700 flex items-center justify-center'></div>
+            <div className='w-16 h-10 flex-shrink-0 sticky left-0 z-40 bg-dark-blue border-r border-gray-700 flex items-center justify-center border-b'></div>
 
             {/* Day headers - sticky vertically */}
             <div className='flex'>

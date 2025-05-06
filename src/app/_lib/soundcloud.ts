@@ -28,42 +28,55 @@ function normalizeSoundcloudShow(show: SoundcloudShowType): CloudShowTypes {
         `[SoundCloud] Processing tags for "${show.title}": ${show.tag_list}`
       );
 
-      // Clean up the tag list string first
-      const cleanTagList = show.tag_list
+      // Improved tag parsing for SoundCloud
+      // SoundCloud often sends tags like: "Jazz & Blues" "Drum & Bass"
+
+      // First, normalize quotes and spaces
+      const normalizedTagList = show.tag_list
         .trim()
-        // Fix malformed quotes - ensure all quotes are properly paired
+        // Replace any sequence of quotes with a single double quote
         .replace(/"+/g, '"')
-        // Remove trailing quotes at the end
-        .replace(/"$/g, '');
+        // Add spaces around quotes for easier splitting
+        .replace(/"/g, ' " ')
+        // Normalize spaces to single spaces
+        .replace(/\s+/g, ' ')
+        .trim();
 
-      // Simpler and more robust tag parsing approach
-      // Split by space, but respect quotes for multi-word tags
-      const tagMatches: string[] = [];
+      // Split by double quotes to extract quoted phrases
+      const parts = normalizedTagList.split('"');
+      const tags: string[] = [];
 
-      // Use regex to match quoted phrases and single words
-      const regex = /"([^"]+)"|(\S+)/g;
-      let match;
+      // Process parts: every other part is inside quotes
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i].trim();
+        if (part === '') continue;
 
-      while ((match = regex.exec(cleanTagList)) !== null) {
-        // match[1] is the content of a quoted string, match[2] is a single word
-        const tag = match[1] || match[2];
-        if (tag && !tag.includes('soundcloud:') && !tag.includes('geo:')) {
-          tagMatches.push(tag.trim());
+        // Parts at even indices are outside quotes - split by space
+        // Parts at odd indices are inside quotes - keep as is
+        if (i % 2 === 0) {
+          // Outside quotes - split by spaces
+          const words = part.split(' ').filter((w) => w !== '');
+          tags.push(...words);
+        } else {
+          // Inside quotes - keep as one tag
+          tags.push(part);
         }
       }
 
-      // Format the tags
-      formattedTags = tagMatches.map((tag) => {
-        // Clean up any remaining quotes or commas
-        const cleanTag = tag.replace(/[",]/g, '').trim();
-        return {
-          key: cleanTag.toLowerCase(),
-          name: cleanTag,
-          url: `tag/${cleanTag.toLowerCase().replace(/\s+/g, '-')}`,
-        };
-      });
+      // Clean up tags and format them
+      formattedTags = tags
+        .filter(
+          (tag) => tag && !tag.includes('soundcloud:') && !tag.includes('geo:')
+        )
+        .map((tag) => {
+          const cleanTag = tag.trim();
+          return {
+            key: cleanTag.toLowerCase(),
+            name: cleanTag,
+            url: `tag/${cleanTag.toLowerCase().replace(/\s+/g, '-')}`,
+          };
+        });
 
-      // Debug
       console.log(
         `[SoundCloud] Parsed ${formattedTags.length} tags for "${show.title}". Tags: ${formattedTags.map((t) => t.name).join(', ')}`
       );
@@ -77,13 +90,43 @@ function normalizeSoundcloudShow(show: SoundcloudShowType): CloudShowTypes {
     console.log(`[SoundCloud] No tags for "${show.title}"`);
   }
 
+  // Get a valid date from the title or creation date
+  // SoundCloud titles don't have // format like Mixcloud, so we need to append it
+  // The format needs to be "Name // DD.MM.YY" for the app to recognize it
+
+  // Extract date from SoundCloud created_at field (ISO format)
+  const createdDate = new Date(show.created_at || new Date());
+  const formattedDate = `${String(createdDate.getDate()).padStart(2, '0')}.${String(createdDate.getMonth() + 1).padStart(2, '0')}.${String(createdDate.getFullYear()).slice(-2)}`;
+
+  // Check if title already includes a date in the expected format
+  const hasDate = / \/\/ \d{2}\.\d{2}\.\d{2}/.test(show.title);
+
+  // If no date in title, add it
+  const formattedTitle = hasDate
+    ? show.title
+    : `${show.title} // ${formattedDate}`;
+
+  console.log(`[SoundCloud] Formatted title: "${formattedTitle}"`);
+
+  // SoundCloud often returns null or undefined for artwork_url
+  // Use a default image in these cases
+  let imageUrl = '/images/placeholder.jpg'; // Default fallback
+
+  if (show.artwork_url) {
+    // Get high resolution artwork if available
+    imageUrl = show.artwork_url.replace('-large', '-t500x500');
+  } else if (show.user && show.user.avatar_url) {
+    // If no track artwork, try to use user avatar
+    imageUrl = show.user.avatar_url.replace('-large', '-t500x500');
+  }
+
   return {
-    name: show.title,
+    name: formattedTitle,
     url: show.permalink_url,
     key: show.id,
     platform: 'soundcloud',
     pictures: {
-      extra_large: show.artwork_url?.replace('-large', '-t500x500') || '',
+      extra_large: imageUrl,
     },
     tags: formattedTags,
   };

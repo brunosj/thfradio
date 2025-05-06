@@ -12,6 +12,7 @@ interface DataContextProps {
 interface DataContextValue {
   cloudShows: CloudShowTypes[] | null;
   isLoadingShows: boolean;
+  showsError: string | null;
   tagsList: TagsList;
   loadCloudShows: () => Promise<void>;
 }
@@ -21,24 +22,45 @@ const DataContext = createContext<DataContextValue | undefined>(undefined);
 export function DataProvider({ children, initialTagsList }: DataContextProps) {
   const [cloudShows, setCloudShows] = useState<CloudShowTypes[] | null>(null);
   const [isLoadingShows, setIsLoadingShows] = useState(false);
+  const [showsError, setShowsError] = useState<string | null>(null);
   const [tagsList] = useState(initialTagsList);
 
   const loadCloudShows = async () => {
-    // Don't fetch if already loading or if we have data already
-    if (isLoadingShows || (cloudShows && cloudShows.length > 0)) return;
+    // Clear any previous errors
+    setShowsError(null);
 
+    // Skip if already loading
+    if (isLoadingShows) {
+      console.log('Already loading shows, skipping duplicate request');
+      return;
+    }
+
+    // If we have data already, don't reload unless forced
+    if (cloudShows && cloudShows.length > 0) {
+      console.log('Shows already loaded, using cached data', cloudShows.length);
+      return;
+    }
+
+    console.log('Loading cloud shows...');
     setIsLoadingShows(true);
 
     try {
       const shows = await fetchCloudShowsCached();
+
       if (Array.isArray(shows) && shows.length > 0) {
+        console.log(`Successfully loaded ${shows.length} shows`);
         setCloudShows(shows);
       } else {
-        console.warn('Fetched shows array is empty or invalid');
+        const errorMsg = 'Fetched shows array is empty or invalid';
+        console.warn(errorMsg);
+        setShowsError(errorMsg);
         setCloudShows([]);
       }
     } catch (error) {
-      console.error('Error loading cloud shows:', error);
+      const errorMsg =
+        error instanceof Error ? error.message : 'Unknown error loading shows';
+      console.error('Error loading cloud shows:', errorMsg);
+      setShowsError(errorMsg);
       setCloudShows([]);
     } finally {
       setIsLoadingShows(false);
@@ -55,6 +77,7 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
       value={{
         cloudShows,
         isLoadingShows,
+        showsError,
         tagsList,
         loadCloudShows,
       }}

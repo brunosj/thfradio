@@ -67,8 +67,17 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
   const name = getShowName(item);
   const formattedDate = getFormattedDateString(item);
 
+  // Debug tags - remove in production
+  if (item.platform === 'soundcloud') {
+    console.log(`[Debug] Rendering SoundCloud item:`, {
+      name: item.name,
+      tags: item.tags,
+      hasTags: item.tags && Array.isArray(item.tags) && item.tags.length > 0,
+    });
+  }
+
   // Limit the number of displayed tags
-  const MAX_VISIBLE_TAGS = 5;
+  const MAX_VISIBLE_TAGS = 15;
 
   // Filter and sort tags - sort alphabetically for consistent display
   const sortedTags =

@@ -1,6 +1,6 @@
 import type { CloudShowTypes, ShowTypes } from '@/types/ResponsesInterface';
 import { fetchMixcloudShows } from './mixcloud';
-// import { fetchSoundcloudShows } from './soundcloud';
+import { fetchSoundcloudShows } from './soundcloud';
 
 type ShowsType = {
   data: ShowTypes[];
@@ -8,19 +8,59 @@ type ShowsType = {
 
 export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
   // Fetch Mixcloud shows first with caching
+  console.log('Fetching Mixcloud shows...');
   const mixcloudShows = await fetchMixcloudShows().catch((error) => {
     console.error('Error fetching Mixcloud shows:', error);
     return [];
   });
 
   // Then try to fetch Soundcloud shows with caching
-  const soundcloudShows: CloudShowTypes[] = [];
-  // let soundcloudShows: CloudShowTypes[] = [];
-  // try {
-  //   soundcloudShows = await fetchSoundcloudShows();
-  // } catch (error) {
-  //   console.error('Error fetching Soundcloud shows:', error);
-  // }
+  console.log('Fetching SoundCloud shows...');
+  let soundcloudShows: CloudShowTypes[] = [];
+  try {
+    // Check if SoundCloud environment variables are set
+    if (
+      !process.env.SOUNDCLOUD_CLIENT_ID ||
+      !process.env.SOUNDCLOUD_CLIENT_SECRET ||
+      !process.env.SOUNDCLOUD_USER_ID
+    ) {
+      console.error('SoundCloud environment variables missing: ', {
+        clientId: process.env.SOUNDCLOUD_CLIENT_ID ? 'Set' : 'Missing',
+        clientSecret: process.env.SOUNDCLOUD_CLIENT_SECRET ? 'Set' : 'Missing',
+        userId: process.env.SOUNDCLOUD_USER_ID ? 'Set' : 'Missing',
+      });
+    }
+
+    soundcloudShows = await fetchSoundcloudShows();
+    console.log(
+      `SoundCloud fetch successful: ${soundcloudShows.length} shows retrieved`
+    );
+
+    // Debug - verify the shows have the expected format
+    if (soundcloudShows.length > 0) {
+      // Check first show format
+      const sampleShow = soundcloudShows[0];
+      console.log('Sample SoundCloud show:', {
+        name: sampleShow.name,
+        platform: sampleShow.platform,
+        tagCount: sampleShow.tags?.length || 0,
+        hasPicture: !!sampleShow.pictures?.extra_large,
+      });
+
+      // Check for any shows without tags
+      const showsWithoutTags = soundcloudShows.filter(
+        (show) =>
+          !show.tags || !Array.isArray(show.tags) || show.tags.length === 0
+      );
+      if (showsWithoutTags.length > 0) {
+        console.warn(
+          `${showsWithoutTags.length} SoundCloud shows have no tags`
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching Soundcloud shows:', error);
+  }
 
   const shows = [...mixcloudShows, ...soundcloudShows];
 
@@ -36,24 +76,44 @@ export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
 // Add a new cached version of the function
 export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
   try {
+    // Get the API URL, defaulting to localhost if not defined
+    const apiBaseUrl =
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const apiUrl = `${apiBaseUrl}/api/cloudShows`;
+
+    console.log(`Fetching cloud shows from: ${apiUrl}`);
+
     // Use Next.js cache instead of localStorage
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/cloudShows`,
-      {
-        next: {
-          revalidate: 43200, // 12 hours to match API route
-        },
-        // Add cache headers to ensure proper caching
-        cache: 'force-cache',
-      }
-    );
+    const response = await fetch(apiUrl, {
+      next: {
+        revalidate: 43200, // 12 hours to match API route
+      },
+      // Add cache headers to ensure proper caching
+      cache: 'force-cache',
+    });
 
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
     }
 
-    const shows = await response.json();
-    return Array.isArray(shows) ? shows : [];
+    const data = await response.json();
+
+    // Handle the new response format which might include error information
+    if (data.error) {
+      console.error(
+        'API returned error:',
+        data.error,
+        'timestamp:',
+        data.timestamp
+      );
+      return data.shows || [];
+    }
+
+    // Handle the original array format
+    const shows = Array.isArray(data) ? data : data.shows || [];
+    console.log(`Successfully fetched ${shows.length} shows`);
+
+    return shows;
   } catch (error) {
     console.error('Error fetching cloud shows:', error);
     // In case of errors, return empty array

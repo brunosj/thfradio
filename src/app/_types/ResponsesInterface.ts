@@ -47,6 +47,10 @@ export interface SoundcloudShowType {
   id: string;
   artwork_url: string;
   tag_list: string;
+  created_at: string;
+  user?: {
+    avatar_url?: string;
+  };
 }
 
 // Combined type for frontend use

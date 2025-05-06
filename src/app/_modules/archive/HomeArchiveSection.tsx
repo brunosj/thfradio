@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import SectionHeader from '@/common/layout/section/SectionHeader';
 import BarsSpinner from '@/common/ui/BarsSpinner';
 import UIButton from '@/common/ui/UIButton';
@@ -9,32 +9,24 @@ import CloudShowsComponent from './CloudShowsComponent';
 import { useData } from '@/context/DataContext';
 import { useTranslations } from 'next-intl';
 
-interface ArchiveProps {
+interface HomeArchiveSectionProps {
   title: string;
   text: string;
-  showAll?: boolean;
   backgroundColor?: string;
 }
 
 const HomeArchiveSection = ({
   title,
   text,
-  showAll = false,
   backgroundColor = 'bg-thf-blue-500',
-}: ArchiveProps) => {
+}: HomeArchiveSectionProps) => {
   const t = useTranslations();
-  const { cloudShows, isLoadingShows, tagsList, loadCloudShows } = useData();
-  const [isVisible, setIsVisible] = useState(showAll); // Initialize to true when showAll is true
+  const { cloudShows, isLoadingShows, tagsList, loadCloudShows, showsError } =
+    useData();
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // If showAll is true, load data immediately without waiting for intersection
-    if (showAll) {
-      setIsVisible(true);
-      loadCloudShows();
-      return;
-    }
-
-    // Only use Intersection Observer if we're on the homepage (not showAll)
+    // Use Intersection Observer to load shows when section comes into view
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -46,19 +38,16 @@ const HomeArchiveSection = ({
       { threshold: 0.1 }
     );
 
-    const element = document.getElementById('programme');
+    const element = document.getElementById('latest');
     if (element) {
       observer.observe(element);
     }
 
     return () => observer.disconnect();
-  }, [loadCloudShows, showAll]);
+  }, [loadCloudShows]);
 
-  // Get all shows and sort them
-  const allSortedShows = cloudShows ? processShows(cloudShows) : [];
-
-  // If not showing all, limit to only 8 latest shows
-  const sortedShows = showAll ? allSortedShows : allSortedShows.slice(0, 8);
+  // Get only the 8 latest shows
+  const latestShows = cloudShows ? processShows(cloudShows).slice(0, 8) : [];
 
   return (
     <section
@@ -71,11 +60,15 @@ const HomeArchiveSection = ({
           <div className='m-auto text-center pb-12'>
             <BarsSpinner color='#ff6314' />
           </div>
+        ) : showsError ? (
+          <div className='m-auto text-center pb-12 text-red-500'>
+            <p>Error loading shows. Please try again later.</p>
+          </div>
         ) : (
           <>
-            <CloudShowsComponent items={sortedShows} tagsList={tagsList} />
+            <CloudShowsComponent items={latestShows} tagsList={tagsList} />
 
-            {!showAll && sortedShows.length > 0 && (
+            {latestShows.length > 0 && (
               <div className='layout text-center pt-12'>
                 <UIButton
                   path='/latest'

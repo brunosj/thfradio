@@ -6,8 +6,9 @@ export const revalidate = 43200; // 12 hours in seconds
 
 export async function GET() {
   try {
+    console.log('API route: Fetching cloud shows...');
     const shows = await fetchCloudShows();
-
+    console.log(`API route: Successfully fetched ${shows.length} shows`);
     return NextResponse.json(shows, {
       status: 200,
       headers: {
@@ -17,6 +18,16 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error in cloud shows API route:', error);
-    return NextResponse.json([], { status: 200 }); // Return empty array with 200 status to not break UI
+    // Return empty array with 200 status to not break UI
+    return NextResponse.json(
+      {
+        shows: [],
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        status: 200,
+      }
+    );
   }
 }

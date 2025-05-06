@@ -1,5 +1,5 @@
 import React from 'react';
-import HomeArchiveSection from '@/modules/archive/HomeArchiveSection';
+import LatestArchiveSection from '@/modules/archive/LatestArchiveSection';
 import { PageTypes } from '@/app/_types/ResponsesInterface';
 import { Metadata } from 'next';
 import { fetchPageBySlug } from '@/lib/pages';
@@ -34,10 +34,9 @@ export default async function LatestPage({ params }: { params: Params }) {
           <h1 className='text-white text-center'>{page.attributes.title}</h1>
         </div>
       </div>
-      <HomeArchiveSection
+      <LatestArchiveSection
         title=''
         text={page.attributes.description}
-        showAll={true}
         backgroundColor='bg-dark-blue'
       />
     </main>
