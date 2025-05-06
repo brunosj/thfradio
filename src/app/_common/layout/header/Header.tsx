@@ -75,22 +75,6 @@ const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [setIsOpen]);
 
-  const [menuWidth, setMenuWidth] = useState(0);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (menuRef.current) {
-        setMenuWidth(menuRef.current.offsetWidth);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [menuWidth]);
-
   const handleToggleMenu = () => {
     setIsOpen(!isOpen);
   };
@@ -166,9 +150,13 @@ const Header: React.FC<HeaderProps> = ({
       {/* Mobile Menu Overlay */}
       <div
         ref={menuRef}
-        className={`fixed top-12 right-0 h-full bg-thf-blue-500 text-white w-4/5 overflow-auto transform duration-700 ease-in-out z-50 ${
-          isOpen ? 'translate-x-0' : `translate-x-full`
-        } transition-transform`}
+        style={{
+          right: isOpen ? '0' : '-100%',
+          visibility: isOpen ? 'visible' : 'hidden',
+        }}
+        className={`fixed top-12 right-0 h-full bg-thf-blue-500 text-white w-4/5 overflow-auto z-50 
+          ${isOpen ? 'translate-x-0' : 'translate-x-full'} 
+          transition-all duration-300 ease-in-out`}
       >
         <div className='flex flex-col items-center justify-center h-full space-y-3'>
           {menuKeys.map((key) => {
