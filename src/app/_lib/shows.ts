@@ -43,7 +43,7 @@ export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
       process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     const apiUrl = `${apiBaseUrl}/api/cloudShows`;
 
-    // Use Next.js cache instead of localStorage
+    // Use Next.js cache
     const response = await fetch(apiUrl, {
       next: {
         revalidate: 43200, // 12 hours to match API route

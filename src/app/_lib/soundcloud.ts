@@ -227,8 +227,15 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
     await waitForRateLimit();
 
     const userId = process.env.SOUNDCLOUD_USER_ID;
+
+    // Define cutoff date for filtering (May 1, 2025)
+    const cutoffDate = new Date('2025-05-01T00:00:00Z');
+    const limit = 500;
+
+    // Created_at parameter doesn't work with /users/{id}/tracks endpoint
+    // Just request with limit and we'll filter client-side
     const tracksResponse = await fetch(
-      `https://api.soundcloud.com/users/${userId}/tracks`,
+      `https://api.soundcloud.com/users/${userId}/tracks?limit=${limit}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -264,12 +271,15 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
     }
 
     const data = await tracksResponse.json();
-
     // Process shows individually to prevent a single track with malformed tags from breaking everything
     const shows: CloudShowTypes[] = [];
     for (const track of data) {
       try {
-        shows.push(normalizeSoundcloudShow(track));
+        // Filter tracks by created_at date
+        const trackCreatedDate = new Date(track.created_at);
+        if (trackCreatedDate >= cutoffDate) {
+          shows.push(normalizeSoundcloudShow(track));
+        }
       } catch (err) {
         console.error(`Error processing track ${track.id}:`, err);
         // Continue with other tracks
