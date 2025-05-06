@@ -15,18 +15,39 @@ import JoinChatMobile from '@/modules/chat/JoinChatMobile';
 import LanguageSwitcher from '@/app/_common/layout/header/LanguageSwitcher';
 
 interface HeaderProps {
-  isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isOpen?: boolean;
+  setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const menuKeys = ['news', 'shows', 'programme', 'latest', 'info'] as const;
 
-const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
+const Header: React.FC<HeaderProps> = ({
+  isOpen: externalIsOpen,
+  setIsOpen: externalSetIsOpen,
+}) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // Use either the external state or internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = externalSetIsOpen || setInternalIsOpen;
+
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations();
   const menuRef = useRef<HTMLDivElement>(null);
   const anchorRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Close mobile menu on larger screens
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024 && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isOpen, setIsOpen]);
 
   // Anchor links smooth behaviour
   const handleAnchorLinkClick = (

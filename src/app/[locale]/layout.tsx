@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 // import { routing } from '@/i18n/routing';
-import HeaderWithBlur from './HeaderWithBlur';
+import Header from '@/app/_common/layout/header/Header';
 import LiveTicker from '@/modules/live-ticker/LiveTicker';
 import JoinChat from '@/modules/chat/JoinChat';
 import Footer from '@/app/_common/layout/footer/Footer';
@@ -51,9 +51,10 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <LiveTicker />
-      <HeaderWithBlur>
-        <article>{children}</article>
-      </HeaderWithBlur>
+      <div className='relative'>
+        <Header />
+        <main>{children}</main>
+      </div>
       <Footer />
       <CloudPlayer />
       {/* <CustomAudioPlayer /> */}

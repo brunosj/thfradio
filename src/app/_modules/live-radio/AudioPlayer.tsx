@@ -38,7 +38,7 @@ const LivePlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(
     return (
       <section className='flex items-center'>
         <button
-          className=''
+          className='cursor-pointer'
           onClick={isPlaying ? pause : play}
           aria-label={
             isPlaying ? 'Pause Live Broadcast' : 'Play Live Broadcast'
