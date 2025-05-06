@@ -56,7 +56,7 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
               }}
             >
               <div className='h-full flex items-start justify-end pr-3 pl-2'>
-                <span className='text-sm text-gray-400 pt-1'>
+                <span className='text-xs text-gray-400 pt-1'>
                   {hour === 0 ? '00:00' : `${hour}:00`}
                 </span>
               </div>

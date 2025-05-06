@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 
 // Loading fallback component
 const TimetableLoading = () => (
-  <div className='m-auto text-center p-12'>
+  <div className='w-full text-center  min-h-[60lvh]  flex items-center justify-center'>
     <BarsSpinner color='#ff6314' />
   </div>
 );
@@ -48,7 +48,7 @@ const CalendarSchedule = () => {
         </h4>
       </div>
 
-      <div className='pl-6 lg:pl-16'>
+      <div className=''>
         {isLoading || isPending ? (
           <TimetableLoading />
         ) : error ? (
@@ -56,7 +56,7 @@ const CalendarSchedule = () => {
             {t('failedToLoad')}
           </div>
         ) : (
-          <div className='overflow-x-auto pb-6'>
+          <div className='overflow-x-auto pb-6 pl-6 lg:pl-16'>
             <TimetableV2 calendarEntries={calendarEntries} />
           </div>
         )}

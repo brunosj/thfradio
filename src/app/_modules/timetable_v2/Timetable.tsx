@@ -32,16 +32,16 @@ export default function TimetableV2({
     return (
       <div
         className={`w-full py-2 px-3 text-center border-r border-gray-700 h-10
-                ${isToday ? 'bg-blue-900/30' : ''}`}
+                ${isToday ? 'bg-blue-900' : 'bg-dark-blue'}`}
       >
         <div className='flex items-center justify-center space-x-2'>
-          <p className='text-base uppercase text-gray-400'>{dayName}</p>
+          <p className='text-sm uppercase text-gray-400'>{dayName}</p>
           <p
-            className={`text-xl ${isToday ? 'font-bold text-orange-400' : 'text-white'}`}
+            className={`text-lg ${isToday ? 'font-bold text-orange-400' : 'text-white'}`}
           >
             {dayNumber}
           </p>
-          <p className='text-base uppercase text-gray-400'>{month}</p>
+          <p className='text-sm uppercase text-gray-400'>{month}</p>
         </div>
       </div>
     );
@@ -49,28 +49,31 @@ export default function TimetableV2({
 
   return (
     <div className='w-full overflow-hidden bg-dark-blue rounded-xl border border-gray-700'>
-      <div className='overflow-x-auto scrollbar-hide' ref={scrollContainerRef}>
-        <div className='flex'>
-          {/* Sticky time column and grid */}
-          <div className='flex flex-col'>
-            {/* Empty time corner + day headers */}
-            <div className='flex border-b border-gray-700'>
-              {/* Empty corner for time column - sticky */}
-              <div className='w-16 h-10 flex-shrink-0 sticky left-0 z-20 bg-dark-blue border-r border-gray-700 flex items-center justify-center'></div>
+      <div
+        className='overflow-auto scrollbar-hide relative'
+        ref={scrollContainerRef}
+      >
+        <div className='flex flex-col'>
+          {/* Headers row */}
+          <div className='flex z-30 border-b border-gray-700 shadow-md transition-shadow duration-200'>
+            {/* Empty corner for time column - sticky in both directions */}
+            <div className='w-16 h-10 flex-shrink-0 sticky left-0 z-40 bg-dark-blue border-r border-gray-700 flex items-center justify-center'></div>
 
-              {/* Day headers */}
-              <div className='flex'>
-                {days.map((day, index) => (
-                  <div className='flex-shrink-0 w-[280px]' key={index}>
-                    {formatDayHeader(day)}
-                  </div>
-                ))}
-              </div>
+            {/* Day headers - sticky vertically */}
+            <div className='flex'>
+              {days.map((day, index) => (
+                <div
+                  className='flex-shrink-0 w-[280px] bg-dark-blue'
+                  key={index}
+                >
+                  {formatDayHeader(day)}
+                </div>
+              ))}
             </div>
-
-            {/* Calendar grid */}
-            <WeekGrid days={days} calendarEntries={calendarEntries} />
           </div>
+
+          {/* Calendar grid */}
+          <WeekGrid days={days} calendarEntries={calendarEntries} />
         </div>
       </div>
 
