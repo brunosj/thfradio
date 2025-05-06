@@ -1,7 +1,7 @@
 export const navLinks = [
   {
-    name: 'Programme',
-    path: '/programme',
+    name: 'Schedule',
+    path: '/schedule',
     lang: 'en',
   },
   {

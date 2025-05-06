@@ -20,12 +20,13 @@
   "viewAllShows": "Alle Shows ansehen",
   "failedToLoadShows": "Shows konnten nicht geladen werden. Bitte versuche es erneut.",
   "retry": "Wiederholen",
-  "navigation": {
-    "toNews": "Zu den Neuigkeiten",
-    "toShows": "Zu den Shows",
-    "toProgramme": "Zum Programm",
-    "toArchive": "Zum Archiv"
-  },
+  "toNews": "Zu den Neuigkeiten",
+  "toShows": "Zu den Shows",
+  "toProgramme": "Zum Programm",
+  "toArchive": "Zum Archiv",
+  "today": "Heute",
+  "previousWeek": "Vorherige Woche",
+  "nextWeek": "Nächste Woche",
   "menu": {
     "news": {
       "name": "News",
@@ -37,7 +38,7 @@
     },
     "programme": {
       "name": "Programm",
-      "path": "/#programme"
+      "path": "/#schedule"
     },
     "latest": {
       "name": "Archiv",
@@ -99,5 +100,8 @@
     "pageDescription": "Entdecke die neuesten Shows von THF Radio",
     "title": "Neueste Shows",
     "description": "Stöbere in unserem vollständigen Archiv von Radiosendungen"
-  }
+  },
+  "upcomingShows": "Kommende Shows",
+  "programme": "Programm",
+  "failedToLoad": "Programmdaten konnten nicht geladen werden. Bitte versuche es später erneut."
 }

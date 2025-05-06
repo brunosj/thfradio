@@ -6,6 +6,7 @@ import {
   endOfDay,
   addDays,
   endOfWeek,
+  addWeeks,
 } from 'date-fns';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
 import type { CalendarComponent, VEvent } from 'node-ical';
@@ -32,7 +33,8 @@ export async function GET() {
     );
 
     const now = startOfDay(new Date());
-    const endOfCurrentWeek = endOfDay(addDays(endOfWeek(now), 1));
+    // Fetch two weeks of data instead of just the current week
+    const endOfTwoWeeks = endOfDay(addDays(endOfWeek(addWeeks(now, 1)), 1));
     const veventEntries = Object.values(calendarEntries) as VEvent[];
 
     const upcomingShows: CalendarEntry[] = veventEntries
@@ -41,8 +43,8 @@ export async function GET() {
         const showStart = new Date(show.start);
         const showEnd = new Date(show.end);
         return (
-          isWithinInterval(showStart, { start: now, end: endOfCurrentWeek }) &&
-          isWithinInterval(showEnd, { start: now, end: endOfCurrentWeek })
+          isWithinInterval(showStart, { start: now, end: endOfTwoWeeks }) &&
+          isWithinInterval(showEnd, { start: now, end: endOfTwoWeeks })
         );
       })
       .map((event: VEvent) => ({

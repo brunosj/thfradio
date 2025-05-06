@@ -20,12 +20,17 @@
   "viewAllShows": "View all shows",
   "failedToLoadShows": "Failed to load shows. Please try again.",
   "retry": "Retry",
-  "navigation": {
-    "toNews": "Go to news section",
-    "toShows": "Go to shows section",
-    "toProgramme": "Go to programme section",
-    "toArchive": "Go to archive section"
-  },
+  "programme": "Schedule",
+  "upcomingShows": "Check out our upcoming shows",
+  "failedToLoad": "Failed to load schedule data. Please try again later.",
+  "today": "Today",
+  "previousWeek": "Previous week",
+  "nextWeek": "Next week",
+  "toNews": "Go to news section",
+  "toShows": "Go to shows section",
+  "toProgramme": "Go to schedule section",
+  "toArchive": "Go to archive section",
+
   "menu": {
     "news": {
       "name": "News",
@@ -36,8 +41,8 @@
       "path": "/shows"
     },
     "programme": {
-      "name": "Programme",
-      "path": "/#programme"
+      "name": "Schedule",
+      "path": "/#schedule"
     },
     "latest": {
       "name": "Latest",
@@ -94,10 +99,8 @@
     "description": "The page you are looking for doesn't exist or has been moved.",
     "backHome": "Back to Home"
   },
-  "Latest": {
-    "pageTitle": "Latest Shows | THF Radio",
-    "pageDescription": "Explore the latest shows from THF Radio",
-    "title": "Latest Shows",
-    "description": "Browse through our complete archive of radio shows"
-  }
+  "pageTitle": "Latest Shows | THF Radio",
+  "pageDescription": "Explore the latest shows from THF Radio",
+  "title": "Latest Shows",
+  "description": "Browse through our complete archive of radio shows"
 }

@@ -1,11 +1,11 @@
 'use client';
 
-import Hero from '@/modules/hero/Hero';
-import HomeShowSection from '@/modules/show-listing/HomeShowsSection';
-import HomeProgrammeSection from '@/modules/timetable/HomeProgrammeSection';
-import HomeArchiveSection from '@/modules/archive/HomeArchiveSection';
-import HomeNewsSection from '@/modules/news/HomeNewsSection';
-import type { HomepageTypes, NewsType } from '@/types/ResponsesInterface';
+import Hero from '@/app/_modules/hero/Hero';
+import HomeShowSection from '@/app/_modules/show-listing/HomeShowsSection';
+import CalendarSchedule from '@/app/_modules/timetable_v2/CalendarSchedule';
+import HomeArchiveSection from '@/app/_modules/archive/HomeArchiveSection';
+import HomeNewsSection from '@/app/_modules/news/HomeNewsSection';
+import type { HomepageTypes, NewsType } from '@/app/_types/ResponsesInterface';
 
 interface HomeContentProps {
   page: HomepageTypes;
@@ -26,7 +26,8 @@ For any issues or dev-related questions, please get in touch at contact@landozon
 
   return (
     <>
-      <HomeProgrammeSection />
+      <CalendarSchedule />
+
       <Hero
         description={page.attributes.heroText}
         images={page.attributes.heroPictures}

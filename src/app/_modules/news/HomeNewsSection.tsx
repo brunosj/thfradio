@@ -37,11 +37,7 @@ export default function HomeNewsSection({ title, text, newsItems }: NewsProps) {
         )}
       </div>
       <div className='pt-12 flex justify-center'>
-        <Button
-          path='/news'
-          color='white-blue'
-          ariaLabel={t('navigation.toNews')}
-        >
+        <Button path='/news' color='white-blue' ariaLabel={t('toNews')}>
           {t('allNews')}
         </Button>
       </div>
