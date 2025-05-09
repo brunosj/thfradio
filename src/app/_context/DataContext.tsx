@@ -17,6 +17,9 @@ interface DataContextValue {
   loadCloudShows: () => Promise<void>;
 }
 
+// 12 hours in milliseconds - matches server-side cache
+const CACHE_DURATION = 12 * 60 * 60 * 1000;
+
 const DataContext = createContext<DataContextValue | undefined>(undefined);
 
 export function DataProvider({ children, initialTagsList }: DataContextProps) {
@@ -24,6 +27,7 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
   const [isLoadingShows, setIsLoadingShows] = useState(false);
   const [showsError, setShowsError] = useState<string | null>(null);
   const [tagsList] = useState(initialTagsList);
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
 
   const loadCloudShows = async () => {
     // Clear any previous errors
@@ -34,8 +38,16 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
       return;
     }
 
-    // If we have data already, don't reload unless forced
-    if (cloudShows && cloudShows.length > 0) {
+    // Check if cache is still valid
+    const now = Date.now();
+    const cacheIsValid =
+      cloudShows &&
+      cloudShows.length > 0 &&
+      lastFetchTime > 0 &&
+      now - lastFetchTime < CACHE_DURATION;
+
+    // If we have valid cached data, don't reload
+    if (cacheIsValid) {
       return;
     }
 
@@ -46,6 +58,7 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
 
       if (Array.isArray(shows) && shows.length > 0) {
         setCloudShows(shows);
+        setLastFetchTime(Date.now());
       } else {
         const errorMsg = 'Fetched shows array is empty or invalid';
         console.warn(errorMsg);
