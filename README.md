@@ -8,6 +8,8 @@ This repo contains the website of [THF Radio](https://thfradio.de), a community 
 
 The site is a [Next.js](https://nextjs.org/) project (App Router) deployed on [Vercel](https://vercel.com/). It sources data from [Strapi](https://strapi.io/) and uses [Tailwind CSS](https://tailwindcss.com) for styling. The site is bilingual (English and German), with `next-intl` handling localization and translations. It features automated individual show page generation, an automated schedule (fetched from a Teamup calendar RSS feed), and Discord chat integration.
 
+Live stream functionality uses Airtime, and the show archive is composed of Mixcloud and Soundcloud shows.
+
 ## Installation
 
 1. Use the git CLI to close the repo
