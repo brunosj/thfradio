@@ -133,7 +133,7 @@ const Header: React.FC<HeaderProps> = ({
               iconClassName='w-6 h-6'
               audioSrc={
                 process.env.LIVE_RADIO_STREAM ||
-                'https://thfradio2.out.airtime.pro/thfradio2_a'
+                'https://thf-radio-7ec0e6ee.radiocult.fm/stream'
               }
             />
             <button
