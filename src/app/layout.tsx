@@ -1,11 +1,8 @@
 import localFont from 'next/font/local';
-import { setRequestLocale } from 'next-intl/server';
 import { DataProviderWrapper } from './_context/DataProviderWrapper';
 
 import '@/styles/global.css';
 import '@/styles/carousel.css';
-
-type Params = Promise<{ locale: string }>;
 
 const NeueMachina = localFont({
   src: [
@@ -37,21 +34,13 @@ const SpaceMono = localFont({
   weight: '1 1000',
 });
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: Params;
 }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
   return (
-    <html
-      className={`${SpaceMono.variable} ${NeueMachina.variable}`}
-      lang={locale}
-    >
+    <html className={`${SpaceMono.variable} ${NeueMachina.variable}`}>
       <body>
         <DataProviderWrapper>{children}</DataProviderWrapper>
       </body>

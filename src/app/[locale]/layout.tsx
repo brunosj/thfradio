@@ -10,12 +10,10 @@ import { siteMetadata } from '@/utils/siteMetadata';
 import CloudPlayer from '@/app/_modules/player/CloudPlayer';
 
 type Params = Promise<{ locale: string }>;
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 type Props = {
   children: React.ReactNode;
   params: Params;
-  searchParams: SearchParams;
 };
 
 export const metadata: Metadata = {

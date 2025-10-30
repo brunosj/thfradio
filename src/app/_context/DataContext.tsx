@@ -1,6 +1,12 @@
 'use client';
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+} from 'react';
 import type { CloudShowTypes, TagsList } from '@/types/ResponsesInterface';
 import { fetchCloudShowsCached } from '@/lib/shows';
 
@@ -29,7 +35,7 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
   const [tagsList] = useState(initialTagsList);
   const [lastFetchTime, setLastFetchTime] = useState<number>(0);
 
-  const loadCloudShows = async () => {
+  const loadCloudShows = useCallback(async () => {
     // Clear any previous errors
     setShowsError(null);
 
@@ -74,12 +80,12 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
     } finally {
       setIsLoadingShows(false);
     }
-  };
+  }, [isLoadingShows, cloudShows, lastFetchTime]);
 
   // Load from cache immediately on mount
   useEffect(() => {
     loadCloudShows();
-  }, []);
+  }, [loadCloudShows]);
 
   return (
     <DataContext.Provider
