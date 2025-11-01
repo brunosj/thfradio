@@ -33,9 +33,9 @@ export default async function PrivacyPage({ params }: { params: Params }) {
     <div className='bg-dark-blue min-h-screen'>
       <div className='layout sectionPy'>
         <h1 className='text-white'>{page.attributes.title}</h1>
-        <ReactMarkdown className='prose prose-lg mt-8 text-white'>
-          {page.attributes.description}
-        </ReactMarkdown>
+        <div className='prose prose-lg mt-8 text-white'>
+          <ReactMarkdown>{page.attributes.description}</ReactMarkdown>
+        </div>
       </div>
     </div>
   );

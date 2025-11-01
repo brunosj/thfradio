@@ -168,7 +168,7 @@ export default function LiveTicker() {
             iconFill='#1200ff'
             audioSrc={
               process.env.NEXT_PUBLIC_LIVE_RADIO_STREAM ||
-              'https://thfradio2.out.airtime.pro/thfradio2_a'
+              'https://thf-radio-7ec0e6ee.radiocult.fm/stream'
             }
           />
         </div>
