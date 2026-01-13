@@ -7,6 +7,9 @@ import { createMetadata } from '@/utils/metadata';
 import { notFound } from 'next/navigation';
 type Params = Promise<{ locale: string }>;
 
+// Revalidate this page every 12 hours (same as API cache)
+export const revalidate = 43200;
+
 export async function generateMetadata({
   params,
 }: {

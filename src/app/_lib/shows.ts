@@ -38,10 +38,16 @@ export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
 // Add a new cached version of the function
 export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
   try {
-    // Get the API URL, defaulting to localhost if not defined
-    const apiBaseUrl =
-      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const apiUrl = `${apiBaseUrl}/api/cloudShows`;
+    // Check if we're on the server side
+    const isServer = typeof window === 'undefined';
+
+    if (isServer) {
+      // On server side, call the function directly to avoid HTTP overhead
+      return await fetchCloudShows();
+    }
+
+    // On client side, use relative URL for API call
+    const apiUrl = '/api/cloudShows';
 
     // Use Next.js cache
     const response = await fetch(apiUrl, {

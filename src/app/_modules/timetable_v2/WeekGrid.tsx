@@ -12,7 +12,7 @@ interface WeekGridProps {
 export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
   // Constants
   const HOUR_HEIGHT = 80; // Reduced from 100px to 80px per hour
-  const START_HOUR = 10; // 10am
+  const START_HOUR = 8; // 8am
   const END_HOUR = 24; // Midnight (24 for calculations)
 
   // Create an array of hours from 10am to midnight

@@ -57,15 +57,12 @@ export default function TimetableV2({
           {/* Headers row */}
           <div className='flex z-30  border-gray-700 shadow-md transition-shadow duration-200'>
             {/* Empty corner for time column - sticky in both directions */}
-            <div className='w-16 h-10 flex-shrink-0 sticky left-0 z-40 bg-dark-blue border-r border-gray-700 flex items-center justify-center border-b'></div>
+            <div className='w-16 h-10 shrink-0 sticky left-0 z-40 bg-dark-blue border-r border-gray-700 flex items-center justify-center border-b'></div>
 
             {/* Day headers - sticky vertically */}
             <div className='flex'>
               {days.map((day, index) => (
-                <div
-                  className='flex-shrink-0 w-[280px] bg-dark-blue'
-                  key={index}
-                >
+                <div className='shrink-0 w-[280px] bg-dark-blue' key={index}>
                   {formatDayHeader(day)}
                 </div>
               ))}

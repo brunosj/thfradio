@@ -7,6 +7,9 @@ import { notFound } from 'next/navigation';
 import type { HomepageTypes } from '@/types/ResponsesInterface';
 type Params = Promise<{ locale: string }>;
 
+// Revalidate this page every 12 hours (same as API cache)
+export const revalidate = 43200;
+
 export async function generateMetadata({
   params,
 }: {
