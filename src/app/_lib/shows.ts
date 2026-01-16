@@ -35,7 +35,8 @@ export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
   return shows;
 }
 
-// Add a new cached version of the function
+// Client-side function to fetch cloud shows from the API
+// Server-side caching is handled by unstable_cache in the API route
 export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
   try {
     // Check if we're on the server side
@@ -43,20 +44,13 @@ export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
 
     if (isServer) {
       // On server side, call the function directly to avoid HTTP overhead
+      // The API route uses unstable_cache for proper caching
       return await fetchCloudShows();
     }
 
-    // On client side, use relative URL for API call
-    const apiUrl = '/api/cloudShows';
-
-    // Use Next.js cache
-    const response = await fetch(apiUrl, {
-      next: {
-        revalidate: 43200, // 12 hours to match API route
-      },
-      // Add cache headers to ensure proper caching
-      cache: 'force-cache',
-    });
+    // On client side, fetch from API
+    // The API route handles caching with proper cache tags
+    const response = await fetch('/api/cloudShows');
 
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);

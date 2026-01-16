@@ -1,4 +1,4 @@
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -8,14 +8,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
     }
 
-    // Revalidate all pages that might display cloud shows
-    revalidatePath('/', 'page'); // Homepage
-    revalidatePath('/latest', 'page'); // Latest shows page
-    revalidatePath('/shows', 'page'); // Shows listing page
+    // Revalidate the API route that fetches shows data
+    revalidatePath('/api/cloudShows');
+
+    // Also revalidate pages that display cloud shows
+    revalidatePath('/', 'page');
+    revalidatePath('/latest', 'page');
+    revalidatePath('/shows', 'page');
 
     return NextResponse.json({
       revalidated: true,
-      paths: ['/', '/latest', '/shows'],
+      paths: ['/api/cloudShows', '/', '/latest', '/shows'],
       now: Date.now(),
     });
   } catch (err) {
@@ -35,14 +38,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Revalidate all pages that might display cloud shows
+    // Revalidate the API route that fetches shows data
+    revalidatePath('/api/cloudShows');
+
+    // Also revalidate pages that display cloud shows
     revalidatePath('/', 'page');
     revalidatePath('/latest', 'page');
     revalidatePath('/shows', 'page');
 
     return NextResponse.json({
       revalidated: true,
-      paths: ['/', '/latest', '/shows'],
+      paths: ['/api/cloudShows', '/', '/latest', '/shows'],
       now: Date.now(),
     });
   } catch (err) {

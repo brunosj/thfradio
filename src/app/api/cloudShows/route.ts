@@ -1,7 +1,9 @@
 import { fetchCloudShows } from '@/lib/shows';
 import { NextResponse } from 'next/server';
 
-// Set to 12 hours for better caching
+// Use route segment config for caching (no 2MB limit like unstable_cache)
+// This caches the entire route response for 12 hours
+// Can be invalidated via revalidatePath('/api/cloudShows')
 export const revalidate = 43200; // 12 hours in seconds
 
 export async function GET() {
@@ -11,7 +13,7 @@ export async function GET() {
     return NextResponse.json(shows, {
       status: 200,
       headers: {
-        // Longer cache times with stale-while-revalidate approach
+        // Cache headers for CDN/browser caching
         'Cache-Control': 'public, max-age=43200, stale-while-revalidate=86400',
       },
     });

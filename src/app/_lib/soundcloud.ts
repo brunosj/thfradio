@@ -4,16 +4,13 @@ import type {
   CloudShowTag,
 } from '@/types/ResponsesInterface';
 
-// In-memory cache
+// In-memory cache for OAuth token only (not shows data)
 let tokenCache: { token: string; expires: number } | null = null;
-let showsCache: { shows: CloudShowTypes[]; expires: number } | null = null;
 
 // Rate limiting parameters
 const rateLimitInfo = {
   lastRequestTime: 0,
   minimumDelay: 2000, // 2 seconds minimum between requests
-  retryDelay: 5000, // 5 seconds on rate limit
-  cacheExtensionOnRateLimit: 24 * 60 * 60 * 1000, // 24 hours
 };
 
 // Helper function to normalize Soundcloud show data
@@ -156,11 +153,8 @@ async function getSoundcloudToken(): Promise<string | null> {
       const error = await response.text();
       console.error('Token request failed:', error);
 
-      // If rate limited, use cached token even if expired with longer extension
+      // If rate limited and we have a cached token, use it
       if (response.status === 429 && tokenCache) {
-        // Extend token expiration
-        tokenCache.expires =
-          Date.now() + rateLimitInfo.cacheExtensionOnRateLimit;
         return tokenCache.token;
       }
 
@@ -176,24 +170,17 @@ async function getSoundcloudToken(): Promise<string | null> {
     return data.access_token;
   } catch (error) {
     console.error('Error getting Soundcloud token:', error);
-    // Return cached token if available, even if expired
+    // Return cached token if available
     if (tokenCache) {
-      // Extend token expiration
-      tokenCache.expires = Date.now() + rateLimitInfo.cacheExtensionOnRateLimit;
       return tokenCache.token;
     }
     return null;
   }
 }
 
-// Add error handling for rate limits
+// Fetch SoundCloud shows - caching is handled by Next.js at the API route level
 export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
   try {
-    // Check cache first with longer expiration during rate limits
-    if (showsCache && Date.now() < showsCache.expires) {
-      return showsCache.shows;
-    }
-
     // Verify environment variables are set
     if (
       !process.env.SOUNDCLOUD_CLIENT_ID ||
@@ -201,25 +188,12 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
       !process.env.SOUNDCLOUD_USER_ID
     ) {
       console.error('Missing environment variables for SoundCloud API');
-
-      // Use cached shows if available, even if expired
-      if (showsCache) {
-        showsCache.expires =
-          Date.now() + rateLimitInfo.cacheExtensionOnRateLimit;
-        return showsCache.shows;
-      }
       return [];
     }
 
     const token = await getSoundcloudToken();
     if (!token) {
-      // Use cached shows if available, even if expired
-      if (showsCache) {
-        // Extend cache expiration
-        showsCache.expires =
-          Date.now() + rateLimitInfo.cacheExtensionOnRateLimit;
-        return showsCache.shows;
-      }
+      console.error('Failed to get SoundCloud token');
       return [];
     }
 
@@ -245,13 +219,6 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
     );
 
     if (!tracksResponse.ok) {
-      if (tracksResponse.status === 429 && showsCache) {
-        // Extend cache expiration
-        showsCache.expires =
-          Date.now() + rateLimitInfo.cacheExtensionOnRateLimit;
-        return showsCache.shows;
-      }
-
       const errorText = await tracksResponse
         .text()
         .catch(() => 'Could not get error text');
@@ -260,13 +227,6 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
         statusText: tracksResponse.statusText,
         error: errorText,
       });
-
-      // Return cached data if available with extended expiration
-      if (showsCache) {
-        showsCache.expires =
-          Date.now() + rateLimitInfo.cacheExtensionOnRateLimit;
-        return showsCache.shows;
-      }
       return [];
     }
 
@@ -286,20 +246,9 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
       }
     }
 
-    // Cache for 1 hour normally
-    showsCache = {
-      shows,
-      expires: Date.now() + 60 * 60 * 1000,
-    };
-
     return shows;
   } catch (error: unknown) {
     console.error('Error fetching Soundcloud shows:', error);
-    // Return cached data if available with extended expiration
-    if (showsCache) {
-      showsCache.expires = Date.now() + rateLimitInfo.cacheExtensionOnRateLimit;
-      return showsCache.shows;
-    }
     return [];
   }
 }
