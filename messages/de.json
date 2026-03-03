@@ -113,6 +113,11 @@
     "envoyer": "Senden",
     "connectionError": "Verbindung fehlgeschlagen",
     "retry": "Wiederholen",
+    "errorTooLong": "Nachricht oder Pseudonym zu lang",
+    "lostConnection": "Verbindung verloren. Verbinde erneut...",
+    "join": "Chat beitreten!",
+    "open": "Chat öffnen",
+    "close": "Chat schließen",
     "errors": {
       "sendFailed": "Nachricht konnte nicht gesendet werden. Bitte versuche es erneut."
     }

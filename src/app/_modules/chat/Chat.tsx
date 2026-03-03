@@ -16,7 +16,7 @@ interface ChatMessage {
 }
 
 interface ServerMessage {
-  type: "message" | "history";
+  type: "message" | "history" | "pong";
   message?: ChatMessage;
   messages?: ChatMessage[];
 }
@@ -25,13 +25,27 @@ export const Chat = () => {
   const { isChatOpen: isOpen, setIsChatOpen: setIsOpen } = useChatState();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [userId] = useState(() => Math.random().toString(36).substr(2, 9));
   const [pseudo, setPseudo] = useState("");
+  const [userId] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("chatUserId");
+      if (saved) return saved;
+      const newId = Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("chatUserId", newId);
+      return newId;
+    }
+    return Math.random().toString(36).substr(2, 9);
+  });
+
+  const [lastSentTime, setLastSentTime] = useState(0);
+  const messageQueue = useRef<string[]>([]);
+  const heartbeatTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const savedPseudo = localStorage.getItem("chatPseudo") || "";
     setPseudo(savedPseudo);
   }, []);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const ws = useRef<WebSocket | null>(null);
   const t = useTranslations();
@@ -50,6 +64,25 @@ export const Chat = () => {
   useEffect(() => {
     let isActive = true;
 
+    const startHeartbeat = () => {
+      if (heartbeatTimer.current) clearInterval(heartbeatTimer.current);
+      heartbeatTimer.current = setInterval(() => {
+        if (ws.current?.readyState === WebSocket.OPEN) {
+          ws.current.send(JSON.stringify({ type: "ping" }));
+        }
+      }, 30000);
+    };
+
+    const flushQueue = () => {
+      if (ws.current?.readyState === WebSocket.OPEN && messageQueue.current.length > 0) {
+        console.log(`[Chat] Flushing ${messageQueue.current.length} queued messages`);
+        while (messageQueue.current.length > 0) {
+          const msg = messageQueue.current.shift();
+          if (msg) ws.current.send(msg);
+        }
+      }
+    };
+
     const connectWebSocket = () => {
       if (!isOpen || ws.current?.readyState === WebSocket.OPEN) return;
 
@@ -66,13 +99,14 @@ export const Chat = () => {
           if (!isActive) return;
           console.log("WebSocket connection established");
           setError(null);
+          startHeartbeat();
+          flushQueue();
         };
 
         ws.current.onmessage = (event) => {
           if (!isActive) return;
           try {
             const data = JSON.parse(event.data) as ServerMessage;
-            console.log("Received from server:", data);
 
             if (data.type === "history" && data.messages) {
               setMessages(data.messages);
@@ -89,8 +123,8 @@ export const Chat = () => {
           if (!isActive) return;
           console.info("WebSocket connection closed:", event.code, event.reason);
           ws.current = null;
+          if (heartbeatTimer.current) clearInterval(heartbeatTimer.current);
 
-          // Attempt to reconnect on abnormal closure
           if (event.code !== 1000 && isOpen) {
             console.log("Attempting reconnection in 3s...");
             setTimeout(connectWebSocket, 3000);
@@ -112,16 +146,16 @@ export const Chat = () => {
 
     return () => {
       isActive = false;
+      if (heartbeatTimer.current) clearInterval(heartbeatTimer.current);
       if (ws.current && isOpen === false) {
         console.log("Cleaning up WebSocket connection");
-        ws.current.close(1000); // Normal closure
+        ws.current.close(1000);
         ws.current = null;
       }
     };
   }, [isOpen, t]);
 
   useEffect(() => {
-    // Prevent space bar from triggering player only when not in input fields
     const handleKeyDown = (e: KeyboardEvent) => {
       const isInputField =
         e.target instanceof HTMLInputElement ||
@@ -141,17 +175,17 @@ export const Chat = () => {
   }, [messages]);
 
   const sendMessage = () => {
+    const now = Date.now();
     if (!newMessage.trim() || !pseudo) return;
 
-    if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
-      setError(t("chat.wait"));
+    // Rate limiting: 1 second between messages
+    if (now - lastSentTime < 1000) {
+      console.log("[Chat] Rate limit: slowing down...");
       return;
     }
 
     try {
-      // Basic sanitization
       const sanitizedMessage = newMessage.trim();
-
       const sanitizedPseudo = pseudo.trim();
 
       if (sanitizedMessage.length > 500 || sanitizedPseudo.length > 20) {
@@ -164,11 +198,23 @@ export const Chat = () => {
         text: sanitizedMessage,
         userId,
         pseudo: sanitizedPseudo,
-        timestamp: Date.now(),
+        timestamp: now,
       };
 
-      ws.current.send(JSON.stringify(message));
+      const messageStr = JSON.stringify(message);
+
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.send(messageStr);
+      } else {
+        console.log("[Chat] WebSocket not open, queuing message...");
+        messageQueue.current.push(messageStr);
+        // Show the message locally immediately for better UX
+        setMessages((prev) => [...prev, message]);
+        setError(t("chat.lostConnection"));
+      }
+
       setNewMessage("");
+      setLastSentTime(now);
       scrollToBottom();
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -194,7 +240,7 @@ export const Chat = () => {
       `}
     >
       {/* Header */}
-      <div className="flex justify-between items-center bg-orange-500 text-white p-4 h-16">
+      <div className="flex justify-between items-center bg-orange-500 text-white p-4 h-16 shrink-0">
         <span className="font-mono font-semibold text-sm">THF Radio Chat</span>
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -207,7 +253,7 @@ export const Chat = () => {
       </div>
 
       {/* Pseudo Input */}
-      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-300">
+      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-300 shrink-0">
         <input
           type="text"
           value={pseudo}
@@ -250,7 +296,7 @@ export const Chat = () => {
       </div>
 
       {/* Input Area */}
-      <div className="flex gap-2 p-4 bg-gray-100 border-t border-gray-300">
+      <div className="flex gap-2 p-4 bg-gray-100 border-t border-gray-300 shrink-0">
         <input
           type="text"
           value={newMessage}
@@ -272,7 +318,7 @@ export const Chat = () => {
       </div>
 
       {error && (
-        <div className="p-2 bg-red-100 text-red-800 text-xs border-t border-red-300 flex justify-between items-center">
+        <div className="p-2 bg-red-100 text-red-800 text-xs border-t border-red-300 flex justify-between items-center shrink-0">
           <span>{error}</span>
           <button onClick={() => setError(null)} className="underline ml-2">
             Close
