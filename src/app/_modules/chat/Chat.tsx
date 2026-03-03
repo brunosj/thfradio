@@ -4,6 +4,7 @@ import { useChatState } from "../../_context/ChatContext";
 import { MessageContent } from "./MessageContent";
 import { getUserColor } from "./Chat.utils";
 import { XMarkIcon } from "../../_common/assets/XMarkIcon";
+import { CMS_URL } from "@/app/_utils/constants";
 
 interface ChatMessage {
   id: string;
@@ -39,9 +40,12 @@ export const Chat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [userId] = useState(() => Math.random().toString(36).substr(2, 9));
-  const [pseudo, setPseudo] = useState(
-    () => localStorage.getItem("chatPseudo") || "",
-  );
+  const [pseudo, setPseudo] = useState("");
+
+  useEffect(() => {
+    const savedPseudo = localStorage.getItem("chatPseudo") || "";
+    setPseudo(savedPseudo);
+  }, []);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const ws = useRef<WebSocket | null>(null);
   const t = useTranslations();
@@ -64,12 +68,10 @@ export const Chat = () => {
       if (!isOpen || ws.current?.readyState === WebSocket.OPEN) return;
 
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host =
-        process.env.NODE_ENV === "production"
-          ? window.location.host
-          : "localhost:3000";
-
+      const host = CMS_URL.replace(/^https?:\/\//, "");
       const wsUrl = `${protocol}//${host}/chat`;
+
+      console.log("Attempting WebSocket connection to:", wsUrl);
 
       try {
         ws.current = new WebSocket(wsUrl);
@@ -77,6 +79,7 @@ export const Chat = () => {
         ws.current.onopen = () => {
           if (!isActive) return;
           console.log("WebSocket connection established");
+          setError(null);
         };
 
         ws.current.onmessage = (event) => {
@@ -98,11 +101,12 @@ export const Chat = () => {
 
         ws.current.onclose = (event) => {
           if (!isActive) return;
-          console.info("WebSocket connection closed:", event.code);
+          console.info("WebSocket connection closed:", event.code, event.reason);
           ws.current = null;
 
           // Attempt to reconnect on abnormal closure
-          if (event.code === 1006 && isOpen) {
+          if (event.code !== 1000 && isOpen) {
+            console.log("Attempting reconnection in 3s...");
             setTimeout(connectWebSocket, 3000);
           }
         };
@@ -201,7 +205,6 @@ export const Chat = () => {
       };
 
       ws.current.send(JSON.stringify(message));
-      setMessages((prev) => [...prev, message]);
       setNewMessage("");
       scrollToBottom();
     } catch (error) {
@@ -218,9 +221,8 @@ export const Chat = () => {
 
   return (
     <div
-      className={`fixed bottom-16 right-5 w-80 bg-white border border-gray-300 rounded-lg overflow-hidden transition-all duration-300 z-50 flex flex-col ${
-        isOpen ? "h-96 opacity-100 visible" : "h-0 opacity-0 invisible"
-      } md:bottom-2 md:right-2`}
+      className={`fixed bottom-16 right-5 w-80 bg-white border border-gray-300 rounded-lg overflow-hidden transition-all duration-300 z-50 flex flex-col ${isOpen ? "h-96 opacity-100 visible" : "h-0 opacity-0 invisible"
+        } md:bottom-2 md:right-2`}
     >
       {/* Header */}
       <div className="flex justify-between items-center bg-orange-500 text-white p-4 h-16">
@@ -255,9 +257,8 @@ export const Chat = () => {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`max-w-xs px-3 py-2 rounded text-sm text-white ${
-              message.pseudo === pseudo ? "bg-orange-500 ml-auto" : ""
-            }`}
+            className={`max-w-xs px-3 py-2 rounded text-sm text-white ${message.pseudo === pseudo ? "bg-orange-500 ml-auto" : ""
+              }`}
             style={{
               backgroundColor:
                 message.pseudo === pseudo
