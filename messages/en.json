@@ -109,6 +109,8 @@
     "ecrivez": "Write a message...",
     "chatPseudo": "Enter a pseudo to chat",
     "envoyer": "Send",
+    "connectionError": "Connection failed",
+    "retry": "Retry",
     "errors": {
       "sendFailed": "Failed to send message. Please try again."
     }

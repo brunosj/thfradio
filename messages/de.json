@@ -111,6 +111,8 @@
     "ecrivez": "Schreibe eine Nachricht...",
     "chatPseudo": "Gib ein Pseudonym ein, um zu chatten",
     "envoyer": "Senden",
+    "connectionError": "Verbindung fehlgeschlagen",
+    "retry": "Wiederholen",
     "errors": {
       "sendFailed": "Nachricht konnte nicht gesendet werden. Bitte versuche es erneut."
     }
