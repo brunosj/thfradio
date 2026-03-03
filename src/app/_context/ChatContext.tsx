@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 interface ChatContextType {
   isChatOpen: boolean;
@@ -11,6 +11,17 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  useEffect(() => {
+    const savedState = localStorage.getItem("chat_open");
+    if (savedState !== null) {
+      setIsChatOpen(savedState === "true");
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("chat_open", isChatOpen.toString());
+  }, [isChatOpen]);
 
   return (
     <ChatContext.Provider value={{ isChatOpen, setIsChatOpen }}>

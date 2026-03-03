@@ -7,7 +7,7 @@ export default function JoinChat() {
   const { isChatOpen, setIsChatOpen } = useChatState();
 
   return (
-    <div className="fixed bottom-2 right-2 hidden lg:block z-50">
+    <div className="fixed bottom-2 right-2 z-50">
       <div className="flex flex-col items-end gap-2">
         {/* Chat Button */}
         <button
@@ -17,6 +17,9 @@ export default function JoinChat() {
         >
           <span className="hidden lg:inline">
             {isChatOpen ? "Close Chat" : "Join the chat!"}
+          </span>
+          <span className="lg:hidden">
+            {isChatOpen ? "X" : "Chat"}
           </span>
         </button>
 

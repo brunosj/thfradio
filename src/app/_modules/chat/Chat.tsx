@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useChatState } from "../../_context/ChatContext";
@@ -19,22 +20,7 @@ interface ServerMessage {
   message?: ChatMessage;
   messages?: ChatMessage[];
 }
-// const sanitizeInput = (input: string): string => {
-//   return input
-//     .replace(/[&<>"'\/]/g, (char) => {
-//       const entities: { [key: string]: string } = {
-//         '&': '&amp;',
-//         '<': '&lt;',
-//         '>': '&gt;',
-//         '"': '&quot;',
-//         "'": '&#x27;',
-//         '/': '&#x2F;'
-//       };
-//       // Show the actual character in display, but encode it for safety
-//       return `${char}${entities[char]}`;
-//     })
-//     .trim();
-// };
+
 export const Chat = () => {
   const { isChatOpen: isOpen, setIsChatOpen: setIsOpen } = useChatState();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -153,6 +139,7 @@ export const Chat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
   const sendMessage = () => {
     if (!newMessage.trim() || !pseudo) return;
 
@@ -162,34 +149,10 @@ export const Chat = () => {
     }
 
     try {
-      // Basic sanitization - remove HTML tags and dangerous characters
-      const sanitizedMessage = newMessage
-        .replace(
-          /[&<>"']/g,
-          (char) =>
-            ({
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#x27;",
-            })[char] || char,
-        )
-        .trim();
+      // Basic sanitization
+      const sanitizedMessage = newMessage.trim();
 
-      const sanitizedPseudo = pseudo
-        .replace(
-          /[&<>"']/g,
-          (char) =>
-            ({
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#x27;",
-            })[char] || char,
-        )
-        .trim();
+      const sanitizedPseudo = pseudo.trim();
 
       if (sanitizedMessage.length > 500 || sanitizedPseudo.length > 20) {
         setError(t("chat.errorTooLong"));
@@ -221,8 +184,14 @@ export const Chat = () => {
 
   return (
     <div
-      className={`fixed bottom-16 right-5 w-80 bg-white border border-gray-300 rounded-lg overflow-hidden transition-all duration-300 z-50 flex flex-col ${isOpen ? "h-96 opacity-100 visible" : "h-0 opacity-0 invisible"
-        } md:bottom-2 md:right-2`}
+      className={`fixed transition-shadow transition-all duration-300 z-[999] flex flex-col bg-white overflow-hidden
+        ${isOpen
+          ? "inset-0 opacity-100 visible"
+          : "inset-x-0 bottom-0 h-0 opacity-0 invisible"
+        }
+        md:inset-auto md:bottom-2 md:right-2 md:w-120 md:border md:border-gray-300 md:rounded-lg
+        ${isOpen ? "md:h-150 md:opacity-100 md:visible shadow-xl" : "md:h-0 md:opacity-0 md:invisible"}
+      `}
     >
       {/* Header */}
       <div className="flex justify-between items-center bg-orange-500 text-white p-4 h-16">
@@ -257,7 +226,7 @@ export const Chat = () => {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`max-w-xs px-3 py-2 rounded text-sm text-white ${message.pseudo === pseudo ? "bg-orange-500 ml-auto" : ""
+            className={`max-w-[80%] px-3 py-2 rounded text-sm text-white ${message.pseudo === pseudo ? "bg-orange-500 ml-auto" : ""
               }`}
             style={{
               backgroundColor:
@@ -266,9 +235,14 @@ export const Chat = () => {
                   : getUserColor(message.pseudo),
             }}
           >
-            <strong className="text-xs block mb-1">
-              {message.pseudo === pseudo ? t("chat.moi") : message.pseudo}
-            </strong>
+            <div className="flex justify-between items-baseline gap-4 mb-0.5">
+              <strong className="text-[10px] uppercase font-bold tracking-wider">
+                {message.pseudo === pseudo ? t("chat.moi") : message.pseudo}
+              </strong>
+              <span className="text-[9px] opacity-80 font-mono">
+                {format(new Date(message.timestamp), "HH:mm")}
+              </span>
+            </div>
             <MessageContent text={message.text} />
           </div>
         ))}

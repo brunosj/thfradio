@@ -18,7 +18,7 @@ export async function fetchCalendar(): Promise<CalendarEntry[]> {
   }
 
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const baseUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000');
     const response = await fetch(`${baseUrl}/api/fetchCalendar`, {
       next: { revalidate: 300 }, // 5 minutes cache using Next.js 15 fetch cache
       headers: {
