@@ -121,7 +121,7 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
                       endTime,
                       startTime
                     );
-                    // Convert duration to proper height based on new HOUR_HEIGHT
+                    // Keep minimum size for clickability but avoid overlap with next slots
                     const heightInPixels = Math.max(
                       35,
                       (durationMinutes * HOUR_HEIGHT) / 60
@@ -130,11 +130,10 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
                     return (
                       <div
                         key={entryIndex}
-                        className='absolute left-1 right-1 pointer-events-auto border-t-2 border-orange-500 rounded-t-sm overflow-hidden'
+                        className='absolute left-1 right-1 pointer-events-auto border-t-2 border-orange-500 rounded-t-sm z-10 hover:z-[9999]'
                         style={{
                           top: `${topPosition}px`,
                           height: `${heightInPixels}px`,
-                          zIndex: 10,
                         }}
                       >
                         <CalendarEventItem event={entry} />

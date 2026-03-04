@@ -10,18 +10,38 @@ const intlMiddleware = createMiddleware({
 
 export default function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const pathHasStaticFile = pathname.match(
+    /\.(jpg|jpeg|png|gif|svg|css|js|ico)$/
+  );
 
   // Exclude API routes and static files
-  if (
-    !pathname.startsWith('/api/') &&
-    !pathname.match(/\.(jpg|jpeg|png|gif|svg|css|js|ico)$/)
-  ) {
+  if (!pathname.startsWith('/api/') && !pathHasStaticFile) {
     // Check if the path doesn't start with a locale prefix
 
     if (!/^\/(?:en|de)(?:\/|$)/.test(pathname) && pathname !== '/') {
       const url = request.nextUrl.clone();
       url.pathname = `/en${pathname}`;
       return NextResponse.redirect(url);
+    }
+
+    const localeMatch = pathname.match(/^\/(en|de)(?:\/|$)/);
+    if (localeMatch) {
+      const locale = localeMatch[1];
+      const localizedPath =
+        pathname.replace(/^\/(?:en|de)/, '') === ''
+          ? '/'
+          : pathname.replace(/^\/(?:en|de)/, '');
+      const normalizedPath =
+        localizedPath.length > 1 && localizedPath.endsWith('/')
+          ? localizedPath.slice(0, -1)
+          : localizedPath;
+      const isAllowedPath = normalizedPath === '/' || normalizedPath === '/latest';
+
+      if (!isAllowedPath) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/${locale}`;
+        return NextResponse.redirect(url);
+      }
     }
   }
 

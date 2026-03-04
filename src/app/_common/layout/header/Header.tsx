@@ -8,10 +8,8 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import logo from '@/assets/logo_white.png';
 import AudioPlayer from '@/modules/live-radio/AudioPlayer';
-import { SlSpeech } from 'react-icons/sl';
 import { Bars3Icon } from '@/common/assets/Bars3Icon';
 import { XMarkIcon } from '@/common/assets/XMarkIcon';
-import JoinChatMobile from '@/modules/chat/JoinChatMobile';
 import LanguageSwitcher from '@/app/_common/layout/header/LanguageSwitcher';
 
 interface HeaderProps {
@@ -19,7 +17,7 @@ interface HeaderProps {
   setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const menuKeys = ['news', 'shows', 'programme', 'latest', 'info'] as const;
+const menuKeys = ['programme', 'latest'] as const;
 
 const Header: React.FC<HeaderProps> = ({
   isOpen: externalIsOpen,
@@ -90,9 +88,6 @@ const Header: React.FC<HeaderProps> = ({
             aria-label='logo'
           >
             <Image quality={75} src={logo} alt='THF Radio Logo' />
-          </Link>
-          <Link href='/chat' className='block lg:hidden'>
-            <SlSpeech className='w-6 h-6 ' />
           </Link>
         </div>
 
@@ -175,7 +170,6 @@ const Header: React.FC<HeaderProps> = ({
               </Link>
             );
           })}
-          <JoinChatMobile />
           <LanguageSwitcher />
         </div>
       </div>

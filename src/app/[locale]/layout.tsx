@@ -4,7 +4,6 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 // import { routing } from '@/i18n/routing';
 import Header from '@/app/_common/layout/header/Header';
 import LiveTicker from '@/modules/live-ticker/LiveTicker';
-import JoinChat from '@/modules/chat/JoinChat';
 import Footer from '@/app/_common/layout/footer/Footer';
 import { siteMetadata } from '@/utils/siteMetadata';
 import CloudPlayer from '@/app/_modules/player/CloudPlayer';
@@ -56,7 +55,6 @@ export default async function LocaleLayout({ children, params }: Props) {
       <Footer />
       <CloudPlayer />
       {/* <CustomAudioPlayer /> */}
-      <JoinChat />
     </NextIntlClientProvider>
   );
 }
