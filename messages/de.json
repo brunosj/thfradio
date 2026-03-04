@@ -103,5 +103,23 @@
   },
   "upcomingShows": "Kommende Shows",
   "programme": "Programm",
-  "failedToLoad": "Programmdaten konnten nicht geladen werden. Bitte versuche es später erneut."
+  "failedToLoad": "Programmdaten konnten nicht geladen werden. Bitte versuche es später erneut.",
+  "chat": {
+    "fermer": "Schließen",
+    "pseudo": "Pseudonym",
+    "moi": "Ich",
+    "ecrivez": "Schreibe eine Nachricht...",
+    "chatPseudo": "Gib ein Pseudonym ein, um zu chatten",
+    "envoyer": "Senden",
+    "connectionError": "Verbindung fehlgeschlagen",
+    "retry": "Wiederholen",
+    "errorTooLong": "Nachricht oder Pseudonym zu lang",
+    "lostConnection": "Verbindung verloren. Verbinde erneut...",
+    "join": "Chat beitreten!",
+    "open": "Chat öffnen",
+    "close": "Chat schließen",
+    "errors": {
+      "sendFailed": "Nachricht konnte nicht gesendet werden. Bitte versuche es erneut."
+    }
+  }
 }

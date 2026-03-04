@@ -30,7 +30,6 @@
   "toShows": "Go to shows section",
   "toProgramme": "Go to schedule section",
   "toArchive": "Go to archive section",
-
   "menu": {
     "news": {
       "name": "News",
@@ -102,5 +101,23 @@
   "pageTitle": "Latest Shows | THF Radio",
   "pageDescription": "Explore the latest shows from THF Radio",
   "title": "Latest Shows",
-  "description": "Browse through our complete archive of radio shows"
+  "description": "Browse through our complete archive of radio shows",
+  "chat": {
+    "fermer": "Close",
+    "pseudo": "Pseudo",
+    "moi": "Me",
+    "ecrivez": "Write a message...",
+    "chatPseudo": "Enter a pseudo to chat",
+    "envoyer": "Send",
+    "connectionError": "Connection failed",
+    "retry": "Retry",
+    "errorTooLong": "Message or pseudo too long",
+    "lostConnection": "Connection lost. Reconnecting...",
+    "join": "Join the chat!",
+    "open": "Open Chat",
+    "close": "Close Chat",
+    "errors": {
+      "sendFailed": "Failed to send message. Please try again."
+    }
+  }
 }
