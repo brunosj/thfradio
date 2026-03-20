@@ -1,5 +1,5 @@
-import { fetchCloudShows } from '@/lib/shows';
-import { NextResponse } from 'next/server';
+import { fetchCloudShows } from "@/lib/shows";
+import { NextResponse } from "next/server";
 
 // Use route segment config for caching (no 2MB limit like unstable_cache)
 // This caches the entire route response for 12 hours
@@ -16,21 +16,21 @@ export async function GET() {
       status: 200,
       headers: {
         // Cache headers for CDN/browser caching
-        'Cache-Control': 'public, max-age=43200, stale-while-revalidate=86400',
+        "Cache-Control": "public, max-age=43200, stale-while-revalidate=86400",
       },
     });
   } catch (error) {
-    console.error('Error in cloud shows API route:', error);
+    console.error("Error in cloud shows API route:", error);
     // Return empty array with 200 status to not break UI
     return NextResponse.json(
       {
         shows: [],
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
       },
       {
         status: 200,
-      }
+      },
     );
   }
 }

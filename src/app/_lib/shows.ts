@@ -13,7 +13,11 @@ export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
     console.error("Error fetching Mixcloud shows:", error);
     return [];
   });
-  console.log("fetchCloudShows: Mixcloud shows:", mixcloudShows.length, "items");
+  console.log(
+    "fetchCloudShows: Mixcloud shows:",
+    mixcloudShows.length,
+    "items",
+  );
 
   // Then try to fetch Soundcloud shows with caching
   let soundcloudShows: CloudShowTypes[] = [];
@@ -28,7 +32,11 @@ export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
     }
 
     soundcloudShows = await fetchSoundcloudShows();
-    console.log("fetchCloudShows: Soundcloud shows:", soundcloudShows.length, "items");
+    console.log(
+      "fetchCloudShows: Soundcloud shows:",
+      soundcloudShows.length,
+      "items",
+    );
   } catch (error) {
     console.error("Error fetching Soundcloud shows:", error);
   }
@@ -75,7 +83,11 @@ export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
 
     // Handle the original array format
     const shows = Array.isArray(data) ? data : data.shows || [];
-    console.log("fetchCloudShowsCached: Returning shows:", shows.length, "items");
+    console.log(
+      "fetchCloudShowsCached: Returning shows:",
+      shows.length,
+      "items",
+    );
 
     return shows;
   } catch (error) {

@@ -1,13 +1,8 @@
-'use client';
+"use client";
 
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-} from 'react';
-import type { CloudShowTypes, TagsList } from '@/types/ResponsesInterface';
-import { fetchCloudShowsCached } from '@/lib/shows';
+import React, { createContext, useState, useContext, useEffect } from "react";
+import type { CloudShowTypes, TagsList } from "@/types/ResponsesInterface";
+import { fetchCloudShowsCached } from "@/lib/shows";
 
 interface DataContextProps {
   children: React.ReactNode;
@@ -33,7 +28,11 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
 
   // Log whenever cloudShows state changes
   useEffect(() => {
-    console.log("[DataContext] cloudShows state updated:", cloudShows?.length || 0, "items");
+    console.log(
+      "[DataContext] cloudShows state updated:",
+      cloudShows?.length || 0,
+      "items",
+    );
   }, [cloudShows]);
 
   const loadCloudShows = async () => {
@@ -45,7 +44,11 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
 
     // Skip if already have data
     if (cloudShows && cloudShows.length > 0) {
-      console.log("[CloudShows] Already have", cloudShows.length, "shows cached");
+      console.log(
+        "[CloudShows] Already have",
+        cloudShows.length,
+        "shows cached",
+      );
       return;
     }
 
@@ -58,18 +61,22 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
       console.log("[CloudShows] Fetch result:", shows?.length || 0, "shows");
 
       if (Array.isArray(shows) && shows.length > 0) {
-        console.log("[CloudShows] Calling setCloudShows with", shows.length, "shows");
+        console.log(
+          "[CloudShows] Calling setCloudShows with",
+          shows.length,
+          "shows",
+        );
         setCloudShows(shows);
         console.log("[CloudShows] setCloudShows called");
       } else {
-        const msg = 'No shows returned from API';
+        const msg = "No shows returned from API";
         console.warn("[CloudShows]", msg);
         setShowsError(msg);
         setCloudShows([]);
       }
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Unknown error';
-      console.error('[CloudShows] Error:', msg);
+      const msg = error instanceof Error ? error.message : "Unknown error";
+      console.error("[CloudShows] Error:", msg);
       setShowsError(msg);
       setCloudShows([]);
     } finally {
@@ -79,7 +86,10 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
 
   // Load on mount only
   useEffect(() => {
-    console.log("[CloudShows] Component mounted, hasLoadedOnce:", hasLoadedOnce);
+    console.log(
+      "[CloudShows] Component mounted, hasLoadedOnce:",
+      hasLoadedOnce,
+    );
     if (!hasLoadedOnce) {
       console.log("[CloudShows] Triggering initial load");
       setHasLoadedOnce(true);
@@ -105,7 +115,7 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
 export function useData() {
   const context = useContext(DataContext);
   if (context === undefined) {
-    throw new Error('useData must be used within a DataProvider');
+    throw new Error("useData must be used within a DataProvider");
   }
   return context;
 }
