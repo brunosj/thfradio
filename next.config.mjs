@@ -8,6 +8,20 @@ const nextConfig = {
   // These settings help prevent duplicate locale prefixes in URLs
   skipTrailingSlashRedirect: true,
   skipMiddlewareUrlNormalize: true,
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/uploads/:path*',
+          destination: 'http://localhost:3001/uploads/:path*',
+        },
+        {
+          source: '/:locale/uploads/:path*',
+          destination: 'http://localhost:3001/uploads/:path*',
+        },
+      ],
+    };
+  },
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -32,6 +46,7 @@ const nextConfig = {
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    qualities: [50, 75, 90],
   },
 };
 

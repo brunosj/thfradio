@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import Hero from '@/modules/hero/Hero';
-import AboutSection from '@/modules/about-section/aboutSection';
-import ImageBanner from '@/modules/image-banner/ImageBanner';
-import CodeOfConductSection from '@/modules/code-of-conduct/CodeOfConductSection';
-import type { AboutTypes } from '@/types/ResponsesInterface';
+import Hero from "@/modules/hero/Hero";
+import AboutSection from "@/modules/about-section/aboutSection";
+import ImageBanner from "@/modules/image-banner/ImageBanner";
+import CodeOfConductSection from "@/modules/code-of-conduct/CodeOfConductSection";
+import type { AboutTypes } from "@/types/ResponsesInterface";
 
 export default function InfoContent({ page }: { page: AboutTypes }) {
   return (
     <>
-      <Hero
+      {/* <Hero
         description={page.attributes.heroText}
         images={page.attributes.heroPictures}
         picturePosition='left'
         showButtons={false}
-      />
+      /> 
       <AboutSection
         title={page.attributes.radioSection.title}
         description={page.attributes.radioSection.description}
@@ -29,12 +29,12 @@ export default function InfoContent({ page }: { page: AboutTypes }) {
         alt='THF Radio at Torhaus'
       />
       <AboutSection
-        title={page.attributes.torhausSection.title}
+        title={page..torhausSection.title}
         description={page.attributes.torhausSection.description}
         button={page.attributes.torhausSection.button}
         links={page.attributes.torhausSection.links}
         className='sectionPt'
-      />
+      />*/}
     </>
   );
 }

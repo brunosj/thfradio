@@ -50,6 +50,10 @@
     "info": {
       "name": "Info",
       "path": "/info"
+    },
+    "shop": {
+      "name": "Shop",
+      "path": "https://thf-radio.sumupstore.com/"
     }
   },
   "followMenu": [

@@ -1,29 +1,50 @@
+// NestJS structure (flat objects)
 export interface PageTypes {
-  attributes: PageComponent & {
-    localizations?: {
-      data: LocalizationType[];
-    };
-  };
-  id: number;
+  id?: string;
+  title?: string;
+  slug?: string;
+  description?: string;
+  content?: string;
+  locale?: string;
 }
 
 export interface TagsList {
-  attributes: {
-    tag: TagTypes[];
+  id?: string;
+  tags?: TagTypes[];
+  // Support for legacy API responses
+  attributes?: {
+    tag?: TagTypes[];
   };
 }
 
 export interface TagTypes {
-  name: string;
-  synonyms: Array<{
+  id?: string;
+  name?: string;
+  title?: string;
+  synonyms?: Array<{
     name: string;
   }>;
 }
 
 export interface CalendarEntry {
-  start: string;
-  end: string;
-  summary: string;
+  id: string;
+  showId?: string;
+  showTitle?: string;
+  showSlug?: string;
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  start?: string; // Legacy support
+  end?: string; // Legacy support
+  summary?: string; // Legacy support
+  status?: string;
+  confirmed?: boolean;
+  djs?: Array<{
+    id: string;
+    name: string;
+    role: string;
+  }>;
 }
 
 // Platform-specific types
@@ -53,20 +74,29 @@ export interface SoundcloudShowType {
   };
 }
 
-// Combined type for frontend use
+// Combined type for frontend use - supports both new flat and old nested structures
 export interface CloudShowTypes {
-  name: string;
+  id: string;
+  title?: string;
+  name?: string;
   url: string;
-  key: string;
-  platform: 'mixcloud' | 'soundcloud';
-  pictures: {
+  key?: string;
+  platform?: "mixcloud" | "soundcloud";
+  source?: "mixcloud" | "soundcloud";
+  picture: string;
+  pictures?: {
     extra_large: string;
   };
-  tags: Array<{
+  tags?: Array<{
     key: string;
     name: string;
     url: string;
   }>;
+  date: string;
+}
+
+export interface ValidShow extends Omit<CloudShowTypes, "date"> {
+  date: Date;
 }
 
 export interface CloudShowTag {
@@ -79,74 +109,104 @@ export interface CloudShows {
   shows: CloudShowTypes[];
 }
 
-export interface ValidShow extends CloudShowTypes {
-  date: Date;
+export interface ShowTypes {
+  attributes?: {
+    id?: string;
+    slug: string;
+    title: string;
+    description: string;
+    keyword?: string;
+    teaserSentence?: string;
+    image?: string;
+    imageFullWidth?: string;
+    rrule?: string;
+    startTime?: string;
+    endTime?: string;
+    durationMinutes?: number;
+    locale: string;
+    activeShow: boolean;
+    status: string;
+    instagram?: string;
+    soundcloud?: string;
+    website?: string;
+    twitter?: string;
+    twitterx?: string;
+    spotify?: string;
+    mail?: string;
+    frequency?: string;
+    day?: string;
+    picture?: {
+      data?: {
+        id?: number;
+        attributes?: {
+          name: string;
+          url: string;
+        };
+      };
+    };
+    pictureFullWidth?: {
+      data?: {
+        id?: number;
+        attributes?: {
+          name: string;
+          url: string;
+        };
+      };
+    };
+    createdAt: string;
+    updatedAt: string;
+    djs: Array<{
+      id: string;
+      name: string;
+      role: string;
+    }>;
+  };
+  // Flat properties for direct access
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  keyword?: string;
+  teaserSentence?: string;
+  image?: string;
+  imageFullWidth?: string;
+  rrule?: string;
+  startTime?: string;
+  endTime?: string;
+  durationMinutes?: number;
+  locale: string;
+  activeShow: boolean;
+  status: string;
+  instagram?: string;
+  soundcloud?: string;
+  website?: string;
+  twitter?: string;
+  twitterx?: string;
+  spotify?: string;
+  mail?: string;
+  frequency?: string;
+  day?: string;
+  createdAt: string;
+  updatedAt: string;
+  djs: Array<{
+    id: string;
+    name: string;
+    role: string;
+  }>;
 }
 
 export interface NewsType {
-  attributes: {
-    title: string;
-    text: string;
-    date: string;
-    slug: string;
-    summary: string;
-    picture: {
-      data: {
-        id: number;
-        attributes: {
-          name: string;
-          url: string;
-        };
-      };
-    };
-    locale: string;
-    shows?: ShowTypes[];
-    localizations?: {
-      data: LocalizationType[];
-    };
-  };
-}
-
-export interface ShowTypes {
-  attributes: {
-    title: string;
-    description: string;
-    slug: string;
-    keyword: string;
-    teaserSentence: string;
-    activeShow: boolean;
-    locale: string;
-    url: string;
-    startTime: string;
-    endTime: string;
-    frequency: string;
-    day: string;
-    instagram: string;
-    soundcloud: string;
-    mail: string;
-    picture: {
-      data: {
-        id: number;
-        attributes: {
-          name: string;
-          url: string;
-        };
-      };
-    };
-    pictureFullWidth: {
-      data: {
-        id: number;
-        attributes: {
-          name: string;
-          url: string;
-        };
-      };
-    };
-    localizations?: {
-      data: LocalizationType[];
-    };
-  };
-  id: number;
+  id?: string;
+  title: string;
+  slug: string;
+  text: string;
+  summary: string;
+  date: string;
+  image?: string;
+  locale?: string;
+  teaserSentence?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Shows {
@@ -154,9 +214,9 @@ export interface Shows {
 }
 
 export interface HomepageSection {
-  title: string;
-  subtitle: string;
-  text: string;
+  title?: string;
+  subtitle?: string;
+  text?: string;
   showListings?: ShowTypes[];
   calendarEntries?: CalendarEntry[];
   shows?: CloudShowTypes[];
@@ -164,102 +224,78 @@ export interface HomepageSection {
 }
 
 export interface AboutSection {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   acceptApplications?: boolean;
-  button: Array<{
+  button?: Array<{
     id: number;
     text: string;
     path: string;
-    color: 'white-orange' | 'white-blue' | 'blue';
+    color?: "white-orange" | "blue" | "white-blue";
   }>;
-  links: {
-    data: Array<{
+  links?: {
+    data?: Array<{
       id: number;
-      attributes: {
-        title: string;
-        links: string;
-      };
+      title: string;
+      links: string;
     }>;
   };
-}
-
-export interface PictureType {
-  attributes: {
-    url: string;
+  archive?: {
+    title: string;
+    text: string;
   };
-}
-
-export interface Pictures {
-  data: Array<{
-    attributes: {
-      url: string;
-    };
-  }>;
+  news?: {
+    title: string;
+    text: string;
+  };
+  shows?: {
+    title: string;
+    text: string;
+  };
+  pictureGallery?: Array<string>;
+  program?: {
+    title: string;
+    text: string;
+  };
 }
 
 export interface HomepageTypes {
+  id: string;
   attributes: {
-    page: PageComponent & {
-      localizations?: {
-        data: LocalizationType[];
-      };
+    page: {
+      title: string;
+      description: string;
     };
     heroText: string;
     heroPictures: {
-      data: Array<{
-        attributes: {
-          url: string;
-        };
-      }>;
+      data: Array<string>;
     };
     shows: HomepageSection;
     news: HomepageSection;
     programme: HomepageSection;
     archive: HomepageSection;
     pictureGallery: {
-      data: Array<{
-        attributes: {
-          url: string;
-        };
-      }>;
-    };
-    localizations?: {
-      data: LocalizationType[];
+      data: Array<string>;
     };
   };
 }
 
 export interface AboutTypes {
-  attributes: {
-    page: PageComponent & {
-      localizations?: {
-        data: LocalizationType[];
-      };
-    };
-    heroText: string;
-    heroPictures: {
-      data: Array<{
-        attributes: {
-          url: string;
-        };
-      }>;
-    };
-    acceptApplications: boolean;
-    radioSection: AboutSection;
-    torhausSection: AboutSection;
-    imageBanner: {
-      data: {
-        attributes: {
-          url: string;
-        };
-      };
-    };
-    codeOfConduct: TextSlide[];
-    localizations?: {
-      data: LocalizationType[];
-    };
-  };
+  id?: string;
+  locale?: string;
+  heroText?: string;
+  heroPictures?: Array<string>;
+  acceptApplications?: boolean;
+  radioSection?: AboutSection;
+  torhausSection?: AboutSection;
+  imageBanner?: string;
+  codeOfConduct?: TextSlide[];
+  radioTitle?: string;
+  radioText?: string;
+  torhausTitle?: string;
+  torhausText?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PageComponent {
@@ -276,8 +312,14 @@ export interface TextSlide {
 
 export interface LocalizationType {
   id: number;
-  attributes: {
-    slug: string;
-    locale: string;
-  };
+  slug: string;
+  locale: string;
+}
+
+export interface PictureType {
+  url: string;
+}
+
+export interface Pictures {
+  data: string[];
 }

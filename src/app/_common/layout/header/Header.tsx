@@ -19,7 +19,7 @@ interface HeaderProps {
   setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const menuKeys = ['news', 'shows', 'programme', 'latest', 'info'] as const;
+const menuKeys = [ 'shows', 'programme', 'latest', 'info'] as const;
 
 const Header: React.FC<HeaderProps> = ({
   isOpen: externalIsOpen,

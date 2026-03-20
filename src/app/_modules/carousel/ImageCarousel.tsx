@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
-} from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
-import { DotButton } from './CarouselNavigation';
-import type { Pictures } from '@/types/ResponsesInterface';
-import { CMS_URL } from '@/utils/constants';
-import { ImageMedia } from '@/lib/image';
+} from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
+import { DotButton } from "./CarouselNavigation";
+import type { Pictures } from "@/types/ResponsesInterface";
+import { CMS_URL } from "@/utils/constants";
+import { ImageMedia } from "@/lib/image";
 
 type PropType = {
   options?: CarouselProps;
@@ -21,7 +21,7 @@ type CarouselPlugin = UseCarouselParameters[1];
 type CarouselProps = {
   opts?: CarouselOptions;
   plugins?: CarouselPlugin;
-  orientation?: 'horizontal' | 'vertical';
+  orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
 };
 
@@ -29,9 +29,9 @@ const ImageCarousel: React.FC<PropType> = (props) => {
   const { slides, options } = props;
   const autoplay = useRef(
     Autoplay(
-      { delay: 3000, stopOnInteraction: false }
+      { delay: 3000, stopOnInteraction: false },
       // (emblaRoot) => emblaRoot.parentElement
-    )
+    ),
   );
 
   const [emblaRef, emblaApi] = useEmblaCarousel(options?.opts, [
@@ -47,7 +47,7 @@ const ImageCarousel: React.FC<PropType> = (props) => {
         autoplay.current.reset();
       }
     },
-    [emblaApi]
+    [emblaApi],
   );
 
   const onInit = useCallback((emblaApi: CarouselApi) => {
@@ -67,45 +67,43 @@ const ImageCarousel: React.FC<PropType> = (props) => {
 
     onInit(emblaApi);
     onSelect(emblaApi);
-    emblaApi.on('reInit', onInit);
-    emblaApi.on('reInit', onSelect);
-    emblaApi.on('select', onSelect);
+    emblaApi.on("reInit", onInit);
+    emblaApi.on("reInit", onSelect);
+    emblaApi.on("select", onSelect);
   }, [emblaApi, onInit, onSelect]);
 
   const imageByIndex = (pictures: Pictures, index: number): string => {
     if (pictures.data.length === 0) {
-      return ''; // or throw an error, depending on your needs
+      return ""; // or throw an error, depending on your needs
     }
-    return `${CMS_URL}${
-      pictures.data[index % pictures.data.length].attributes.url
-    }`;
+    return `${pictures.data[index % pictures.data.length]}`;
   };
 
   return (
     <>
-      <div className='embla'>
-        <div className='embla__viewport' ref={emblaRef}>
-          <div className='embla__container'>
+      <div className="embla">
+        <div className="embla__viewport" ref={emblaRef}>
+          <div className="embla__container">
             {slides.data.map((slide, index) => (
-              <div className='embla__slide' key={index}>
-                <div className='relative h-[30rem] w-full overflow-hidden lg:rounded-lg'>
+              <div className="embla__slide" key={index}>
+                <div className="relative h-[30rem] w-full overflow-hidden lg:rounded-lg">
                   <ImageMedia
-                    imgClassName='object-cover'
+                    imgClassName="object-cover"
                     src={imageByIndex(slides, index)}
-                    alt='Your alt text'
+                    alt="Your alt text"
                     fill
                     priority={index === 0}
-                    loading={index < 3 ? 'eager' : 'lazy'}
+                    loading={index < 3 ? "eager" : "lazy"}
                   />
                   {/* Dark overlay for mobile devices */}
-                  <div className='absolute inset-0 bg-black/20 '></div>
+                  <div className="absolute inset-0 bg-black/20 "></div>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className='embla__dots'>
+        <div className="embla__dots">
           {scrollSnaps.length > 1 &&
             scrollSnaps.map((_, index) => (
               <DotButton

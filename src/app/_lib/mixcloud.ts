@@ -2,7 +2,7 @@ import type {
   CloudShowTypes,
   MixcloudShowType,
   CloudShowTag,
-} from '@/types/ResponsesInterface';
+} from "@/types/ResponsesInterface";
 
 function normalizeMixcloudShow(show: MixcloudShowType): CloudShowTypes {
   // Ensure the tags array is properly formatted
@@ -16,18 +16,21 @@ function normalizeMixcloudShow(show: MixcloudShowType): CloudShowTypes {
         key: tag.key.toLowerCase(),
         name: tag.name,
         // Replace spaces with hyphens in the URL path for consistency
-        url: `tag/${tag.key.toLowerCase().replace(/\s+/g, '-')}`,
+        url: `tag/${tag.key.toLowerCase().replace(/\s+/g, "-")}`,
       };
     });
   }
 
   return {
+    id: show.key,
     name: show.name,
     url: show.url,
     key: show.key,
-    platform: 'mixcloud',
+    platform: "mixcloud",
+    picture: show.pictures?.extra_large || "",
     pictures: show.pictures,
     tags: formattedTags,
+    date: new Date().toISOString(),
   };
 }
 
@@ -39,7 +42,7 @@ export async function fetchMixcloudShows(): Promise<CloudShowTypes[]> {
 
   // Get the API URL, defaulting to a sensible value if not defined
   const mixcloudApi =
-    process.env.MIXCLOUD_API || 'https://api.mixcloud.com/thfradio/cloudcasts/';
+    process.env.MIXCLOUD_API || "https://api.mixcloud.com/thfradio/cloudcasts/";
 
   // Fetch in batches with improved error handling
   const results: CloudShowTypes[][] = [];
@@ -47,12 +50,12 @@ export async function fetchMixcloudShows(): Promise<CloudShowTypes[]> {
   for (let i = 0; i < maxPages; i++) {
     try {
       const response = await fetch(
-        `${mixcloudApi}?offset=${i * limit}&limit=${limit}`
+        `${mixcloudApi}?offset=${i * limit}&limit=${limit}`,
       );
 
       if (!response.ok) {
         console.error(
-          `Mixcloud API error on page ${i + 1}: ${response.status} ${response.statusText}`
+          `Mixcloud API error on page ${i + 1}: ${response.status} ${response.statusText}`,
         );
         continue; // Skip this batch but continue with others
       }

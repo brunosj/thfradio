@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import Hero from '@/app/_modules/hero/Hero';
-import HomeShowSection from '@/app/_modules/show-listing/HomeShowsSection';
-import CalendarSchedule from '@/app/_modules/timetable_v2/CalendarSchedule';
-import HomeArchiveSection from '@/app/_modules/archive/HomeArchiveSection';
-import HomeNewsSection from '@/app/_modules/news/HomeNewsSection';
-import type { HomepageTypes, NewsType } from '@/app/_types/ResponsesInterface';
+import Hero from "@/app/_modules/hero/Hero";
+import HomeShowSection from "@/app/_modules/show-listing/HomeShowsSection";
+import CalendarSchedule from "@/app/_modules/timetable_v2/CalendarSchedule";
+import HomeArchiveSection from "@/app/_modules/archive/HomeArchiveSection";
+import HomeNewsSection from "@/app/_modules/news/HomeNewsSection";
+import type { HomepageTypes, NewsType } from "@/app/_types/ResponsesInterface";
 
 interface HomeContentProps {
   page: HomepageTypes;
@@ -27,21 +27,21 @@ For any issues or dev-related questions, please get in touch at contact@landozon
   return (
     <>
       <CalendarSchedule />
-      <Hero
+      {/* <Hero
         description={page.attributes.heroText}
         images={page.attributes.heroPictures}
         showButtons={true}
-        picturePosition='right'
-      />
+        picturePosition="right"
+      /> */}
       <HomeArchiveSection
         title={page.attributes.archive.title}
         text={page.attributes.archive.text}
       />
-      <HomeNewsSection
+      {/* <HomeNewsSection
         title={page.attributes.news.title}
         text={page.attributes.news.text}
         newsItems={latestNews}
-      />
+      /> */}
       <HomeShowSection
         title={page.attributes.shows.title}
         text={page.attributes.shows.text}
