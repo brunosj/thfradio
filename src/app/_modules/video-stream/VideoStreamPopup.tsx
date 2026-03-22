@@ -86,11 +86,11 @@ export default function VideoStreamPopup() {
       } catch (error) {
         console.error("Error loading popup position:", error);
         // Set default position (bottom left)
-        setPosition({ x: 16, y: window.innerHeight - 500 });
+        setPosition({ x: 16, y: Math.max(0, window.innerHeight - 500) });
       }
     } else {
       // Set default position (bottom left)
-      setPosition({ x: 16, y: window.innerHeight - 500 });
+      setPosition({ x: 16, y: Math.max(0, window.innerHeight - 500) });
     }
   }, []);
 
@@ -169,7 +169,7 @@ export default function VideoStreamPopup() {
       {isOpen && (
         <div
           ref={popupRef}
-          className={`${isFullPage ? "fixed inset-0 z-50" : "fixed z-40"} flex flex-col overflow-hidden ${isFullPage ? "" : "rounded-lg"} bg-black shadow-2xl`}
+          className={`${isFullPage ? "fixed inset-0 z-50" : "fixed z-50"} flex flex-col overflow-hidden ${isFullPage ? "" : "rounded-lg"} bg-black shadow-2xl`}
           style={
             isFullPage
               ? {}
