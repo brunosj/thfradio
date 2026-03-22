@@ -26,6 +26,12 @@ const nextConfig = {
     unoptimized: true,
     remotePatterns: [
       {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3001',
+        pathname: '/uploads/**',
+      },
+      {
         protocol: 'https',
         hostname: 'thumbnailer.mixcloud.com',
       },

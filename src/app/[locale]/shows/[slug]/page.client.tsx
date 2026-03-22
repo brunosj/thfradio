@@ -14,26 +14,30 @@ export default function ShowContent({ content }: { content: ShowTypes }) {
   const { cloudShows, isLoadingShows, loadCloudShows } = useData();
   const [filteredShows, setFilteredShows] = useState<CloudShowTypes[]>([]);
 
+  // Helper to construct full image URL
+  const getImageUrl = (imagePath: string | null | undefined) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    if (imagePath.startsWith("/")) return `${CMS_URL}${imagePath}`;
+    return `${CMS_URL}/uploads/${imagePath}`;
+  };
+
   useEffect(() => {
     async function getFilteredShows() {
-      // If no keyword, can't filter
-      if (!content.keyword) {
-        console.log("No keyword to filter shows");
+      // Use keyword or fallback to show title for filtering
+      const searchTerm = content.keyword || content.title;
+
+      if (!searchTerm) {
         setFilteredShows([]);
         return;
       }
 
       // If shows are already in context, filter them
-      console.log(
-        "Filtering shows for content keyword:",
-        content.keyword,
-        cloudShows,
-      );
       if (cloudShows && cloudShows.length > 0) {
         const filtered = cloudShows.filter((show) => {
-          const name = show.name.replace(/[\s-]/g, "").toLowerCase();
-          const keyword = content.keyword!.replace(/[\s-]/g, "").toLowerCase();
-          return new RegExp(keyword, "i").test(name);
+          const name = show?.name?.replace(/[\s-]/g, "").toLowerCase();
+          const keyword = searchTerm.replace(/[\s-]/g, "").toLowerCase();
+          return new RegExp(keyword, "i").test(name || "");
         });
         setFilteredShows(filtered);
         return;
@@ -44,25 +48,27 @@ export default function ShowContent({ content }: { content: ShowTypes }) {
     }
 
     getFilteredShows();
-  }, [cloudShows, content.keyword, loadCloudShows]);
+  }, [cloudShows, content.keyword, content.title, loadCloudShows]);
 
   console.log(
-    "Filtered shows for content keyword:",
-    content.keyword,
+    "Filtered shows for search term:",
+    content.keyword || content.title,
     filteredShows,
     { cloudShows },
   );
 
   const sortedShows = processShows(filteredShows);
 
+  const headerImageUrl = getImageUrl(content.imageFullWidth);
+
   return (
     <>
       <div className="relative">
-        {content.pictureFullWidth?.data ? (
+        {headerImageUrl ? (
           <div className="relative min-h-fit lg:min-h-[80vh] w-full">
             <Image
               quality={50}
-              src={`${CMS_URL}${content.pictureFullWidth?.data.attributes.url}`}
+              src={headerImageUrl}
               fill
               sizes="100vw"
               className="object-cover object-center"

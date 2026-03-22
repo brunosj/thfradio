@@ -23,6 +23,14 @@ interface ShowDetailsProps {
 const ShowDetails: React.FC<ShowDetailsProps> = ({ currentContent }) => {
   const locale = useLocale();
 
+  // Construct full image URL from backend
+  const getImageUrl = (imagePath: string | null | undefined) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    if (imagePath.startsWith("/")) return `${CMS_URL}${imagePath}`;
+    return `${CMS_URL}/uploads/${imagePath}`;
+  };
+
   const getGermanDay = (day: string): string => {
     if (locale === "en") {
       return day.charAt(0).toUpperCase() + day.slice(1);
@@ -79,9 +87,9 @@ const ShowDetails: React.FC<ShowDetailsProps> = ({ currentContent }) => {
             <div className="relative w-20 h-20 lg:w-24 lg:h-24 flex-shrink-0">
               <Image
                 quality={50}
-                src={currentContent.image}
+                src={getImageUrl(currentContent.image) || ""}
                 fill
-                sizes=""
+                sizes="(max-width: 768px) 80px, 96px"
                 className="object-cover rounded-xl aspect-square "
                 alt={currentContent.title}
               />

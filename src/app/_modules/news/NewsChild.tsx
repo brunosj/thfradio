@@ -12,6 +12,14 @@ interface NewsProps {
 const NewsChild: React.FC<NewsProps> = ({ item }) => {
   const formattedDate = formatDate(item.date);
 
+  // Construct full image URL from backend
+  const getImageUrl = (imagePath: string | null | undefined) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    if (imagePath.startsWith("/")) return `${CMS_URL}${imagePath}`;
+    return `${CMS_URL}/uploads/${imagePath}`;
+  };
+
   if (!item.image) {
     return (
       <div className=" text-white rounded-xl" id={item.slug}>
@@ -34,9 +42,9 @@ const NewsChild: React.FC<NewsProps> = ({ item }) => {
       <div className="relative w-full h-48 lg:h-72 aspect-video">
         <Image
           quality={50}
-          src={`${CMS_URL}${item.image}`}
+          src={getImageUrl(item.image) || ""}
           fill
-          sizes=""
+          sizes="(max-width: 768px) 100vw, 672px"
           className="object-contain object-center rounded-t-xl aspect-video p-4"
           alt={item.title}
         />

@@ -19,20 +19,33 @@ const ProgrammeShowsChild = React.forwardRef<
     ? "pr-3 pl-4 lg:pl-12 space-y-2"
     : "pl-[5rem] lg:pl-[11rem] pr-3 space-y-2";
 
+  // Construct full image URL from backend
+  const getImageUrl = (imagePath: string | null) => {
+    if (!imagePath) return null;
+    // If path already includes http/https, return as is
+    if (imagePath.startsWith("http")) return imagePath;
+    // If path starts with /, it already includes /uploads/
+    if (imagePath.startsWith("/")) return `${CMS_URL}${imagePath}`;
+    // Otherwise, it's just a filename - add /uploads/ prefix
+    return `${CMS_URL}/uploads/${imagePath}`;
+  };
+
+  const imageUrl = getImageUrl(item.image);
+
   return (
     <div key={item.id} ref={ref}>
       <Link
         className="group flex items-center flex-row border rounded-xl border-blue-600 bg-white hover:bg-thf-blue-500 hover:text-white font-mono duration-200 h-20 lg:h-32 relative"
         href={`/shows/${item.slug}`}
       >
-        {item.image && (
+        {imageUrl && (
           <div className="group relative flex h-full justify-around imageHover">
             <div className="relative w-16 lg:w-32">
               <Image
                 quality={50}
-                src={item.image}
+                src={imageUrl}
                 fill
-                sizes=""
+                sizes="(max-width: 768px) 64px, 128px"
                 className="object-cover rounded-l-xl"
                 alt={item.title}
               />
