@@ -66,11 +66,12 @@ export const Chat = () => {
       if (!isOpen || socketRef.current?.connected) return;
 
       try {
-        const backendUrl =
-          typeof window !== "undefined"
-            ? process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
-            : "http://localhost:3001";
-
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        console.log(
+          "NEXT_PUBLIC_BACKEND_URL:",
+          process.env.NEXT_PUBLIC_BACKEND_URL,
+        );
+        console.log("Connecting to WebSocket at:", backendUrl);
         const socketUrl = `${backendUrl}/chat`;
 
         socketRef.current = io(socketUrl, {

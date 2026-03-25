@@ -1,7 +1,6 @@
 import type { NewsType } from "@/types/ResponsesInterface";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 type NewsItemsType = {
   data: NewsType[];

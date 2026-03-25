@@ -35,7 +35,7 @@ export default function VideoStreamPopup() {
     try {
       // First try the backend API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/health/stream`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/health/stream`,
         {
           cache: "no-store",
         },

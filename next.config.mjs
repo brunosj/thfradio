@@ -13,11 +13,11 @@ const nextConfig = {
       beforeFiles: [
         {
           source: '/uploads/:path*',
-          destination: 'http://localhost:3001/uploads/:path*',
+          destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/:path*`,
         },
         {
           source: '/:locale/uploads/:path*',
-          destination: 'http://localhost:3001/uploads/:path*',
+          destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/:path*`,
         },
       ],
     };
@@ -26,9 +26,9 @@ const nextConfig = {
     unoptimized: true,
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3001',
+        protocol: 'https',
+        hostname: 'cms.thfradio.com',
+        port: '',
         pathname: '/uploads/**',
       },
       {

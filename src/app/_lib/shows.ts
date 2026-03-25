@@ -99,8 +99,7 @@ export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
 
 export async function fetchProgrammeShows(locale: string) {
   try {
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     const response = await fetch(`${backendUrl}/shows?lang=${locale}`, {
       next: { revalidate: 300 },
     });
@@ -113,8 +112,7 @@ export async function fetchProgrammeShows(locale: string) {
 
 export async function fetchShowBySlug(slug: string, locale: string) {
   try {
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     const response = await fetch(`${backendUrl}/shows/${slug}?lang=${locale}`, {
       next: { revalidate: 600 },
     });
