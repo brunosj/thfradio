@@ -66,7 +66,8 @@ export const Chat = () => {
       if (!isOpen || socketRef.current?.connected) return;
 
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
+        if (!backendUrl) return;
         console.log(
           "NEXT_PUBLIC_BACKEND_URL:",
           process.env.NEXT_PUBLIC_BACKEND_URL,

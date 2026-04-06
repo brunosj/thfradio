@@ -82,13 +82,16 @@ export async function GET(request: NextRequest) {
 
       // Create placeholder show object
       show = {
+        id: url,
         name: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
         url: url,
         key: url,
         platform: 'soundcloud', // Default to soundcloud for safety
+        picture: '',
         pictures: {
           extra_large: '',
         },
+        date: new Date().toISOString(),
         tags: [],
       };
 

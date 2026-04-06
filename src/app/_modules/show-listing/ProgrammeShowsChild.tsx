@@ -30,7 +30,7 @@ const ProgrammeShowsChild = React.forwardRef<
     return `${CMS_URL}/uploads/${imagePath}`;
   };
 
-  const imageUrl = getImageUrl(item.image);
+  const imageUrl = getImageUrl(item.image ?? null);
 
   return (
     <div key={item.id} ref={ref}>

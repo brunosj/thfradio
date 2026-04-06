@@ -6,6 +6,7 @@ import AutoHeight from 'embla-carousel-auto-height';
 import { DotButtonText } from './CarouselNavigation';
 import type { TextSlide } from '@/types/ResponsesInterface';
 import ReactMarkdown from 'react-markdown';
+import SanitizedHtml from '@/common/ui/SanitizedHtml';
 
 type PropType = {
   slides: TextSlide[];
@@ -60,7 +61,11 @@ const TextCarousel: React.FC<PropType> = (props) => {
                   <h1 className='text-thf-blue-500 uppercase tracking-wider font-semibold'>
                     {slide.heading}
                   </h1>
-                  <ReactMarkdown>{slide.text}</ReactMarkdown>
+                  {slide.textHtml?.trim() ? (
+                    <SanitizedHtml html={slide.textHtml} />
+                  ) : (
+                    <ReactMarkdown>{slide.text}</ReactMarkdown>
+                  )}
                 </div>
               </div>
             ))}

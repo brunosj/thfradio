@@ -1,16 +1,20 @@
-import type { CloudShowTypes, ValidShow } from '@/types/ResponsesInterface';
+import type {
+  CloudShowListItem,
+  CloudShowTypes,
+  ValidShow,
+} from '@/types/ResponsesInterface';
 import { parse, toDate, isValid, format } from 'date-fns';
 
-export const getShowName = (item: CloudShowTypes): string | null => {
-  if (!item.name.includes('//')) {
+export const getShowName = (item: CloudShowListItem): string | null => {
+  if (!item.name?.includes('//')) {
     return null;
   }
   const showNameSplitted = item.name.split('//');
   return showNameSplitted[0].trim();
 };
 
-export const getDateFromShow = (item: CloudShowTypes): Date | null => {
-  if (!item.name.includes('//')) {
+export const getDateFromShow = (item: CloudShowListItem): Date | null => {
+  if (!item.name?.includes('//')) {
     return null;
   }
 
@@ -35,7 +39,9 @@ export const getDateFromShow = (item: CloudShowTypes): Date | null => {
   return null;
 };
 
-export const getFormattedDateString = (item: CloudShowTypes): string | null => {
+export const getFormattedDateString = (
+  item: CloudShowListItem,
+): string | null => {
   // const date = formatDate(item);
   const date = getDateFromShow(item);
   return date ? format(date, 'dd.MM.yyyy') : null;

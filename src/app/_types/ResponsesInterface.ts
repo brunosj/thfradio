@@ -4,6 +4,7 @@ export interface PageTypes {
   title?: string;
   slug?: string;
   description?: string;
+  /** TipTap HTML from CMS; sanitize before rendering with dangerouslySetInnerHTML */
   content?: string;
   locale?: string;
 }
@@ -98,6 +99,9 @@ export interface CloudShowTypes {
 export interface ValidShow extends Omit<CloudShowTypes, "date"> {
   date: Date;
 }
+
+/** Processed cloud shows (date as Date) or raw API shape (date as string) */
+export type CloudShowListItem = CloudShowTypes | ValidShow;
 
 export interface CloudShowTag {
   key: string;
@@ -217,9 +221,12 @@ export interface HomepageSection {
   title?: string;
   subtitle?: string;
   text?: string;
-  showListings?: ShowTypes[];
+  /** Sanitized CMS HTML when set; otherwise `text` is rendered as markdown. */
+  textHtml?: string;
+  /** Recent news for the homepage news block (flat records, not Strapi-shaped). */
+  newsPreview?: NewsType[];
   calendarEntries?: CalendarEntry[];
-  shows?: CloudShowTypes[];
+  shows?: ShowTypes[];
   tagsList?: TagsList;
 }
 
@@ -259,25 +266,22 @@ export interface AboutSection {
   };
 }
 
+/** `GET /content/homepage` — flat Nest response (no Strapi `attributes` wrapper). */
 export interface HomepageTypes {
   id: string;
-  attributes: {
-    page: {
-      title: string;
-      description: string;
-    };
-    heroText: string;
-    heroPictures: {
-      data: Array<string>;
-    };
-    shows: HomepageSection;
-    news: HomepageSection;
-    programme: HomepageSection;
-    archive: HomepageSection;
-    pictureGallery: {
-      data: Array<string>;
-    };
+  /** CMS row locale (`en` / `de`). */
+  locale?: string;
+  meta: {
+    title: string;
+    description: string;
   };
+  heroText: string;
+  heroPictures: string[];
+  pictureGallery: string[];
+  shows: HomepageSection;
+  news: HomepageSection;
+  programme: HomepageSection;
+  archive: HomepageSection;
 }
 
 export interface AboutTypes {
@@ -291,11 +295,17 @@ export interface AboutTypes {
   imageBanner?: string;
   codeOfConduct?: TextSlide[];
   radioTitle?: string;
-  radioText?: string;
+  radioHtml?: string;
+  /** Rich text Links column for the Radio block (localized by API `lang`). */
+  radioLinksHtml?: string;
   torhausTitle?: string;
-  torhausText?: string;
+  torhausHtml?: string;
+  /** Rich text Links column for the Torhaus block (localized by API `lang`). */
+  torhausLinksHtml?: string;
   createdAt?: string;
   updatedAt?: string;
+  /** Raw CMS JSON; optional structured keys parsed in fetchAboutPage */
+  extras?: Record<string, unknown>;
 }
 
 export interface PageComponent {
@@ -307,7 +317,10 @@ export interface PageComponent {
 
 export interface TextSlide {
   heading: string;
+  /** Plain / markdown body when `textHtml` is not used. */
   text: string;
+  /** TipTap HTML from CMS; sanitize in the carousel when set. */
+  textHtml?: string;
 }
 
 export interface LocalizationType {

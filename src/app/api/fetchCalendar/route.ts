@@ -47,15 +47,22 @@ export async function GET() {
           isWithinInterval(showEnd, { start: now, end: endOfTwoWeeks })
         );
       })
-      .map((event: VEvent) => ({
-        start: new Date(event.start).toISOString(),
-        end: new Date(event.end).toISOString(),
-        summary: event.summary,
-        description: event.description,
-        location: event.location,
-      }))
+      .map((event: VEvent, index) => {
+        const startTime = new Date(event.start).toISOString();
+        const endTime = new Date(event.end).toISOString();
+        const title = event.summary ?? 'Show';
+        return {
+          id: String(event.uid ?? `cal-${index}`),
+          title,
+          startTime,
+          endTime,
+          summary: event.summary,
+          description: event.description,
+        } satisfies CalendarEntry;
+      })
       .sort(
-        (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+        (a, b) =>
+          new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
       );
 
     return NextResponse.json(upcomingShows, {

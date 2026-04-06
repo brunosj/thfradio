@@ -8,14 +8,15 @@ interface ShowsProps {
   title: string;
   pictures: PictureType[];
   text: string;
+  textHtml?: string;
 }
 
-const HomeShowSection = ({ title, pictures, text }: ShowsProps) => {
+const HomeShowSection = ({ title, pictures, text, textHtml }: ShowsProps) => {
   const t = useTranslations();
 
   return (
     <section className="bg-orange-500 sectionPb" id="shows">
-      <SectionHeader title={title} text={text} />
+      <SectionHeader title={title} text={text} textHtml={textHtml} />
       {/* <div className="layout">
         <ImageGallery items={pictures} />
       </div> */}

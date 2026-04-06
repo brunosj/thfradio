@@ -11,10 +11,16 @@ import { useTranslations } from 'next-intl';
 interface NewsProps {
   title: string;
   text: string;
+  textHtml?: string;
   newsItems: NewsType[];
 }
 
-export default function HomeNewsSection({ title, text, newsItems }: NewsProps) {
+export default function HomeNewsSection({
+  title,
+  text,
+  textHtml,
+  newsItems,
+}: NewsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const t = useTranslations();
 
@@ -26,7 +32,7 @@ export default function HomeNewsSection({ title, text, newsItems }: NewsProps) {
 
   return (
     <section className='bg-dark-blue sectionPb'>
-      <SectionHeader title={title} text={text} />
+      <SectionHeader title={title} text={text} textHtml={textHtml} />
       <div className='layout'>
         {isLoading ? (
           <div className='flex justify-center pb-12'>

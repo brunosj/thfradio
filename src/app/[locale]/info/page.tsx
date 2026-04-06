@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { createMetadata } from '@/utils/metadata';
 import InfoContent from './page.client';
 import { fetchAboutPage } from '@/lib/pages';
+import { metadataFromAbout } from '@/lib/metadataPlainText';
 import { notFound } from 'next/navigation';
 import type { AboutTypes } from '@/types/ResponsesInterface';
 
@@ -14,10 +15,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const page: AboutTypes | null = await fetchAboutPage(locale);
-  return createMetadata({
-    title: page?.attributes.page.title,
-    description: page?.attributes.page.description,
-  });
+  return createMetadata(metadataFromAbout(page));
 }
 
 export default async function InfoPage({ params }: { params: Params }) {

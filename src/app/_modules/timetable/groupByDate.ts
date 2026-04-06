@@ -2,12 +2,16 @@
 import type { CalendarEntry } from '@/types/ResponsesInterface';
 import { startOfDay } from 'date-fns';
 
+function entryStartIso(entry: CalendarEntry): string | undefined {
+  return entry.startTime ?? entry.start;
+}
+
 // Use a cache to avoid reprocessing the same data
 const groupCache = new Map<string, { [key: string]: CalendarEntry[] }>();
 
 const groupByDate = (entries: CalendarEntry[]) => {
   // Create a cache key based on entries data
-  const cacheKey = JSON.stringify(entries.map((e) => e.start));
+  const cacheKey = JSON.stringify(entries.map((e) => entryStartIso(e)));
 
   // Check if we have cached results
   if (groupCache.has(cacheKey)) {
@@ -17,8 +21,11 @@ const groupByDate = (entries: CalendarEntry[]) => {
   // Process entries if not cached
   const result = entries.reduce(
     (acc: { [key: string]: CalendarEntry[] }, entry) => {
-      // Convert date only once outside the reducer for better performance
-      const startDate = startOfDay(new Date(entry.start)).toISOString();
+      const startIso = entryStartIso(entry);
+      if (!startIso) {
+        return acc;
+      }
+      const startDate = startOfDay(new Date(startIso)).toISOString();
 
       if (!acc[startDate]) {
         acc[startDate] = [];
@@ -33,9 +40,12 @@ const groupByDate = (entries: CalendarEntry[]) => {
 
   // Sort entries for each date
   Object.keys(result).forEach((date) => {
-    result[date].sort(
-      (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
-    );
+    result[date].sort((a, b) => {
+      const aS = entryStartIso(a);
+      const bS = entryStartIso(b);
+      if (!aS || !bS) return 0;
+      return new Date(aS).getTime() - new Date(bS).getTime();
+    });
   });
 
   // Store in cache

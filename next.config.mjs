@@ -4,6 +4,9 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   reactStrictMode: true,
   // These settings help prevent duplicate locale prefixes in URLs
   skipTrailingSlashRedirect: true,

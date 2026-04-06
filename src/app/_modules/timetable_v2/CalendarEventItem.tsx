@@ -7,9 +7,14 @@ interface CalendarEventItemProps {
 }
 
 export default function CalendarEventItem({ event }: CalendarEventItemProps) {
-  // Parse dates to display time
-  const startDate = parseISO(event.start);
-  const endDate = parseISO(event.end);
+  const startIso = event.startTime ?? event.start;
+  const endIso = event.endTime ?? event.end;
+  if (!startIso || !endIso) {
+    return null;
+  }
+
+  const startDate = parseISO(startIso);
+  const endDate = parseISO(endIso);
 
   // Format times
   const startTime = format(startDate, 'HH:mm');
@@ -49,7 +54,7 @@ export default function CalendarEventItem({ event }: CalendarEventItemProps) {
       <div
         className={` ${hasEnoughSpace ? 'text-sm' : 'text-xs'} break-words line-clamp-3`}
       >
-        {event.summary}
+        {event.summary ?? event.title}
       </div>
 
       {isLongDuration && (

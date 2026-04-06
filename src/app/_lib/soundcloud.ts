@@ -104,13 +104,16 @@ function normalizeSoundcloudShow(show: SoundcloudShowType): CloudShowTypes {
   }
 
   return {
+    id: show.id,
     name: formattedTitle,
     url: show.permalink_url,
     key: show.id,
-    platform: 'soundcloud',
+    platform: 'soundcloud' as const,
+    picture: imageUrl,
     pictures: {
       extra_large: imageUrl,
     },
+    date: show.created_at ?? new Date().toISOString(),
     tags: formattedTags,
   };
 }

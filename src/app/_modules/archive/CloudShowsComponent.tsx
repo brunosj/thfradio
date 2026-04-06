@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CloudShowTypes, TagTypes, TagsList } from '@/types/ResponsesInterface';
+import type { CloudShowListItem, TagTypes, TagsList } from '@/types/ResponsesInterface';
 import useShowFilter from '@/hooks/useShowFilter';
 import CloudShowsList from './CloudShowsList';
 import CloudShowsFilter from './CloudShowsFilter';
 import Pagination from '@/common/ui/Pagination';
 
 interface ShowCardProps {
-  items: CloudShowTypes[];
+  items: CloudShowListItem[];
   tagsList: TagsList;
 }
 
@@ -36,11 +36,12 @@ const CloudShowsComponent = ({ items, tagsList }: ShowCardProps) => {
   const itemsToDisplay = allFilteredItems.slice(startIndex, endIndex);
 
   // Genre tags
-  const sortedTags = tagsList.attributes.tag
+  const sortedTags = (tagsList.attributes?.tag ?? [])
     .map((tag) => ({
-      name: tag.name,
+      name: tag.name ?? "",
       synonyms: tag.synonyms || [],
     }))
+    .filter((t) => t.name)
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const handleTagClick = (tag: TagTypes) => {

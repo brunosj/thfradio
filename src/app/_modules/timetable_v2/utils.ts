@@ -2,6 +2,14 @@
 import { parseISO, isSameDay, addDays, startOfDay } from 'date-fns';
 import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
 
+export function entryStartIso(entry: CalendarEntry): string | undefined {
+  return entry.startTime ?? entry.start;
+}
+
+export function entryEndIso(entry: CalendarEntry): string | undefined {
+  return entry.endTime ?? entry.end;
+}
+
 /**
  * Groups calendar entries by day
  */
@@ -10,7 +18,9 @@ export function groupEntriesByDay(entries: CalendarEntry[], days: Date[]) {
     date: day,
     events: entries.filter((entry) => {
       try {
-        const startDate = parseISO(entry.start);
+        const startIso = entryStartIso(entry);
+        if (!startIso) return false;
+        const startDate = parseISO(startIso);
         return isSameDay(startDate, day);
       } catch {
         return false;
@@ -27,8 +37,11 @@ export function getCurrentShows(entries: CalendarEntry[]) {
 
   return entries.filter((entry) => {
     try {
-      const startDate = parseISO(entry.start);
-      const endDate = parseISO(entry.end);
+      const startIso = entryStartIso(entry);
+      const endIso = entryEndIso(entry);
+      if (!startIso || !endIso) return false;
+      const startDate = parseISO(startIso);
+      const endDate = parseISO(endIso);
       return now >= startDate && now <= endDate;
     } catch {
       return false;

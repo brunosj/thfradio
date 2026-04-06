@@ -26,8 +26,8 @@ export async function generateMetadata({
   }
 
   return createMetadata({
-    title: page.attributes.page.title,
-    description: page.attributes.page.description,
+    title: page.meta.title,
+    description: page.meta.description,
   });
 }
 

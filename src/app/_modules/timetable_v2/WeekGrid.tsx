@@ -3,6 +3,7 @@ import React from 'react';
 import { isSameDay, parseISO, differenceInMinutes } from 'date-fns';
 import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
 import CalendarEventItem from './CalendarEventItem';
+import { entryEndIso, entryStartIso } from './utils';
 
 interface WeekGridProps {
   days: Date[];
@@ -26,7 +27,9 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
     // Get all entries for this day
     const dayEntries = calendarEntries.filter((entry) => {
       try {
-        const startDate = parseISO(entry.start);
+        const startIso = entryStartIso(entry);
+        if (!startIso) return false;
+        const startDate = parseISO(startIso);
         return isSameDay(startDate, day);
       } catch {
         return false;
@@ -99,8 +102,11 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
               >
                 {entries.map((entry, entryIndex) => {
                   try {
-                    const startTime = parseISO(entry.start);
-                    const endTime = parseISO(entry.end);
+                    const startIso = entryStartIso(entry);
+                    const endIso = entryEndIso(entry);
+                    if (!startIso || !endIso) return null;
+                    const startTime = parseISO(startIso);
+                    const endTime = parseISO(endIso);
 
                     // Only display if the event starts within our time range
                     const startHour = startTime.getHours();
