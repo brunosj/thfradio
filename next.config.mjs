@@ -4,6 +4,9 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // isomorphic-dompurify loads jsdom on the server; bundling jsdom can break
+  // createWindow in production. Keep these as runtime externals.
+  serverExternalPackages: ['isomorphic-dompurify', 'jsdom', 'dompurify'],
   eslint: {
     ignoreDuringBuilds: true,
   },
