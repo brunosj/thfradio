@@ -4,6 +4,9 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // isomorphic-dompurify loads jsdom on the server; bundling jsdom breaks createWindow
+  // (TypeError: i is not a function) in production. Load from node_modules at runtime.
+  serverExternalPackages: ['isomorphic-dompurify', 'jsdom', 'dompurify'],
   eslint: {
     ignoreDuringBuilds: true,
   },
