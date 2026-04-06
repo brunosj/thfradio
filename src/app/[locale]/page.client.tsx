@@ -17,36 +17,40 @@ export default function HomeContent({ page, latestNews }: HomeContentProps) {
     return <div>Loading...</div>;
   }
 
-  console.log(`
-Hey there, welcome to the site of THF Radio, a community radio based in Berlin 📻
-
-If you like it and want to see the code behind it, check it out at https://github.com/brunosj/thfradio-nextjs
-
-For any issues or dev-related questions, please get in touch at contact@landozone.net ✨`);
+  const galleryPictures = (page.pictureGallery ?? []).map((url) => ({
+    url,
+  }));
 
   return (
     <>
-      <CalendarSchedule />
+      <CalendarSchedule
+        programmeTitle={page.programme.title}
+        programmeText={page.programme.text}
+        programmeTextHtml={page.programme.textHtml}
+      />
       <Hero
-        description={page.attributes.heroText}
-        images={page.attributes.heroPictures}
+        description={page.heroText ?? ''}
+        images={{ data: page.heroPictures }}
         showButtons={true}
         picturePosition='right'
       />
       <HomeArchiveSection
-        title={page.attributes.archive.title}
-        text={page.attributes.archive.text}
+        title={page.archive.title ?? ''}
+        text={page.archive.text ?? ''}
+        textHtml={page.archive.textHtml}
       />
-      <HomeNewsSection
-        title={page.attributes.news.title}
-        text={page.attributes.news.text}
-        newsItems={latestNews}
-      />
-      <HomeShowSection
-        title={page.attributes.shows.title}
-        text={page.attributes.shows.text}
-        pictures={page.attributes.pictureGallery.data}
-      />
+      {/* <HomeNewsSection
+        title={page.news.title ?? ''}
+        text={page.news.text ?? ''}
+        textHtml={page.news.textHtml}
+        newsItems={page.news.newsPreview ?? latestNews}
+      /> */}
+      {/* <HomeShowSection
+        title={page.shows.title ?? ''}
+        text={page.shows.text ?? ''}
+        textHtml={page.shows.textHtml}
+        pictures={galleryPictures}
+      /> */}
     </>
   );
 }

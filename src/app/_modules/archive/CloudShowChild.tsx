@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
-import type { CloudShowTypes } from '@/types/ResponsesInterface';
+import type { CloudShowListItem } from '@/types/ResponsesInterface';
 import { Play } from '@/common/assets/PlayIcon';
 import { getShowName, getFormattedDateString } from '@/utils/showUtils';
 import BarsSpinner from '@/common/ui/BarsSpinner';
@@ -11,7 +11,7 @@ import { getMixcloudKey } from '@/utils/getMixcloudKey';
 import { ActivePlayer } from '@/hooks/useStore';
 
 interface ShowCardProps {
-  item: CloudShowTypes;
+  item: CloudShowListItem;
 }
 
 const CloudShowChild = ({ item }: ShowCardProps) => {
@@ -25,7 +25,7 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
   const onClick = () => {
     if (item.platform === 'mixcloud') {
       showKeySet(getMixcloudKey(item.url));
-    } else {
+    } else if (item.key) {
       trackIdSet(item.key);
     }
     setCurrentShowUrl(item.url);
@@ -112,10 +112,14 @@ const CloudShowChild = ({ item }: ShowCardProps) => {
             ref={imageRef}
             unoptimized
             quality={50}
-            src={imageError ? placeholderImage : item.pictures.extra_large}
+            src={
+              imageError
+                ? placeholderImage
+                : (item.pictures?.extra_large ?? item.picture ?? placeholderImage)
+            }
             height={600}
             width={600}
-            alt={name || item.name}
+            alt={name || item.name || 'Show'}
             className={`transition-opacity duration-300 rounded-md ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImageLoaded(true)}
             onError={() => {

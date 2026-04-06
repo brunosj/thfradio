@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 import type {
+  CloudShowListItem,
   CloudShowTag,
-  CloudShowTypes,
   TagTypes,
 } from '@/types/ResponsesInterface';
 import normalizeTagName from '@/utils/normalizeTagName';
 
 interface UseShowFilterProps {
-  items: CloudShowTypes[];
+  items: CloudShowListItem[];
   selectedTag: TagTypes | null;
 }
 
 const useShowFilter = ({ items, selectedTag }: UseShowFilterProps) => {
-  const [filteredItems, setFilteredItems] = useState<CloudShowTypes[]>([]);
+  const [filteredItems, setFilteredItems] = useState<CloudShowListItem[]>([]);
   useEffect(() => {
     let filteredItems = items;
 
@@ -35,11 +35,11 @@ const useShowFilter = ({ items, selectedTag }: UseShowFilterProps) => {
   const tagMatches = (tag: CloudShowTag, selectedTag: TagTypes) => {
     const escapeRegExp = (string: string) =>
       string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const tagName = escapeRegExp(normalizeTagName(tag.name))
+    const tagName = escapeRegExp(normalizeTagName(tag.name ?? ""))
       .toLowerCase()
       .trim();
 
-    const selectedTagName = normalizeTagName(selectedTag.name);
+    const selectedTagName = normalizeTagName(selectedTag.name ?? "");
     if (!tagName) {
       return false;
     }

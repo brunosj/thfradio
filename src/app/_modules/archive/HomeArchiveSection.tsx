@@ -12,12 +12,14 @@ import { useTranslations } from 'next-intl';
 interface HomeArchiveSectionProps {
   title: string;
   text: string;
+  textHtml?: string;
   backgroundColor?: string;
 }
 
 const HomeArchiveSection = ({
   title,
   text,
+  textHtml,
   backgroundColor = 'bg-thf-blue-500',
 }: HomeArchiveSectionProps) => {
   const t = useTranslations();
@@ -54,7 +56,7 @@ const HomeArchiveSection = ({
       className={`${backgroundColor} scroll-mt-24 sectionPb min-h-[60lvh]`}
       id='latest'
     >
-      <SectionHeader title={title} text={text} />
+      <SectionHeader title={title} text={text} textHtml={textHtml} />
       <div className='flex w-full m-auto flex-col'>
         {!isVisible || isLoadingShows || !cloudShows ? (
           <div className='m-auto text-center pb-12'>

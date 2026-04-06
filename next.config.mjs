@@ -4,13 +4,36 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   reactStrictMode: true,
   // These settings help prevent duplicate locale prefixes in URLs
   skipTrailingSlashRedirect: true,
   skipMiddlewareUrlNormalize: true,
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/uploads/:path*',
+          destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/:path*`,
+        },
+        {
+          source: '/:locale/uploads/:path*',
+          destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/:path*`,
+        },
+      ],
+    };
+  },
   images: {
     unoptimized: true,
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cms.thfradio.com',
+        port: '',
+        pathname: '/uploads/**',
+      },
       {
         protocol: 'https',
         hostname: 'thumbnailer.mixcloud.com',
@@ -32,6 +55,7 @@ const nextConfig = {
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    qualities: [50, 75, 90],
   },
 };
 

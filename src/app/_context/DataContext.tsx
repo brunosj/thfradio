@@ -1,14 +1,8 @@
-'use client';
+"use client";
 
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-  useCallback,
-} from 'react';
-import type { CloudShowTypes, TagsList } from '@/types/ResponsesInterface';
-import { fetchCloudShowsCached } from '@/lib/shows';
+import React, { createContext, useState, useContext, useEffect } from "react";
+import type { CloudShowTypes, TagsList } from "@/types/ResponsesInterface";
+import { fetchCloudShowsCached } from "@/lib/shows";
 
 interface DataContextProps {
   children: React.ReactNode;
@@ -23,9 +17,6 @@ interface DataContextValue {
   loadCloudShows: () => Promise<void>;
 }
 
-// 12 hours in milliseconds - matches server-side cache
-const CACHE_DURATION = 12 * 60 * 60 * 1000;
-
 const DataContext = createContext<DataContextValue | undefined>(undefined);
 
 export function DataProvider({ children, initialTagsList }: DataContextProps) {
@@ -33,59 +24,78 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
   const [isLoadingShows, setIsLoadingShows] = useState(false);
   const [showsError, setShowsError] = useState<string | null>(null);
   const [tagsList] = useState(initialTagsList);
-  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
-  const loadCloudShows = useCallback(async () => {
-    // Clear any previous errors
-    setShowsError(null);
+  // Log whenever cloudShows state changes
+  useEffect(() => {
+    console.log(
+      "[DataContext] cloudShows state updated:",
+      cloudShows?.length || 0,
+      "items",
+    );
+  }, [cloudShows]);
 
+  const loadCloudShows = async () => {
     // Skip if already loading
     if (isLoadingShows) {
+      console.log("[CloudShows] Already loading, skipping");
       return;
     }
 
-    // Check if cache is still valid
-    const now = Date.now();
-    const cacheIsValid =
-      cloudShows &&
-      cloudShows.length > 0 &&
-      lastFetchTime > 0 &&
-      now - lastFetchTime < CACHE_DURATION;
-
-    // If we have valid cached data, don't reload
-    if (cacheIsValid) {
+    // Skip if already have data
+    if (cloudShows && cloudShows.length > 0) {
+      console.log(
+        "[CloudShows] Already have",
+        cloudShows.length,
+        "shows cached",
+      );
       return;
     }
 
+    console.log("[CloudShows] Starting fetch...");
     setIsLoadingShows(true);
+    setShowsError(null);
 
     try {
       const shows = await fetchCloudShowsCached();
+      console.log("[CloudShows] Fetch result:", shows?.length || 0, "shows");
 
       if (Array.isArray(shows) && shows.length > 0) {
+        console.log(
+          "[CloudShows] Calling setCloudShows with",
+          shows.length,
+          "shows",
+        );
         setCloudShows(shows);
-        setLastFetchTime(Date.now());
+        console.log("[CloudShows] setCloudShows called");
       } else {
-        const errorMsg = 'Fetched shows array is empty or invalid';
-        console.warn(errorMsg);
-        setShowsError(errorMsg);
+        const msg = "No shows returned from API";
+        console.warn("[CloudShows]", msg);
+        setShowsError(msg);
         setCloudShows([]);
       }
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : 'Unknown error loading shows';
-      console.error('Error loading cloud shows:', errorMsg);
-      setShowsError(errorMsg);
+      const msg = error instanceof Error ? error.message : "Unknown error";
+      console.error("[CloudShows] Error:", msg);
+      setShowsError(msg);
       setCloudShows([]);
     } finally {
       setIsLoadingShows(false);
     }
-  }, [isLoadingShows, cloudShows, lastFetchTime]);
+  };
 
-  // Load from cache immediately on mount
+  // Load on mount only
   useEffect(() => {
-    loadCloudShows();
-  }, [loadCloudShows]);
+    console.log(
+      "[CloudShows] Component mounted, hasLoadedOnce:",
+      hasLoadedOnce,
+    );
+    if (!hasLoadedOnce) {
+      console.log("[CloudShows] Triggering initial load");
+      setHasLoadedOnce(true);
+      loadCloudShows();
+    }
+  }, []);
 
   return (
     <DataContext.Provider
@@ -105,7 +115,7 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
 export function useData() {
   const context = useContext(DataContext);
   if (context === undefined) {
-    throw new Error('useData must be used within a DataProvider');
+    throw new Error("useData must be used within a DataProvider");
   }
   return context;
 }

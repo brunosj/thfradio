@@ -8,8 +8,14 @@ import { useLocale } from 'next-intl';
 const CalendarEntry = ({ entry }: { entry: CalendarEntryProps }) => {
   const locale = useLocale();
 
-  const entryStartDate = new Date(entry.start);
-  const entryEndDate = new Date(entry.end);
+  const startIso = entry.startTime ?? entry.start;
+  const endIso = entry.endTime ?? entry.end;
+  if (!startIso || !endIso) {
+    return null;
+  }
+
+  const entryStartDate = new Date(startIso);
+  const entryEndDate = new Date(endIso);
   const startTime = entryStartDate.toLocaleString(locale, {
     hour: '2-digit',
     minute: '2-digit',
@@ -41,7 +47,9 @@ const CalendarEntry = ({ entry }: { entry: CalendarEntryProps }) => {
         </p>
       </div>
       <div className='w-full max-w-fit '>
-        <span className={summaryClass}>{entry.summary}</span>
+        <span className={summaryClass}>
+          {entry.summary ?? entry.title}
+        </span>
       </div>
     </div>
   );

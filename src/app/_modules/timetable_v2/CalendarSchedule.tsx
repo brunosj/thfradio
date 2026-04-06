@@ -4,8 +4,16 @@ import { useState, useEffect, useTransition } from 'react';
 import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
 import { TimetableV2 } from '.';
 import BarsSpinner from '@/app/_common/ui/BarsSpinner';
+import SectionHeader from '@/app/_common/layout/section/SectionHeader';
 import { fetchCalendar } from '@/app/_lib/calendar';
 import { useTranslations } from 'next-intl';
+
+export type CalendarScheduleProps = {
+  /** CMS homepage programme block; falls back to i18n when empty */
+  programmeTitle?: string;
+  programmeText?: string;
+  programmeTextHtml?: string;
+};
 
 // Loading fallback component
 const TimetableLoading = () => (
@@ -14,7 +22,11 @@ const TimetableLoading = () => (
   </div>
 );
 
-const CalendarSchedule = () => {
+const CalendarSchedule = ({
+  programmeTitle,
+  programmeText,
+  programmeTextHtml,
+}: CalendarScheduleProps = {}) => {
   const [isPending, startTransition] = useTransition();
   const [calendarEntries, setCalendarEntries] = useState<CalendarEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,17 +48,17 @@ const CalendarSchedule = () => {
     });
   }, []); // Empty dependency array to run only once on mount
 
+  const title = programmeTitle?.trim() ? programmeTitle.trim() : t('programme');
+  const textHtml = programmeTextHtml?.trim() ? programmeTextHtml : undefined;
+  const subtitleText =
+    textHtml === undefined ? programmeText?.trim() || t('upcomingShows') : '';
+
   return (
     <section
       className='bg-dark-blue py-8 scroll-mt-24 text-white'
       id='schedule'
     >
-      <div className='layout py-6 lg:py-16 text-center'>
-        <h1 className='uppercase'>{t('programme')}</h1>
-        <h4 className='font-mono font-light text-gray-300'>
-          {t('upcomingShows')}
-        </h4>
-      </div>
+      <SectionHeader title={title} text={subtitleText} textHtml={textHtml} />
 
       <div className=''>
         {isLoading || isPending ? (

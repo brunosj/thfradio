@@ -1,10 +1,10 @@
-import { Metadata } from 'next';
-import { createMetadata } from '@/utils/metadata';
-import ShowContent from './page.client';
+import { Metadata } from "next";
+import { createMetadata } from "@/utils/metadata";
+import ShowContent from "./page.client";
 // import type { LocalizationType, ShowTypes } from '@/types/ResponsesInterface';
-import { CMS_URL } from '@/utils/constants';
-import { fetchShowBySlug } from '@/lib/shows';
-import { notFound } from 'next/navigation';
+import { CMS_URL } from "@/utils/constants";
+import { fetchShowBySlug } from "@/lib/shows";
+import { notFound } from "next/navigation";
 
 type Params = Promise<{ slug: string; locale: string }>;
 
@@ -18,14 +18,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const content = await fetchShowBySlug(slug, locale);
-  const image =
-    content.attributes.pictureFullWidth?.data?.attributes.url ||
-    content.attributes.picture?.data?.attributes.url ||
-    '';
+  const image = content?.image || "";
 
   return createMetadata({
-    title: content.attributes.title,
-    description: content.attributes.description,
+    title: content.title,
+    description: content.description,
     image: `${CMS_URL}${image}`,
   });
 }
@@ -74,6 +71,7 @@ export default async function ShowPage({ params }: { params: Params }) {
   const { locale, slug } = await params;
   const content = await fetchShowBySlug(slug, locale);
 
+  console.log("Fetched show content:", content);
   if (!content) {
     notFound();
   }

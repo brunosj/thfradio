@@ -6,6 +6,16 @@ import { formatDate } from '@/utils/formatDate';
 import BarsSpinner from '@/common/ui/BarsSpinner';
 import { useState, useEffect } from 'react';
 import type { NewsType } from '@/types/ResponsesInterface';
+import { sanitizeCmsHtml } from '@/lib/sanitizeHtml';
+
+function resolveNewsImageSrc(image: string | undefined): string | null {
+  if (!image) return null;
+  if (image.startsWith('http://') || image.startsWith('https://')) {
+    return image;
+  }
+  const base = CMS_URL ?? '';
+  return image.startsWith('/') ? `${base}${image}` : `${base}/${image}`;
+}
 
 export default function NewsContent({ article }: { article: NewsType }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -24,26 +34,28 @@ export default function NewsContent({ article }: { article: NewsType }) {
     );
   }
 
+  const imageSrc = resolveNewsImageSrc(article.image);
+
   return (
     <article className='min-h-screen'>
-      {article.attributes.picture?.data && (
+      {imageSrc ? (
         <div className='relative h-[50vh] w-full'>
           <Image
-            src={`${CMS_URL}${article.attributes.picture.data.attributes.url}`}
-            alt={article.attributes.title}
+            src={imageSrc}
+            alt={article.title}
             fill
             className='object-cover'
           />
         </div>
-      )}
+      ) : null}
       <div className='layout py-8 lg:py-16'>
-        <h1>{article.attributes.title}</h1>
+        <h1>{article.title}</h1>
         <time className='text-sm text-gray-500 block mt-2'>
-          {formatDate(article.attributes.date)}
+          {formatDate(article.date)}
         </time>
         <div
           className='prose prose-lg mt-8'
-          dangerouslySetInnerHTML={{ __html: article.attributes.text }}
+          dangerouslySetInnerHTML={{ __html: sanitizeCmsHtml(article.text) }}
         />
       </div>
     </article>

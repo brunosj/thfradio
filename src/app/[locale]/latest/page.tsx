@@ -1,10 +1,13 @@
 import React from 'react';
 import LatestArchiveSection from '@/modules/archive/LatestArchiveSection';
-import { PageTypes } from '@/app/_types/ResponsesInterface';
 import { Metadata } from 'next';
 import { fetchPageBySlug } from '@/lib/pages';
 import { createMetadata } from '@/utils/metadata';
+import { metadataFromPage } from '@/lib/metadataPlainText';
 import { notFound } from 'next/navigation';
+import SanitizedHtml from '@/common/ui/SanitizedHtml';
+import SectionHeader from '@/common/layout/section/SectionHeader';
+
 type Params = Promise<{ locale: string }>;
 
 // Revalidate this page every 12 hours (same as API cache)
@@ -16,30 +19,24 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const page: PageTypes = await fetchPageBySlug('latest', locale);
-  return createMetadata({
-    title: page.attributes.title,
-    description: page.attributes.description,
-  });
+  const page = await fetchPageBySlug('latest', locale);
+  return createMetadata(metadataFromPage(page));
 }
 export default async function LatestPage({ params }: { params: Params }) {
   const { locale } = await params;
-  const page: PageTypes = await fetchPageBySlug('latest', locale);
+  const page = await fetchPageBySlug('latest', locale);
 
   if (!page) {
     notFound();
   }
 
+  const introHtml = page.content?.trim();
+
   return (
-    <main className='min-h-[80lvh]'>
-      <div className='bg-thf-blue-500 relative pt-6 lg:pt-10'>
-        <div className='layout sectionPy'>
-          <h1 className='text-white text-center'>{page.attributes.title}</h1>
-        </div>
-      </div>
+    <main className='min-h-[80lvh] pt-10 bg-dark-blue'>
       <LatestArchiveSection
-        title=''
-        text={page.attributes.description}
+        title={page.title ?? ''}
+        text={page.description ?? ''}
         backgroundColor='bg-dark-blue'
       />
     </main>

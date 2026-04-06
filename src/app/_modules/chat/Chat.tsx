@@ -5,18 +5,18 @@ import { useChatState } from "../../_context/ChatContext";
 import { MessageContent } from "./MessageContent";
 import { getUserColor } from "./Chat.utils";
 import { XMarkIcon } from "../../_common/assets/XMarkIcon";
-import { CMS_URL } from "@/app/_utils/constants";
+import { io, Socket } from "socket.io-client";
 
 interface ChatMessage {
   id: string;
   text: string;
-  userId: string;
+  userId: string | null; // null for anonymous users
   pseudo: string;
   timestamp: number;
 }
 
 interface ServerMessage {
-  type: "message" | "history" | "pong";
+  type: "message" | "history" | "pong" | "announcement";
   message?: ChatMessage;
   messages?: ChatMessage[];
 }
@@ -38,22 +38,20 @@ export const Chat = () => {
   });
 
   const [lastSentTime, setLastSentTime] = useState(0);
-  const messageQueue = useRef<string[]>([]);
-  const heartbeatTimer = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const savedPseudo = localStorage.getItem("chatPseudo") || "";
-    setPseudo(savedPseudo);
-  }, []);
-
+  const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const ws = useRef<WebSocket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
   const t = useTranslations();
   const [error, setError] = useState<string | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const savedPseudo = localStorage.getItem("chatPseudo") || "";
+    setPseudo(savedPseudo);
+  }, []);
 
   useEffect(() => {
     if (pseudo) {
@@ -64,93 +62,82 @@ export const Chat = () => {
   useEffect(() => {
     let isActive = true;
 
-    const startHeartbeat = () => {
-      if (heartbeatTimer.current) clearInterval(heartbeatTimer.current);
-      heartbeatTimer.current = setInterval(() => {
-        if (ws.current?.readyState === WebSocket.OPEN) {
-          ws.current.send(JSON.stringify({ type: "ping" }));
-        }
-      }, 30000);
-    };
-
-    const flushQueue = () => {
-      if (ws.current?.readyState === WebSocket.OPEN && messageQueue.current.length > 0) {
-        console.log(`[Chat] Flushing ${messageQueue.current.length} queued messages`);
-        while (messageQueue.current.length > 0) {
-          const msg = messageQueue.current.shift();
-          if (msg) ws.current.send(msg);
-        }
-      }
-    };
-
-    const connectWebSocket = () => {
-      if (!isOpen || ws.current?.readyState === WebSocket.OPEN) return;
-
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host = CMS_URL.replace(/^https?:\/\//, "");
-      const wsUrl = `${protocol}//${host}/chat`;
-
-      console.log("Attempting WebSocket connection to:", wsUrl);
+    const connectSocket = () => {
+      if (!isOpen || socketRef.current?.connected) return;
 
       try {
-        ws.current = new WebSocket(wsUrl);
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
+        if (!backendUrl) return;
+        console.log(
+          "NEXT_PUBLIC_BACKEND_URL:",
+          process.env.NEXT_PUBLIC_BACKEND_URL,
+        );
+        console.log("Connecting to WebSocket at:", backendUrl);
+        const socketUrl = `${backendUrl}/chat`;
 
-        ws.current.onopen = () => {
+        socketRef.current = io(socketUrl, {
+          transports: ["websocket", "polling"],
+          reconnection: true,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          reconnectionAttempts: Infinity,
+          upgrade: true,
+          forceNew: false,
+          secure: backendUrl.startsWith("https"),
+        });
+
+        socketRef.current.on("connect", () => {
           if (!isActive) return;
-          console.log("WebSocket connection established");
+          setIsConnected(true);
           setError(null);
-          startHeartbeat();
-          flushQueue();
-        };
+        });
 
-        ws.current.onmessage = (event) => {
+        socketRef.current.on("message", (data: ServerMessage) => {
           if (!isActive) return;
           try {
-            const data = JSON.parse(event.data) as ServerMessage;
-
             if (data.type === "history" && data.messages) {
               setMessages(data.messages);
-            } else if (data.type === "message" && data.message) {
+            } else if (
+              (data.type === "message" || data.type === "announcement") &&
+              data.message
+            ) {
               setMessages((prev) => [...prev, data.message as ChatMessage]);
             }
             scrollToBottom();
           } catch (error) {
-            console.error("Error parsing received message:", error);
+            console.error("Error processing message:", error);
           }
-        };
+        });
 
-        ws.current.onclose = (event) => {
+        socketRef.current.on("disconnect", (reason: string) => {
           if (!isActive) return;
-          console.info("WebSocket connection closed:", event.code, event.reason);
-          ws.current = null;
-          if (heartbeatTimer.current) clearInterval(heartbeatTimer.current);
+          setIsConnected(false);
+        });
 
-          if (event.code !== 1000 && isOpen) {
-            console.log("Attempting reconnection in 3s...");
-            setTimeout(connectWebSocket, 3000);
-          }
-        };
-
-        ws.current.onerror = (error) => {
+        socketRef.current.on("error", (error: any) => {
           if (!isActive) return;
           console.error("WebSocket error:", error);
           setError(t("chat.connectionError"));
-        };
+        });
+
+        socketRef.current.on("connect_error", (error: any) => {
+          if (!isActive) return;
+          console.error("Connection error:", error);
+          setError(t("chat.connectionError"));
+        });
       } catch (error) {
-        console.error("Failed to create WebSocket:", error);
+        console.error("Failed to create connection:", error);
         setError(t("chat.connectionError"));
       }
     };
 
-    connectWebSocket();
+    connectSocket();
 
     return () => {
       isActive = false;
-      if (heartbeatTimer.current) clearInterval(heartbeatTimer.current);
-      if (ws.current && isOpen === false) {
-        console.log("Cleaning up WebSocket connection");
-        ws.current.close(1000);
-        ws.current = null;
+      if (socketRef.current && !isOpen) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
       }
     };
   }, [isOpen, t]);
@@ -176,11 +163,12 @@ export const Chat = () => {
 
   const sendMessage = () => {
     const now = Date.now();
-    if (!newMessage.trim() || !pseudo) return;
+    if (!newMessage.trim() || !pseudo) {
+      return;
+    }
 
     // Rate limiting: 1 second between messages
     if (now - lastSentTime < 1000) {
-      console.log("[Chat] Rate limit: slowing down...");
       return;
     }
 
@@ -193,23 +181,17 @@ export const Chat = () => {
         return;
       }
 
-      const message = {
+      const message: ChatMessage = {
         id: Math.random().toString(36).substr(2, 9),
         text: sanitizedMessage,
-        userId,
+        userId: null, // Anonymous users send null, not generated IDs
         pseudo: sanitizedPseudo,
         timestamp: now,
       };
 
-      const messageStr = JSON.stringify(message);
-
-      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-        ws.current.send(messageStr);
+      if (socketRef.current?.connected) {
+        socketRef.current.emit("message", message);
       } else {
-        console.log("[Chat] WebSocket not open, queuing message...");
-        messageQueue.current.push(messageStr);
-        // Show the message locally immediately for better UX
-        setMessages((prev) => [...prev, message]);
         setError(t("chat.lostConnection"));
       }
 
@@ -231,9 +213,10 @@ export const Chat = () => {
   return (
     <div
       className={`fixed transition-shadow transition-all duration-300 z-[999] flex flex-col bg-white overflow-hidden
-        ${isOpen
-          ? "inset-0 opacity-100 visible"
-          : "inset-x-0 bottom-0 h-0 opacity-0 invisible"
+        ${
+          isOpen
+            ? "inset-0 opacity-100 visible"
+            : "inset-x-0 bottom-0 h-0 opacity-0 invisible"
         }
         md:inset-auto md:bottom-2 md:right-2 md:w-120 md:border md:border-gray-300 md:rounded-lg
         ${isOpen ? "md:h-150 md:opacity-100 md:visible shadow-xl" : "md:h-0 md:opacity-0 md:invisible"}
@@ -241,7 +224,16 @@ export const Chat = () => {
     >
       {/* Header */}
       <div className="flex justify-between items-center bg-orange-500 text-white p-4 h-16 shrink-0">
-        <span className="font-mono font-semibold text-sm">THF Radio Chat</span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono font-semibold text-sm">
+            THF Radio Chat
+          </span>
+          <span
+            className={`w-2 h-2 rounded-full ${
+              isConnected ? "bg-green-300" : "bg-red-300"
+            }`}
+          />
+        </div>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="cursor-pointer hover:opacity-80 transition-opacity"
@@ -272,8 +264,9 @@ export const Chat = () => {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`max-w-[80%] px-3 py-2 rounded text-sm text-white ${message.pseudo === pseudo ? "bg-orange-500 ml-auto" : ""
-              }`}
+            className={`max-w-[80%] px-3 py-2 rounded text-sm text-white ${
+              message.pseudo === pseudo ? "bg-orange-500 ml-auto" : ""
+            }`}
             style={{
               backgroundColor:
                 message.pseudo === pseudo
@@ -303,17 +296,17 @@ export const Chat = () => {
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder={pseudo ? t("chat.ecrivez") : t("chat.chatPseudo")}
-          disabled={!pseudo}
+          disabled={!pseudo || !isConnected}
           className="flex-grow px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-200 disabled:cursor-not-allowed h-8"
         />
         <button
           onClick={sendMessage}
-          disabled={!pseudo}
+          disabled={!pseudo || !isConnected}
           aria-label={t("chat.envoyer")}
           title={t("chat.envoyer")}
           className="px-3 py-2 bg-orange-500 text-white rounded text-sm font-semibold hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors h-8 flex items-center justify-center"
         >
-          {ws.current?.readyState === WebSocket.OPEN ? "→" : "..."}
+          {isConnected ? "→" : "..."}
         </button>
       </div>
 

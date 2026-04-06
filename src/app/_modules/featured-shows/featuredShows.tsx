@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import type {
-  CloudShowTypes,
+  CloudShowListItem,
   TagsList,
   TagTypes,
 } from '@/types/ResponsesInterface';
@@ -8,7 +8,7 @@ import CloudShowChild from '../archive/CloudShowChild';
 import useShowFilter from '@/hooks/useShowFilter';
 
 interface FeaturedShowsProps {
-  shows: CloudShowTypes[];
+  shows: CloudShowListItem[];
   tagsList: TagsList;
 }
 
@@ -22,7 +22,9 @@ const getCurrentWeek = () => {
 
 const FeaturedShows = ({ shows, tagsList }: FeaturedShowsProps) => {
   const [randomTag, setRandomTag] = useState<TagTypes | null>(null);
-  const [randomizedItems, setRandomizedItems] = useState<CloudShowTypes[]>([]);
+  const [randomizedItems, setRandomizedItems] = useState<CloudShowListItem[]>(
+    [],
+  );
 
   const allItems = useShowFilter({
     items: shows,
@@ -46,10 +48,9 @@ const FeaturedShows = ({ shows, tagsList }: FeaturedShowsProps) => {
         setRandomTag(JSON.parse(storedTag) as TagTypes);
       } else {
         // Pick a new random tag for the current week
-        const newTag =
-          tagsList.attributes.tag[
-            Math.floor(Math.random() * tagsList.attributes.tag.length)
-          ];
+        const tagPool = tagsList.attributes?.tag ?? [];
+        if (tagPool.length === 0) return;
+        const newTag = tagPool[Math.floor(Math.random() * tagPool.length)];
         setRandomTag(newTag);
 
         // Store the new tag and the current week number

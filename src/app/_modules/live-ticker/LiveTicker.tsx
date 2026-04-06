@@ -13,6 +13,15 @@ import { fetchCalendar } from '@/lib/calendar';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
 import { ActivePlayer, useGlobalStore } from '@/hooks/useStore';
 
+function entryIntervalStrings(
+  entry: CalendarEntry,
+): { start: string; end: string } | null {
+  const start = entry.startTime ?? entry.start;
+  const end = entry.endTime ?? entry.end;
+  if (!start || !end) return null;
+  return { start, end };
+}
+
 export default function LiveTicker() {
   const t = useTranslations();
   const pathname = usePathname();
@@ -57,13 +66,17 @@ export default function LiveTicker() {
   const getCurrentShowName = () => {
     const now = new Date();
     const currentShow = calendarEntries.find((entry) => {
-      const showStart = new Date(entry.start);
-      const showEnd = new Date(entry.end);
+      const se = entryIntervalStrings(entry);
+      if (!se) return false;
+      const showStart = parseISO(se.start);
+      const showEnd = parseISO(se.end);
       return isWithinInterval(now, { start: showStart, end: showEnd });
     });
 
     const nextShow = calendarEntries.find((entry) => {
-      const showStart = parseISO(entry.start);
+      const se = entryIntervalStrings(entry);
+      if (!se) return false;
+      const showStart = parseISO(se.start);
       return showStart > now;
     });
 
@@ -72,10 +85,14 @@ export default function LiveTicker() {
     }
 
     if (currentShow) {
-      const formattedStartHour = format(new Date(currentShow.start), 'HH:mm', {
+      const curSe = entryIntervalStrings(currentShow);
+      if (!curSe) {
+        return <span />;
+      }
+      const formattedStartHour = format(parseISO(curSe.start), 'HH:mm', {
         locale: localeModule,
       });
-      const formattedEndHour = format(new Date(currentShow.end), 'HH:mm', {
+      const formattedEndHour = format(parseISO(curSe.end), 'HH:mm', {
         locale: localeModule,
       });
       // const nextShowStart = nextShow
@@ -83,13 +100,14 @@ export default function LiveTicker() {
       //       locale: localeModule,
       //     })
       //   : '';
-      const nextShowStartTime = nextShow
-        ? format(parseISO(nextShow.start), 'HH:mm', {
+      const nextSe = nextShow ? entryIntervalStrings(nextShow) : null;
+      const nextShowStartTime = nextSe
+        ? format(parseISO(nextSe.start), 'HH:mm', {
             locale: localeModule,
           })
         : '';
-      const nextShowEndTime = nextShow
-        ? format(parseISO(nextShow.end), 'HH:mm', {
+      const nextShowEndTime = nextSe
+        ? format(parseISO(nextSe.end), 'HH:mm', {
             locale: localeModule,
           })
         : '';
@@ -97,19 +115,20 @@ export default function LiveTicker() {
       return (
         <div className='uppercase text-sm lg:text-base space-x-3 flex items-center'>
           <LiveCircle className='w-6 h-6 animate-pulse ml-4' />
-          <span>{currentShow.summary}</span>
+          <span>{currentShow.summary ?? currentShow.title}</span>
           <span>
             {formattedStartHour}-{formattedEndHour}
           </span>
           {nextShow &&
-            format(parseISO(nextShow.start), 'yyyy-MM-dd') ===
-              format(new Date(currentShow.start), 'yyyy-MM-dd') && (
+            nextSe &&
+            format(parseISO(nextSe.start), 'yyyy-MM-dd') ===
+              format(parseISO(curSe.start), 'yyyy-MM-dd') && (
               <>
                 <span className='px-12'>
                   <ArrowRightLong />
                 </span>
                 <span>{t('nextShow')}:</span>
-                <span>{nextShow.summary}</span>
+                <span>{nextShow.summary ?? nextShow.title}</span>
                 <span>
                   {nextShowStartTime}-{nextShowEndTime}
                 </span>
@@ -123,8 +142,9 @@ export default function LiveTicker() {
     }
 
     // No current show, display next show info
-    const nextShowDate = nextShow
-      ? format(parseISO(nextShow.start), 'EEEE dd.MM.yyyy', {
+    const nextShowSe = nextShow ? entryIntervalStrings(nextShow) : null;
+    const nextShowDate = nextShowSe
+      ? format(parseISO(nextShowSe.start), 'EEEE dd.MM.yyyy', {
           locale: localeModule,
         })
       : '';

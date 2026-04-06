@@ -1,21 +1,53 @@
-import type { NewsType } from '@/types/ResponsesInterface';
+import type { NewsType } from "@/types/ResponsesInterface";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 type NewsItemsType = {
   data: NewsType[];
 };
 
 export async function fetchNews(locale: string) {
-  const response = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}news-items?locale=${locale}&populate=*&sort=createdAt:desc`
-  );
-  const data: NewsItemsType = await response.json();
-  return data.data;
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}/content/news?lang=${locale}&limit=20`,
+      {
+        next: { revalidate: 600 },
+      },
+    );
+
+    if (!response.ok) {
+      console.warn(`News API returned status ${response.status}`);
+      return [];
+    }
+
+    const result = await response.json();
+
+    // Handle both formats: { data: [...] } and direct array
+    if (Array.isArray(result)) {
+      return result;
+    }
+    if (result && Array.isArray(result.data)) {
+      return result.data;
+    }
+
+    return [];
+  } catch (error) {
+    console.error("Error fetching news:", error);
+    return [];
+  }
 }
 
 export async function fetchNewsArticle(slug: string, locale: string) {
-  const response = await fetch(
-    `${process.env.STRAPI_PUBLIC_API_URL}news?locale=${locale}&filters[slug][$eq]=${slug}&populate=*`
-  );
-  const data: NewsItemsType = await response.json();
-  return data.data[0];
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}/content/news/${slug}?lang=${locale}`,
+      {
+        next: { revalidate: 600 },
+      },
+    );
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching news article ${slug}:`, error);
+    return null;
+  }
 }

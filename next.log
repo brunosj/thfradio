@@ -1,0 +1,324 @@
+
+> thfradio@3.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.5.9 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://172.20.10.3:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Compiled middleware in 101ms
+ ✓ Ready in 1117ms
+ ○ Compiling /[locale] ...
+ ✓ Compiled /[locale] in 4.8s
+ ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+
+Hey there, welcome to the site of THF Radio, a community radio based in Berlin 📻
+
+If you like it and want to see the code behind it, check it out at https://github.com/brunosj/thfradio-nextjs
+
+For any issues or dev-related questions, please get in touch at contact@landozone.net ✨
+ GET /en 200 in 5617ms
+
+Hey there, welcome to the site of THF Radio, a community radio based in Berlin 📻
+
+If you like it and want to see the code behind it, check it out at https://github.com/brunosj/thfradio-nextjs
+
+For any issues or dev-related questions, please get in touch at contact@landozone.net ✨
+ GET /en 200 in 143ms
+
+Hey there, welcome to the site of THF Radio, a community radio based in Berlin 📻
+
+If you like it and want to see the code behind it, check it out at https://github.com/brunosj/thfradio-nextjs
+
+For any issues or dev-related questions, please get in touch at contact@landozone.net ✨
+ GET /en 200 in 157ms
+
+Hey there, welcome to the site of THF Radio, a community radio based in Berlin 📻
+
+If you like it and want to see the code behind it, check it out at https://github.com/brunosj/thfradio-nextjs
+
+For any issues or dev-related questions, please get in touch at contact@landozone.net ✨
+ GET /en 200 in 184ms
+ ✓ Compiled middleware in 30ms
+ ✓ Compiled middleware in 1ms
+ ✓ Compiled middleware in 4ms
+ ✓ Compiled middleware in 4ms
+ ✓ Compiled in 201ms
+ ✓ Compiled in 144ms
+ ✓ Compiled middleware in 5ms
+ ✓ Compiled middleware in 3ms
+ ✓ Compiled middleware in 1ms
+ ✓ Compiled in 84ms
+ ✓ Compiled in 79ms
+ ✓ Compiled in 59ms
+ ✓ Compiled in 54ms
+ ✓ Compiled in 135ms
+ ✓ Compiled in 124ms
+ ✓ Compiled in 69ms
+ ○ Compiling /api/tags ...
+ ✓ Compiled /api/tags in 609ms
+ GET /api/tags 200 in 1016ms
+ GET /api/homepage?lang=en 200 in 1156ms
+ ✓ Compiled /api/news in 72ms
+ GET /api/news?lang=en&limit=20 200 in 336ms
+ ✓ Compiled /api/page in 167ms
+ GET /api/page?slug=shows&lang=en 200 in 514ms
+ GET /api/page?slug=shows&lang=en 200 in 518ms
+ GET /api/page?slug=latest&lang=en 200 in 307ms
+ GET /api/page?slug=news&lang=en 200 in 378ms
+ ✓ Compiled in 276ms
+ ✓ Compiled /[locale] in 15ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/[locale]/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/[locale]/page/app-build-manifest.json'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 1103ms
+ ⨯ Error: Cannot find module '../chunks/ssr/[turbopack]_runtime.js'
+Require stack:
+- /Users/timotheedorand/Local/thfradio/.next/server/pages/_document.js
+- /Users/timotheedorand/Local/thfradio/node_modules/.pnpm/next@15.5.9_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/server/require.js
+- /Users/timotheedorand/Local/thfradio/node_modules/.pnpm/next@15.5.9_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/server/load-components.js
+- /Users/timotheedorand/Local/thfradio/node_modules/.pnpm/next@15.5.9_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/build/utils.js
+- /Users/timotheedorand/Local/thfradio/node_modules/.pnpm/next@15.5.9_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/build/swc/options.js
+- /Users/timotheedorand/Local/thfradio/node_modules/.pnpm/next@15.5.9_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/build/swc/index.js
+- /Users/timotheedorand/Local/thfradio/node_modules/.pnpm/next@15.5.9_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/build/analysis/parse-module.js
+- /Users/timotheedorand/Local/thfradio/node_modules/.pnpm/next@15.5.9_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/build/analysis/get-page-static-info.js
+- /Users/timotheedorand/Local/thfradio/node_modules/.pnpm/next@15.5.9_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/timotheedorand/Local/thfradio/node_modules/.pnpm/next@15.5.9_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/server/lib/router-server.js
+- /Users/timotheedorand/Local/thfradio/node_modules/.pnpm/next@15.5.9_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/server/lib/start-server.js
+    at Object.<anonymous> (.next/server/pages/_document.js:1:7) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ GET /en 500 in 1360ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/tags/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/tags/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/homepage/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/homepage/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ GET /api/homepage?lang=en 500 in 110ms
+ GET /api/tags 500 in 119ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/news/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/news/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ GET /api/news?lang=en&limit=20 500 in 43ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/homepage/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/homepage/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ GET /api/homepage?lang=en 500 in 62ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/news/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/news/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ GET /api/news?lang=en&limit=20 500 in 54ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/tags/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/tags/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/homepage/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/homepage/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ GET /api/homepage?lang=en 500 in 145ms
+ GET /api/tags 500 in 153ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/news/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/news/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ GET /api/news?lang=en&limit=20 500 in 83ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/tags/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/tags/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/homepage/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/homepage/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ GET /api/tags 500 in 84ms
+ GET /api/homepage?lang=en 500 in 95ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/news/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/news/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ GET /api/news?lang=en&limit=20 500 in 71ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/page/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/page/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ GET /api/page?slug=shows&lang=en 500 in 59ms
+ ✓ Compiled /api/shows in 149ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/timotheedorand/Local/thfradio/.next/server/app/api/page/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/timotheedorand/Local/thfradio/.next/server/app/api/page/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ GET /api/page?slug=shows&lang=en 500 in 82ms
+ ○ Compiling /[locale]/shows ...
+ ✓ Compiled /[locale]/shows in 571ms
+ GET /api/shows?lang=en 200 in 507ms
+ GET /api/shows?lang=en 200 in 1177ms
+ ✓ Compiled in 152ms
+ ✓ Compiled in 338ms
+ ✓ Compiled /[locale] in 199ms
+ ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+[homepage API] Using backend URL: http://localhost:3001
+[homepage API] Fetching: http://localhost:3001/content/homepage?lang=en
+[homepage API] Response status: 200
+ GET /en 200 in 35501ms
+[TypeError: fetch failed] {
+  [cause]: [Error [SocketError]: other side closed] {
+    code: 'UND_ERR_SOCKET',
+    socket: {
+      localAddress: '::1',
+      localPort: 53930,
+      remoteAddress: '::1',
+      remotePort: 3001,
+      remoteFamily: 'IPv6',
+      timeout: undefined,
+      bytesWritten: 184,
+      bytesRead: 0
+    }
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: [Error [SocketError]: other side closed] {
+    code: 'UND_ERR_SOCKET',
+    socket: {
+      localAddress: '::1',
+      localPort: 53930,
+      remoteAddress: '::1',
+      remotePort: 3001,
+      remoteFamily: 'IPv6',
+      timeout: undefined,
+      bytesWritten: 184,
+      bytesRead: 0
+    }
+  }
+}
+[Error: failed to pipe response] {
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '::1',
+        localPort: 53930,
+        remoteAddress: '::1',
+        remotePort: 3001,
+        remoteFamily: 'IPv6',
+        timeout: undefined,
+        bytesWritten: 184,
+        bytesRead: 0
+      }
+    }
+  }
+}
+ GET /api/tags 500 in 215638ms
+[TypeError: fetch failed] {
+  [cause]: [Error [SocketError]: other side closed] {
+    code: 'UND_ERR_SOCKET',
+    socket: {
+      localAddress: '::1',
+      localPort: 53928,
+      remoteAddress: '::1',
+      remotePort: 3001,
+      remoteFamily: 'IPv6',
+      timeout: undefined,
+      bytesWritten: 377,
+      bytesRead: 202
+    }
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: [Error [SocketError]: other side closed] {
+    code: 'UND_ERR_SOCKET',
+    socket: {
+      localAddress: '::1',
+      localPort: 53928,
+      remoteAddress: '::1',
+      remotePort: 3001,
+      remoteFamily: 'IPv6',
+      timeout: undefined,
+      bytesWritten: 377,
+      bytesRead: 202
+    }
+  }
+}
+[Error: failed to pipe response] {
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '::1',
+        localPort: 53928,
+        remoteAddress: '::1',
+        remotePort: 3001,
+        remoteFamily: 'IPv6',
+        timeout: undefined,
+        bytesWritten: 377,
+        bytesRead: 202
+      }
+    }
+  }
+}
+ GET /api/homepage?lang=en 500 in 215758ms
+ ⨯ Error: Could not parse module '[project]/src/app/api/news/route.ts'
+
+Expression expected
+    at __TURBOPACK__module__evaluation__ (.next/server/chunks/[root-of-the-server]__218cb583._.js:43:11)
+    at Object.<anonymous> (.next/server/app/api/news/route.js:5:3) {
+  code: 'MODULE_UNPARSABLE',
+  page: '/api/news'
+}
+ GET /api/news?lang=en&limit=20 500 in 871ms
+Error fetching news: Error: Failed to fetch news: 500
+    at fetchNews (src/app/_lib/news.ts:31:13)
+    at async HomePage (src/app/[locale]/page.tsx:37:22)
+  29 |
+  30 |     if (!response.ok) {
+> 31 |       throw new Error(`Failed to fetch news: ${response.status}`);
+     |             ^
+  32 |     }
+  33 |
+  34 |     const result = await response.json();
+
+Hey there, welcome to the site of THF Radio, a community radio based in Berlin 📻
+
+If you like it and want to see the code behind it, check it out at https://github.com/brunosj/thfradio-nextjs
+
+For any issues or dev-related questions, please get in touch at contact@landozone.net ✨
+[?25h
