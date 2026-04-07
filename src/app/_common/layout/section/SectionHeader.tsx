@@ -18,7 +18,7 @@ const SectionHeader = ({ title, text, textHtml }: SectionHeaderProps) => {
     <div className='layout text-white text-center sectionPy max-w-4xl m-auto'>
       <h1 className='uppercase '>{title}</h1>
       {textHtml?.trim() ? (
-        <div className='font-mono font-light markdown text-left sm:text-center'>
+        <div className='font-mono font-light markdown text-base lg:text-xl text-center'>
           <SanitizedHtml html={textHtml} />
         </div>
       ) : (

@@ -19,7 +19,7 @@ interface HeaderProps {
   setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const menuKeys = [ 'shows', 'programme', 'latest', 'info'] as const;
+const menuKeys = ['shows', 'programme', 'latest', 'info'] as const;
 
 const Header: React.FC<HeaderProps> = ({
   isOpen: externalIsOpen,
@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({
   // Anchor links smooth behaviour
   const handleAnchorLinkClick = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
-    href: string
+    href: string,
   ) => {
     e.preventDefault();
     if (href.startsWith('#')) {
@@ -91,9 +91,9 @@ const Header: React.FC<HeaderProps> = ({
           >
             <Image quality={75} src={logo} alt='THF Radio Logo' />
           </Link>
-          <Link href='/chat' className='block lg:hidden'>
+          {/* <Link href='/chat' className='block lg:hidden'>
             <SlSpeech className='w-6 h-6 ' />
-          </Link>
+          </Link> */}
         </div>
 
         <div>

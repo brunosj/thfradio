@@ -4,9 +4,9 @@ import { useState, useEffect, useTransition } from 'react';
 import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
 import { TimetableV2 } from '.';
 import BarsSpinner from '@/app/_common/ui/BarsSpinner';
-import SectionHeader from '@/app/_common/layout/section/SectionHeader';
 import { fetchCalendar } from '@/app/_lib/calendar';
 import { useTranslations } from 'next-intl';
+import SectionHeader from '@/common/layout/section/SectionHeader';
 
 export type CalendarScheduleProps = {
   /** CMS homepage programme block; falls back to i18n when empty */

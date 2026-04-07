@@ -1,0 +1,95 @@
+name: Deploy Project
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+      - name: Execute deployment script
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          REPO_PATH: ${{ secrets.REPO_PATH }}
+          PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
+        run: |
+          set -e
+          echo "🚀 Starting deployment of $PROJECT_NAME..."
+          ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR ${{ env.USERNAME }}@${{ env.HOST }} "
+            set -e
+            
+            if [ ! -d '${{ env.REPO_PATH }}' ]; then
+              echo '❌ Repo directory not found!'
+              exit 1
+            fi
+            
+            cd '${{ env.REPO_PATH }}'
+            git fetch origin --quiet
+            git reset --hard origin/main --quiet
+            
+            if [ ! -f 'scripts/deploy.sh' ]; then
+              echo '❌ Deploy script not found!'
+              exit 1
+            fi
+            
+            bash scripts/deploy.sh
+          "
+          EXIT_STATUS=$?
+          if [ $EXIT_STATUS -eq 0 ]; then
+            echo "✅ Deployment completed successfully"
+          else
+            echo "❌ Deployment failed with exit status $EXIT_STATUS"
+          fi
+          exit $EXIT_STATUS
+
+      - name: Verify deployment
+        if: success()
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          REPO_PATH: ${{ secrets.REPO_PATH }}
+        run: |
+          echo "🔍 Verifying deployment..."
+          ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR ${{ env.USERNAME }}@${{ env.HOST }} "
+            echo '📊 PM2 Processes:'
+            pm2 list --no-color | grep -E 'id|backend|frontend|─'
+            
+            echo ''
+            echo '🔗 Build output:'
+            if [ ! -s '${{ env.REPO_PATH }}/.next/BUILD_ID' ]; then
+              echo '❌ Missing Next.js build: .next/BUILD_ID'
+              exit 1
+            fi
+            
+            echo '✅ Frontend BUILD_ID present'
+            
+            echo ''
+            echo '🏥 Health Checks:'
+            BACKEND_STATUS=\$(curl -sf http://localhost:3011/health && echo '✅ Backend OK' || echo '❌ Backend not responding')
+            FRONTEND_STATUS=\$(curl -sf http://localhost:3000 > /dev/null && echo '✅ Frontend OK' || echo '❌ Frontend not responding')
+            echo \"\$BACKEND_STATUS\"
+            echo \"\$FRONTEND_STATUS\"
+          "
+
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - name: Notify via Resend
+        uses: brunosj/actions/resend-notify@v1
+        with:
+          subject: 'GitHub Actions - Deploy ${{ secrets.PROJECT_NAME }} Failed'
+          resend_api_key: ${{ secrets.RESEND_API_KEY }}
