@@ -1,11 +1,13 @@
-import { memo } from "react";
+import { memo } from 'react';
 
 interface MessageContentProps {
   text: string;
 }
 
 export const MessageContent = memo(({ text }: MessageContentProps) => {
-  return <div className="whitespace-pre-wrap break-words text-sm">{text}</div>;
+  return (
+    <div className='whitespace-pre-wrap wrap-break-words text-sm'>{text}</div>
+  );
 });
 
-MessageContent.displayName = "MessageContent";
+MessageContent.displayName = 'MessageContent';

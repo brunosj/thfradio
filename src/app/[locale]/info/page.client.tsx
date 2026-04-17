@@ -11,7 +11,6 @@ export default function InfoContent({ page }: { page: AboutTypes }) {
   const radio = page.radioSection;
   const tor = page.torhausSection;
 
-  console.log(page);
   return (
     <>
       <Hero

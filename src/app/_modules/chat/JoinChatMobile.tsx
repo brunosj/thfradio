@@ -1,10 +1,19 @@
 "use client";
 
-import { Link } from "@/i18n/routing";
+import { usePathname } from "next/navigation";
 import { useChatState } from "@/app/_context/ChatContext";
+import {
+  isGlobalChatOverlaySuppressed,
+  normalizeAppPath,
+} from "@/modules/chat/chatRouteUtils";
 
 export default function JoinChatMobile() {
+  const pathname = usePathname();
   const { isChatOpen, setIsChatOpen } = useChatState();
+
+  if (isGlobalChatOverlaySuppressed(normalizeAppPath(pathname))) {
+    return null;
+  }
 
   return (
     <div className="pb-5 pt-2">

@@ -17,19 +17,16 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const url = searchParams.get('url');
 
-  console.log('Show details request for URL:', url);
-
   if (!url) {
     console.error('Missing url parameter');
     return NextResponse.json(
       { error: 'Missing url parameter' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   // Check cache first
   if (detailsCache[url] && detailsCache[url].expires > Date.now()) {
-    console.log('Using cached show details for URL:', url);
     return NextResponse.json({ show: detailsCache[url].data });
   }
 
@@ -48,7 +45,6 @@ export async function GET(request: NextRequest) {
         if (segments.length >= 2) {
           // The format may be user/track-name or group/track-name
           soundcloudId = segments[segments.length - 1];
-          console.log('Extracted potential SoundCloud ID:', soundcloudId);
         }
       }
     }
@@ -61,17 +57,14 @@ export async function GET(request: NextRequest) {
 
     // If not found, try to find by parts of the URL if it's a SoundCloud URL
     if (!show && soundcloudId) {
-      console.log('Trying to find show by SoundCloud ID part:', soundcloudId);
       show = allShows.find(
         (s) =>
           s.platform === 'soundcloud' &&
-          s.url.toLowerCase().includes(soundcloudId.toLowerCase())
+          s.url.toLowerCase().includes(soundcloudId.toLowerCase()),
       );
     }
 
     if (!show) {
-      console.log('Show not found, creating basic placeholder from URL');
-
       // Create a basic show object as a fallback
       const urlParts = url.split('/');
       const name = urlParts[urlParts.length - 1]
@@ -109,7 +102,7 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching show details:', error);
     return NextResponse.json(
       { error: 'Failed to fetch show details' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

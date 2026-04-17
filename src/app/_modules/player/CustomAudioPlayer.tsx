@@ -15,14 +15,10 @@ import MixcloudWidget from '@/modules/mixcloud/MixcloudWidget';
 const DEFAULT_IMAGE = '/images/placeholder.svg';
 
 export default function CustomAudioPlayer() {
-  console.log('CustomAudioPlayer rendering');
-
   const activePlayer = useGlobalStore((state) => state.activePlayer);
   const trackId = useGlobalStore((state) => state.trackId);
   const currentShowUrl = useGlobalStore((state) => state.currentShowUrl);
   const resetPlayer = useGlobalStore((state) => state.resetPlayer);
-
-  console.log('Player state:', { activePlayer, trackId, currentShowUrl });
 
   const [audioUrl, setAudioUrl] = useState<string>('');
   const [widgetUrl, setWidgetUrl] = useState<string>('');
@@ -35,14 +31,12 @@ export default function CustomAudioPlayer() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [useWidget, setUseWidget] = useState(false);
-  const [availableFormats, setAvailableFormats] = useState<string[]>([]);
 
   // Use the correct type from the library
   const audioRef = useRef<AudioPlayerRef>(null);
 
   // Function to close the player
   const handleClose = () => {
-    console.log('Closing player');
     if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -53,29 +47,18 @@ export default function CustomAudioPlayer() {
   // Function to fetch audio URL for Soundcloud
   const fetchSoundcloudAudio = useCallback(async () => {
     if (!trackId) {
-      console.log('No trackId provided for Soundcloud');
       return;
     }
 
     setIsLoading(true);
     setError(null);
     setUseWidget(false);
-    setAvailableFormats([]);
 
     try {
-      console.log('Fetching Soundcloud stream for trackId:', trackId);
       const response = await fetch(`/api/soundcloud-stream?trackId=${trackId}`);
-
-      console.log('Soundcloud stream response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Soundcloud stream data:', data);
-
-        // Save available formats for debugging
-        if (data.availableFormats && Array.isArray(data.availableFormats)) {
-          setAvailableFormats(data.availableFormats);
-        }
 
         // Save widget URL for fallback
         if (data.widgetUrl) {
@@ -84,7 +67,6 @@ export default function CustomAudioPlayer() {
 
         // Check if there's an error but we have a widget URL
         if (data.error && data.widgetUrl) {
-          console.log('Stream error with widget fallback:', data.error);
           setError(data.error);
           setUseWidget(true);
 
@@ -106,20 +88,8 @@ export default function CustomAudioPlayer() {
 
         // Check for streamUrl in the response
         if (data.streamUrl) {
-          console.log(
-            `Setting audio URL (${data.streamFormat}):`,
-            data.streamUrl
-          );
           setAudioUrl(data.streamUrl);
           setStreamFormat(data.streamFormat || '');
-
-          // If the data was from cache, log it
-          if (data.cached) {
-            console.log(
-              'Using cached stream data',
-              data.expired ? '(expired)' : ''
-            );
-          }
         } else {
           console.error('No stream URL in response:', data);
           setError('No stream URL available');
@@ -170,22 +140,16 @@ export default function CustomAudioPlayer() {
   // Function to fetch show details for Soundcloud
   const fetchShowDetails = useCallback(async () => {
     if (!currentShowUrl || !trackId) {
-      console.log('No current show URL or trackId for Soundcloud');
       return;
     }
 
     try {
-      console.log('Fetching Soundcloud show details for URL:', currentShowUrl);
       const encodedUrl = encodeURIComponent(currentShowUrl);
-      console.log('Encoded URL:', encodedUrl);
 
       const response = await fetch(`/api/show-details?url=${encodedUrl}`);
 
-      console.log('Show details response status:', response.status);
-
       if (response.ok) {
         const data = await response.json();
-        console.log('Soundcloud show details:', data);
 
         if (data.show) {
           setCurrentShow(data.show);
@@ -220,18 +184,14 @@ export default function CustomAudioPlayer() {
 
   // Effect to fetch audio URL for Soundcloud
   useEffect(() => {
-    console.log('useEffect triggered with:', { activePlayer, trackId });
-
     setAudioUrl('');
     setWidgetUrl('');
     setStreamFormat('');
     setError(null);
     setRetryCount(0);
     setUseWidget(false);
-    setAvailableFormats([]);
 
     if (activePlayer === ActivePlayer.SOUNDCLOUD && trackId) {
-      console.log('Fetching Soundcloud data...');
       fetchSoundcloudAudio();
       fetchShowDetails();
     }
@@ -239,16 +199,12 @@ export default function CustomAudioPlayer() {
 
   // Handle play/pause for Soundcloud
   const handlePlayPause = () => {
-    console.log('Play/Pause clicked, current state:', { isPlaying });
-
     // Only handle play/pause for Soundcloud and when not using widget
     if (activePlayer === ActivePlayer.SOUNDCLOUD && !useWidget) {
       if (audioRef.current) {
         if (isPlaying) {
-          console.log('Pausing audio');
           audioRef.current.pause();
         } else {
-          console.log('Playing audio');
           audioRef.current.play();
         }
       }
@@ -262,11 +218,9 @@ export default function CustomAudioPlayer() {
     errorMessage: string
   ) => {
     console.error('Audio player error:', errorMessage);
-    console.log('Available formats were:', availableFormats);
 
     // Always switch to widget if available when there's an audio error
     if (widgetUrl) {
-      console.log('Switching to Soundcloud widget after audio error');
       setError(`Error playing audio: ${errorMessage}`);
       setUseWidget(true);
       return;
@@ -278,34 +232,19 @@ export default function CustomAudioPlayer() {
     // Try fetching the audio again only once
     if (retryCount === 0) {
       setRetryCount((prev) => prev + 1);
-      console.log('Retrying audio fetch...');
       fetchSoundcloudAudio();
     }
   };
 
   // If no active player, don't render
   if (activePlayer === undefined) {
-    console.log('No active player, not rendering');
     return null;
   }
 
   // For Mixcloud, we use the dedicated MixcloudWidget component
   if (activePlayer === ActivePlayer.MIXCLOUD) {
-    console.log('Using MixcloudWidget');
     return <MixcloudWidget />;
   }
-
-  console.log('Rendering Soundcloud player with:', {
-    audioUrl,
-    widgetUrl,
-    streamFormat,
-    showTitle,
-    isLoading,
-    error,
-    retryCount,
-    useWidget,
-    availableFormats,
-  });
 
   // Get show name safely
   const showName =
@@ -380,15 +319,12 @@ export default function CustomAudioPlayer() {
             className='thf-audio-player'
             volume={0.8}
             onPlay={() => {
-              console.log('Audio playing');
               setIsPlaying(true);
             }}
             onPause={() => {
-              console.log('Audio paused');
               setIsPlaying(false);
             }}
             onEnd={() => {
-              console.log('Audio ended');
               setIsPlaying(false);
             }}
             onError={handleAudioError}

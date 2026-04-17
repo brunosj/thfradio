@@ -26,48 +26,25 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
   const [tagsList] = useState(initialTagsList);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
-  // Log whenever cloudShows state changes
-  useEffect(() => {
-    console.log(
-      "[DataContext] cloudShows state updated:",
-      cloudShows?.length || 0,
-      "items",
-    );
-  }, [cloudShows]);
-
   const loadCloudShows = async () => {
     // Skip if already loading
     if (isLoadingShows) {
-      console.log("[CloudShows] Already loading, skipping");
       return;
     }
 
     // Skip if already have data
     if (cloudShows && cloudShows.length > 0) {
-      console.log(
-        "[CloudShows] Already have",
-        cloudShows.length,
-        "shows cached",
-      );
       return;
     }
 
-    console.log("[CloudShows] Starting fetch...");
     setIsLoadingShows(true);
     setShowsError(null);
 
     try {
       const shows = await fetchCloudShowsCached();
-      console.log("[CloudShows] Fetch result:", shows?.length || 0, "shows");
 
       if (Array.isArray(shows) && shows.length > 0) {
-        console.log(
-          "[CloudShows] Calling setCloudShows with",
-          shows.length,
-          "shows",
-        );
         setCloudShows(shows);
-        console.log("[CloudShows] setCloudShows called");
       } else {
         const msg = "No shows returned from API";
         console.warn("[CloudShows]", msg);
@@ -86,12 +63,7 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
 
   // Load on mount only
   useEffect(() => {
-    console.log(
-      "[CloudShows] Component mounted, hasLoadedOnce:",
-      hasLoadedOnce,
-    );
     if (!hasLoadedOnce) {
-      console.log("[CloudShows] Triggering initial load");
       setHasLoadedOnce(true);
       loadCloudShows();
     }

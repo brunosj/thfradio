@@ -56,8 +56,7 @@ export async function POST(request: NextRequest) {
         }
         break;
       default:
-        // Log unhandled content types
-        console.log(`Unhandled content type: ${model}`);
+        break;
     }
 
     return NextResponse.json({ revalidated: true, now: Date.now() });

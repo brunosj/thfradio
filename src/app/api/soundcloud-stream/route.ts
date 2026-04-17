@@ -27,7 +27,6 @@ async function waitForRateLimit() {
 
   if (timeSinceLastRequest < rateLimitInfo.minimumDelay) {
     const delay = rateLimitInfo.minimumDelay - timeSinceLastRequest;
-    console.log(`Rate limiting: waiting ${delay}ms`);
     await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
@@ -37,11 +36,9 @@ async function waitForRateLimit() {
 async function getSoundcloudToken(): Promise<string | null> {
   try {
     if (tokenCache && tokenCache.expires > Date.now()) {
-      console.log('Using cached Soundcloud token');
       return tokenCache.token;
     }
 
-    console.log('Fetching new Soundcloud token');
     // Add rate limiting delay
     await waitForRateLimit();
 
@@ -76,7 +73,6 @@ async function getSoundcloudToken(): Promise<string | null> {
       expires: Date.now() + data.expires_in * 1000,
     };
 
-    console.log('New Soundcloud token obtained');
     return data.access_token;
   } catch (error) {
     console.error('Error getting Soundcloud token:', error);
@@ -95,12 +91,6 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const trackId = searchParams.get('trackId');
 
-  console.log('Soundcloud stream request for trackId:', trackId);
-  console.log('Environment variables check:', {
-    hasClientId: !!process.env.SOUNDCLOUD_CLIENT_ID,
-    hasClientSecret: !!process.env.SOUNDCLOUD_CLIENT_SECRET,
-  });
-
   if (!trackId) {
     console.error('Missing trackId parameter');
     return NextResponse.json(
@@ -112,12 +102,10 @@ export async function GET(request: NextRequest) {
   try {
     // Check if we have the track cached
     if (trackCache[trackId] && trackCache[trackId].expires > Date.now()) {
-      console.log(`Using cached data for track ${trackId}`);
       const cachedData = trackCache[trackId];
 
       // If we have cached streams, create response from cache
       if (cachedData.streams) {
-        console.log('Using cached stream data');
         const streamsData = cachedData.streams;
         const trackData = cachedData.data;
 
@@ -167,7 +155,6 @@ export async function GET(request: NextRequest) {
 
       // If we have just track data but no streams, we can still return the widget URL
       if (cachedData.data && !cachedData.streams) {
-        console.log('Using cached track data with widget fallback');
         return NextResponse.json({
           error: 'No stream URL in cache, using widget',
           widgetUrl: `https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${trackId}&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true`,
@@ -190,7 +177,6 @@ export async function GET(request: NextRequest) {
     }
 
     // First, get the track details to verify it exists and is streamable
-    console.log(`Fetching track details for trackId: ${trackId}`);
     await waitForRateLimit();
 
     const trackResponse = await fetch(
@@ -217,7 +203,6 @@ export async function GET(request: NextRequest) {
         if (cachedData.streams) {
           // Same logic as above for returning cached stream data
           // [Simplified for brevity - would repeat the cached stream logic]
-          console.log('Using expired stream data due to rate limit');
           const streamsData = cachedData.streams;
           const trackData = cachedData.data;
 
@@ -266,11 +251,6 @@ export async function GET(request: NextRequest) {
     }
 
     const trackData = await trackResponse.json();
-    console.log('Track data received:', {
-      id: trackData.id,
-      title: trackData.title,
-      streamable: trackData.streamable,
-    });
 
     // Cache the track data
     if (!trackCache[trackId]) {
@@ -299,7 +279,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Get the streaming URLs directly from the streams endpoint
-    console.log('Fetching streaming URLs from streams endpoint');
     await waitForRateLimit();
 
     const streamsResponse = await fetch(
@@ -320,7 +299,6 @@ export async function GET(request: NextRequest) {
 
       // If we can't get streams, try the traditional method with stream_url
       if (trackData.stream_url) {
-        console.log('Falling back to stream_url method');
         const streamUrl = `${trackData.stream_url}?client_id=${process.env.SOUNDCLOUD_CLIENT_ID}`;
 
         // Create a widget URL as a fallback option
@@ -350,7 +328,6 @@ export async function GET(request: NextRequest) {
     }
 
     const streamsData = await streamsResponse.json();
-    console.log('Available stream formats:', Object.keys(streamsData));
 
     // Cache the streams data
     if (trackCache[trackId]) {
@@ -388,7 +365,6 @@ export async function GET(request: NextRequest) {
 
       // Try the traditional method with stream_url as a fallback
       if (trackData.stream_url) {
-        console.log('Falling back to stream_url method');
         streamUrl = `${trackData.stream_url}?client_id=${process.env.SOUNDCLOUD_CLIENT_ID}`;
         streamFormat = 'stream_url';
       } else {
@@ -404,10 +380,6 @@ export async function GET(request: NextRequest) {
         );
       }
     }
-
-    console.log(
-      `Using ${streamFormat} format: ${streamUrl.substring(0, 50)}...`
-    );
 
     // Create a widget URL as a fallback option
     const widgetUrl = `https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${trackId}&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true`;

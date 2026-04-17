@@ -122,6 +122,7 @@
     "join": "Chat beitreten!",
     "open": "Chat öffnen",
     "close": "Chat schließen",
+    "backHome": "Zur Startseite",
     "errors": {
       "sendFailed": "Nachricht konnte nicht gesendet werden. Bitte versuche es erneut."
     }

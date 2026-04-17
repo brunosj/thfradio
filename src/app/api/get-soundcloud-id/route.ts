@@ -26,8 +26,6 @@ export async function GET() {
     // First get the token
     const token = await getToken();
 
-    console.log('Got token:', token.slice(0, 10) + '...');
-
     // Then use it to resolve the user
     const url = `https://api.soundcloud.com/resolve?url=https://soundcloud.com/thfradio`;
     const response = await fetch(url, {

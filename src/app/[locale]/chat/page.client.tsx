@@ -1,23 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import { TbBrandDiscord } from 'react-icons/tb';
-import DiscordEmbed from '@/modules/chat/DiscordEmbed';
+import { Chat } from '@/modules/chat/Chat';
 
 export default function ChatContent() {
+  /* Top padding clears the fixed LiveTicker (`top-16`, out of flow) so the chat header is not covered. */
   return (
-    <div className='relative pt-6'>
-      <div className='absolute left-0 w-full bg-orange-500 text-white h-[63px] px-4'>
-        <div className='flex space-x-4 items-center h-full'>
-          <span className='flex-grow'>
-            <Link href='/'>THF Radio</Link>
-          </span>
-          <TbBrandDiscord className='w-6 h-6' />
-        </div>
-      </div>
-      <div className='pt-[5.6rem] h-screen w-[full] bg-[#303236]'>
-        <DiscordEmbed />
-      </div>
+    <div className='box-border flex h-[calc(100dvh-6rem)] w-full min-h-0 min-w-0 flex-col pt-6 lg:pt-10'>
+      <Chat variant='inline' />
     </div>
   );
 }

@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
-// import { routing } from '@/i18n/routing';
-import Header from "@/app/_common/layout/header/Header";
-import LiveTicker from "@/modules/live-ticker/LiveTicker";
-import JoinChat from "@/modules/chat/JoinChat";
-import Footer from "@/app/_common/layout/footer/Footer";
 import { siteMetadata } from "@/utils/siteMetadata";
-import CloudPlayer from "@/app/_modules/player/CloudPlayer";
-import VideoStreamPopup from "@/app/_modules/video-stream/VideoStreamPopup";
+import { LocaleLayoutChrome } from "./LocaleLayoutChrome";
 
 type Params = Promise<{ locale: string }>;
 
@@ -38,10 +32,6 @@ export const metadata: Metadata = {
   },
 };
 
-// export function generateStaticParams() {
-//   return routing.locales.map((locale) => ({ locale }));
-// }
-
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -49,16 +39,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
-      <LiveTicker />
-      <div className="relative">
-        <Header />
-        <main>{children}</main>
-      </div>
-      <Footer />
-      <CloudPlayer />
-      {/* <CustomAudioPlayer /> */}
-      <JoinChat />
-      <VideoStreamPopup />
+      <LocaleLayoutChrome>{children}</LocaleLayoutChrome>
     </NextIntlClientProvider>
   );
 }

@@ -120,6 +120,7 @@
     "join": "Join the chat!",
     "open": "Open Chat",
     "close": "Close Chat",
+    "backHome": "Back to home",
     "errors": {
       "sendFailed": "Failed to send message. Please try again."
     }
