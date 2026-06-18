@@ -40,7 +40,7 @@ export default function ChannelToggle({
     <div
       className={
         variant === 'calendar'
-          ? 'flex justify-end items-center gap-3 px-4 lg:pr-16 pb-0 lg:pb-6'
+          ? 'flex justify-end items-center gap-3 pl-4 pr-7 lg:pr-16 pb-0 lg:pb-6'
           : 'flex items-center'
       }
       role='group'
