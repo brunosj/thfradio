@@ -16,13 +16,13 @@ type TickerTranslate = (key: string) => string;
 const tickerRow =
   'flex items-baseline gap-3 lg:gap-4 text-sm lg:text-[15px] leading-none whitespace-nowrap';
 const tickerLabel =
-  'inline-flex h-[1em] items-center text-[11px] uppercase tracking-widest font-medium leading-none opacity-55 shrink-0';
+  'inline-flex h-[1em] items-center text-[11px] uppercase tracking-widest font-medium leading-none opacity-70 shrink-0';
 const tickerTitle =
   'inline-flex h-[1em] items-center font-medium leading-none shrink-0';
 const tickerMeta =
-  'inline-flex h-[1em] items-center overflow-hidden font-mono text-xs lg:text-sm tabular-nums leading-none opacity-55 shrink-0';
+  'inline-flex h-[1em] items-center overflow-hidden font-mono text-xs lg:text-sm tabular-nums leading-none opacity-70 shrink-0';
 const tickerMuted =
-  'inline-flex h-[1em] items-center leading-none shrink-0 opacity-55 font-normal normal-case tracking-normal';
+  'inline-flex h-[1em] items-center leading-none shrink-0 opacity-70 font-normal normal-case tracking-normal';
 const tickerDate =
   'inline-flex h-[1em] items-center overflow-hidden font-mono text-xs lg:text-sm tabular-nums leading-none shrink-0';
 const tickerShowWhen = 'inline-flex items-baseline gap-1 lg:gap-1.5 shrink-0';

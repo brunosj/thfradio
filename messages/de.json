@@ -109,6 +109,8 @@
   "programme": "Programm",
   "liveChannels": {
     "label": "Live-Kanal",
+    "scheduleLabel": "Programm",
+    "scheduleAriaLabel": "Programm zum Anzeigen wählen",
     "thf1": "THF1",
     "thf2": "THF2"
   },

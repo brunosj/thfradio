@@ -33,16 +33,24 @@ export default function ChannelToggle({
       ? 'inline-flex rounded border border-thf-blue-500 overflow-hidden shrink-0'
       : 'inline-flex rounded-lg border border-gray-600 overflow-hidden';
 
+  const groupAriaLabel =
+    variant === 'calendar' ? t('scheduleAriaLabel') : t('label');
+
   return (
     <div
       className={
         variant === 'calendar'
-          ? 'flex justify-center pb-0 lg:pb-6'
+          ? 'flex justify-end items-center gap-3 px-4 lg:pr-16 pb-0 lg:pb-6'
           : 'flex items-center'
       }
       role='group'
-      aria-label={t('label')}
+      aria-label={groupAriaLabel}
     >
+      {variant === 'calendar' && (
+        <span className='font-mono text-sm uppercase text-gray-400 shrink-0'>
+          {t('scheduleLabel')}
+        </span>
+      )}
       <div className={containerClass}>
         <button
           type='button'

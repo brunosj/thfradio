@@ -27,6 +27,8 @@
   "nextDayWithShows": "Next day with shows",
   "liveChannels": {
     "label": "Live channel",
+    "scheduleLabel": "Schedule",
+    "scheduleAriaLabel": "Choose schedule to display",
     "thf1": "THF1",
     "thf2": "THF2"
   },

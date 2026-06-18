@@ -52,7 +52,7 @@ export default function LiveChannelRow({
       className={`flex w-full flex-1 min-w-0 items-center gap-2 lg:gap-3 px-2 lg:px-4 py-1.5
         transition-colors duration-200 ${
           isActiveStream
-            ? 'bg-thf-blue-500 text-white rounded-lg'
+            ? 'bg-thf-blue-500 text-white rounded-lg [&_.opacity-70]:opacity-85'
             : 'bg-white text-thf-blue-500'
         }`}
     >
@@ -85,7 +85,7 @@ export default function LiveChannelRow({
       {showChannelLabel && (
         <span
           className={`hidden sm:inline-flex h-[1em] items-center overflow-hidden shrink-0 font-mono text-[10px] lg:text-[11px] font-medium uppercase tracking-widest leading-none ${
-            isActiveStream ? 'text-white/70' : 'text-thf-blue-500/40'
+            isActiveStream ? 'text-white/85' : 'text-thf-blue-500/50'
           }`}
         >
           {label}
