@@ -42,7 +42,7 @@ const Hero = ({
         )}
       >
         <div className='lg:hidden absolute inset-0 flex flex-col items-center justify-center px-6 py-12 text-center z-40'>
-          <div className='markdown text-white'>
+          <div className='markdown text-white text-xl sm:text-2xl font-semibold'>
             <ReactMarkdown>{description}</ReactMarkdown>
           </div>
           <div className='pt-6 flex justify-center order-3 '>

@@ -37,7 +37,7 @@ export default function ChannelToggle({
     <div
       className={
         variant === 'calendar'
-          ? 'flex justify-center pb-2 lg:pb-6'
+          ? 'flex justify-center pb-0 lg:pb-6'
           : 'flex items-center'
       }
       role='group'
@@ -62,9 +62,7 @@ export default function ChannelToggle({
           <button
             type='button'
             className={`${baseButton} border-l ${
-              variant === 'ticker'
-                ? 'border-thf-blue-500'
-                : 'border-gray-600'
+              variant === 'ticker' ? 'border-thf-blue-500' : 'border-gray-600'
             } ${
               activeChannel === 2
                 ? 'bg-thf-blue-500 text-white'

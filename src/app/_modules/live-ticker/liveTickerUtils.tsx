@@ -25,8 +25,7 @@ const tickerMuted =
   'inline-flex h-[1em] items-center leading-none shrink-0 opacity-55 font-normal normal-case tracking-normal';
 const tickerDate =
   'inline-flex h-[1em] items-center overflow-hidden font-mono text-xs lg:text-sm tabular-nums leading-none shrink-0';
-const tickerShowWhen =
-  'inline-flex items-baseline gap-1 lg:gap-1.5 shrink-0';
+const tickerShowWhen = 'inline-flex items-baseline gap-1 lg:gap-1.5 shrink-0';
 const tickerLoopPad = 'inline-block w-10 shrink-0 leading-none';
 
 function LiveIndicator() {

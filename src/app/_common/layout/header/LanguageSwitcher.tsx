@@ -29,7 +29,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     return (
       <button
         onClick={() => handleLocaleChange(locale === 'en' ? 'de' : 'en')}
-        className='border-t border-white block text-xl textHover'
+        className='block text-xl textHover'
         disabled={isPending}
       >
         <p className='px-4 py-6'>

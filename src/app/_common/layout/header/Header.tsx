@@ -169,7 +169,10 @@ const Header: React.FC<HeaderProps> = ({
             );
           })}
           <JoinChatMobile />
-          <LanguageSwitcher />
+          <LanguageSwitcher
+            isMobile
+            onMobileClick={() => setIsOpen(false)}
+          />
         </div>
       </div>
     </header>

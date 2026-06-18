@@ -2,10 +2,7 @@
 
 import { useMemo } from 'react';
 import type { Locale } from 'date-fns';
-import {
-  LIVE_CHANNELS,
-  type LiveChannelId,
-} from '@/app/_lib/liveChannels';
+import { LIVE_CHANNELS, type LiveChannelId } from '@/app/_lib/liveChannels';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
 import AdaptiveMarquee from './AdaptiveMarquee';
 import {
@@ -53,12 +50,11 @@ export default function LiveChannelRow({
   return (
     <div
       className={`flex w-full flex-1 min-w-0 items-center gap-2 lg:gap-3 px-2 lg:px-4 py-1.5
-        border-b border-thf-blue-500 last:border-b-0 lg:border-b-0
         transition-colors duration-200 ${
-        isActiveStream
-          ? 'bg-thf-blue-500 text-white rounded-lg'
-          : 'bg-white text-thf-blue-500'
-      }`}
+          isActiveStream
+            ? 'bg-thf-blue-500 text-white rounded-lg'
+            : 'bg-white text-thf-blue-500'
+        }`}
     >
       <span
         className={`shrink-0 w-5 h-5 inline-flex items-center justify-center font-mono text-[10px] font-bold leading-none border rounded-sm ${

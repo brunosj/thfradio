@@ -10,6 +10,10 @@ interface MobileDayTabsProps {
   onSelectDay: (day: Date) => void;
 }
 
+const selectedTabClass = 'bg-orange-500 text-white';
+const unselectedTabClass =
+  'bg-thf-blue-500/30 text-gray-300 hover:bg-thf-blue-500/50';
+
 export default function MobileDayTabs({
   days,
   selectedDay,
@@ -42,36 +46,28 @@ export default function MobileDayTabs({
     });
   }, [selectedDay, today]);
 
-  const groupBorderClass = isTodaySelected
-    ? 'border-white'
-    : 'border-orange-400';
-  const groupSelectedClass = isTodaySelected
-    ? 'bg-white text-neutral-900'
-    : 'bg-thf-blue-500/50 text-white';
+  const todayGroupClass = isTodaySelected ? selectedTabClass : unselectedTabClass;
 
   return (
-    <div className='mb-4 flex items-center gap-2'>
+    <div className='mb-0 flex items-center gap-2'>
       {todayInRange && (
-        <div
-          className={`flex shrink-0 min-h-11 rounded-lg border overflow-hidden ${groupBorderClass}`}
-        >
+        <div className='flex shrink-0 min-h-11 rounded-lg overflow-hidden'>
           <button
             type='button'
             onClick={handleToday}
             aria-label={t('today')}
-            className={`px-3 py-2 text-xs font-mono uppercase transition-colors border-r
-              ${isTodaySelected ? 'border-neutral-200' : 'border-orange-400/50'}
-              ${groupSelectedClass}`}
+            className={`px-3 py-2 text-xs font-mono uppercase transition-colors border-r border-white/10 ${todayGroupClass}`}
           >
             {t('today')}
           </button>
           <button
             type='button'
             role='tab'
+            id={`mobile-day-tab-${today.toISOString()}`}
             aria-selected={isTodaySelected}
             tabIndex={isTodaySelected ? 0 : -1}
             onClick={handleToday}
-            className={`min-w-14 px-2.5 py-2 font-mono text-center transition-colors ${groupSelectedClass}`}
+            className={`min-w-14 px-2.5 py-2 font-mono text-center transition-colors ${todayGroupClass}`}
           >
             <span className='block text-[10px] uppercase opacity-80'>
               {todayDayName}
@@ -120,12 +116,8 @@ export default function MobileDayTabs({
               aria-selected={isSelected}
               tabIndex={isSelected ? 0 : -1}
               onClick={() => onSelectDay(day)}
-              className={`shrink-0 snap-start min-h-11 min-w-14 px-2.5 py-2 rounded-lg font-mono text-center transition-colors border
-                ${
-                  isSelected
-                    ? 'bg-white text-neutral-900 border-white'
-                    : 'bg-thf-blue-500/30 text-gray-300 border-transparent hover:bg-thf-blue-500/50'
-                }`}
+              className={`shrink-0 snap-start min-h-11 min-w-14 px-2.5 py-2 rounded-lg font-mono text-center transition-colors
+                ${isSelected ? selectedTabClass : unselectedTabClass}`}
             >
               <span className='block text-[10px] uppercase opacity-80'>
                 {dayName}
