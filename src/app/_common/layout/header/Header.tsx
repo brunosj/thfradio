@@ -97,8 +97,8 @@ const Header: React.FC<HeaderProps> = ({
 
         <div>
           {/* Desktop Menu */}
-          <nav className='hidden lg:flex items-center border-t'>
-            {menuKeys.map((key) => {
+          <nav className='hidden lg:flex items-stretch rounded-t-xl overflow-hidden'>
+            {menuKeys.map((key, index) => {
               const isExternal = t(`menu.${key}.path`).slice(0, 4) === 'http';
               const menuPath = t(`menu.${key}.path`);
               // Remove locale from pathname for comparison
@@ -112,10 +112,12 @@ const Header: React.FC<HeaderProps> = ({
                   onClick={(e) => handleAnchorLinkClick(e, menuPath)}
                   rel={isExternal ? 'noopener noreferrer' : ''}
                   target={isExternal ? '_blank' : ''}
-                  className={`border-l border-white hover:bg-white hover:text-neutral-900 duration-300 ${
+                  className={`border-t border-l border-white hover:bg-white hover:text-thf-blue-500 duration-300 ${
+                    index === 0 ? 'rounded-tl-xl' : ''
+                  } ${
                     currentPath === comparePath
-                      ? 'bg-white text-neutral-900'
-                      : 'textHover'
+                      ? 'bg-white text-thf-blue-500'
+                      : ''
                   }`}
                 >
                   <p className='py-3 px-6'>{t(`menu.${key}.name`)}</p>

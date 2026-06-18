@@ -5,4 +5,5 @@ export { default as WeekGrid } from './WeekGrid';
 export { default as TimeColumn } from './TimeColumn';
 export { default as CalendarEventItem } from './CalendarEventItem';
 export { default as HomeProgrammeSectionV2 } from './CalendarSchedule';
+export { default as MobileTimetable } from './MobileTimetable';
 export * from './utils';

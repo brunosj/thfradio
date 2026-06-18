@@ -1,7 +1,5 @@
 import { format, isWithinInterval, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
-import { ArrowRightLong } from '@/common/assets/ArrowRightLong';
-import LiveCircle from '@/common/assets/LiveCircle';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
 
 export function entryIntervalStrings(
@@ -14,6 +12,31 @@ export function entryIntervalStrings(
 }
 
 type TickerTranslate = (key: string) => string;
+
+const tickerRow =
+  'flex items-baseline gap-3 lg:gap-4 text-sm lg:text-[15px] leading-none whitespace-nowrap';
+const tickerLabel =
+  'inline-flex h-[1em] items-center text-[11px] uppercase tracking-widest font-medium leading-none opacity-55 shrink-0';
+const tickerTitle =
+  'inline-flex h-[1em] items-center font-medium leading-none shrink-0';
+const tickerMeta =
+  'inline-flex h-[1em] items-center overflow-hidden font-mono text-xs lg:text-sm tabular-nums leading-none opacity-55 shrink-0';
+const tickerMuted =
+  'inline-flex h-[1em] items-center leading-none shrink-0 opacity-55 font-normal normal-case tracking-normal';
+const tickerDate =
+  'inline-flex h-[1em] items-center overflow-hidden font-mono text-xs lg:text-sm tabular-nums leading-none shrink-0';
+const tickerShowWhen =
+  'inline-flex items-baseline gap-1 lg:gap-1.5 shrink-0';
+const tickerLoopPad = 'inline-block w-10 shrink-0 leading-none';
+
+function LiveIndicator() {
+  return (
+    <span className='relative flex h-2 w-2 shrink-0 self-center' aria-hidden>
+      <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-60' />
+      <span className='relative inline-flex h-2 w-2 rounded-full bg-orange-500' />
+    </span>
+  );
+}
 
 function parseEntryStart(entry: CalendarEntry): Date | null {
   const se = entryIntervalStrings(entry);
@@ -68,19 +91,25 @@ export function getChannelShowMeasureKey(
   if (currentShow) {
     const se = entryIntervalStrings(currentShow);
     const nextSe = nextShow ? entryIntervalStrings(nextShow) : null;
-    return prefix + [
-      'live',
-      currentShow.summary ?? currentShow.title,
-      se?.start,
-      se?.end,
-      nextShow?.summary ?? nextShow?.title,
-      nextSe?.start,
-    ].join('|');
+    return (
+      prefix +
+      [
+        'live',
+        currentShow.summary ?? currentShow.title,
+        se?.start,
+        se?.end,
+        nextShow?.summary ?? nextShow?.title,
+        nextSe?.start,
+      ].join('|')
+    );
   }
 
   if (nextShow) {
     const se = entryIntervalStrings(nextShow);
-    return prefix + ['upcoming', nextShow.summary ?? nextShow.title, se?.start].join('|');
+    return (
+      prefix +
+      ['upcoming', nextShow.summary ?? nextShow.title, se?.start].join('|')
+    );
   }
 
   return prefix + 'empty';
@@ -151,56 +180,60 @@ export function getChannelShowContent(
     const nextShowEndTime = nextSe
       ? format(parseISO(nextSe.end), 'HH:mm', { locale: localeModule })
       : '';
+    const sameDayNext =
+      nextShow &&
+      nextSe &&
+      format(parseISO(nextSe.start), 'yyyy-MM-dd') ===
+        format(parseISO(curSe.start), 'yyyy-MM-dd');
 
     return (
-      <div className='uppercase text-sm lg:text-base space-x-3 flex items-center'>
-        <LiveCircle className='w-5 h-5 animate-pulse shrink-0' />
-        <span>{currentShow.summary ?? currentShow.title}</span>
-        <span>
-          {formattedStartHour}-{formattedEndHour}
+      <div className={tickerRow}>
+        <LiveIndicator />
+        <span className={tickerTitle}>
+          {currentShow.summary ?? currentShow.title}
         </span>
-        {nextShow &&
-          nextSe &&
-          format(parseISO(nextSe.start), 'yyyy-MM-dd') ===
-            format(parseISO(curSe.start), 'yyyy-MM-dd') && (
-            <>
-              <span className='px-8'>
-                <ArrowRightLong />
-              </span>
-              <span>{t('nextShow')}:</span>
-              <span>{nextShow.summary ?? nextShow.title}</span>
-              <span>
-                {nextShowStartTime}-{nextShowEndTime}
-              </span>
-            </>
-          )}
+        <span className={tickerMeta}>
+          {formattedStartHour}–{formattedEndHour}
+        </span>
+        {sameDayNext && nextShow && (
+          <>
+            <span className={tickerLabel}>{t('nextShow')}</span>
+            <span className={tickerTitle}>
+              {nextShow.summary ?? nextShow.title}
+            </span>
+            <span className={tickerMeta}>
+              {nextShowStartTime}–{nextShowEndTime}
+            </span>
+          </>
+        )}
+        <span className={tickerLoopPad} aria-hidden />
       </div>
     );
   }
 
   const nextShowSe = nextShow ? entryIntervalStrings(nextShow) : null;
   const nextShowDate = nextShowSe
-    ? format(parseISO(nextShowSe.start), 'EEEE dd.MM.yyyy', {
+    ? format(parseISO(nextShowSe.start), 'dd.MM.yyyy', {
         locale: localeModule,
       })
     : '';
 
   return (
-    <span className='text-sm italic'>
-      <span className='uppercase'>
-        {t('archivePlaying')}
-        {' // '}
-      </span>
+    <div className={tickerRow}>
+      <span className={tickerLabel}>{t('archivePlaying')}</span>
       {nextShow && (
-        <span>
-          {t('nextShow')}:{' '}
-          <span className='not-italic font-normal'>
-            {nextShow.summary ?? nextShow.title}
-          </span>{' '}
-          {t('on')} {nextShowDate}
-          {' // '}
-        </span>
+        <>
+          <span className={tickerLabel}>{t('nextShow')}</span>
+          <span className={tickerShowWhen}>
+            <span className={tickerTitle}>
+              {nextShow.summary ?? nextShow.title}
+            </span>
+            <span className={tickerMuted}>{t('on')}</span>
+            <span className={tickerDate}>{nextShowDate}</span>
+          </span>
+          <span className={tickerLoopPad} aria-hidden />
+        </>
       )}
-    </span>
+    </div>
   );
 }

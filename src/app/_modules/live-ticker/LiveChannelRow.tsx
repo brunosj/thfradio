@@ -52,14 +52,16 @@ export default function LiveChannelRow({
 
   return (
     <div
-      className={`flex flex-1 min-w-0 items-center gap-2 lg:gap-3 px-2 lg:px-4 py-1.5 border-r border-thf-blue-500 last:border-r-0 font-mono transition-colors duration-200 ${
+      className={`flex w-full flex-1 min-w-0 items-center gap-2 lg:gap-3 px-2 lg:px-4 py-1.5
+        border-b border-thf-blue-500 last:border-b-0 lg:border-b-0
+        transition-colors duration-200 ${
         isActiveStream
-          ? 'bg-thf-blue-500 text-white'
+          ? 'bg-thf-blue-500 text-white rounded-lg'
           : 'bg-white text-thf-blue-500'
       }`}
     >
       <span
-        className={`shrink-0 w-5 h-5 flex items-center justify-center text-xs font-bold border ${
+        className={`shrink-0 w-5 h-5 inline-flex items-center justify-center font-mono text-[10px] font-bold leading-none border rounded-sm ${
           isActiveStream
             ? 'border-white bg-white text-thf-blue-500'
             : 'border-thf-blue-500 text-thf-blue-500 bg-white'
@@ -78,8 +80,7 @@ export default function LiveChannelRow({
       </div>
 
       <AdaptiveMarquee
-        className='flex-1 **:text-inherit'
-        contentClassName='text-sm lg:text-base'
+        className='flex-1 min-w-0 leading-none **:text-inherit'
         measureKey={measureKey}
       >
         {showContent}
@@ -87,8 +88,8 @@ export default function LiveChannelRow({
 
       {showChannelLabel && (
         <span
-          className={`hidden sm:inline shrink-0 text-[10px] lg:text-xs font-semibold uppercase tracking-wide ${
-            isActiveStream ? 'text-white/90' : 'text-gray-400'
+          className={`hidden sm:inline-flex h-[1em] items-center overflow-hidden shrink-0 font-mono text-[10px] lg:text-[11px] font-medium uppercase tracking-widest leading-none ${
+            isActiveStream ? 'text-white/70' : 'text-thf-blue-500/40'
           }`}
         >
           {label}

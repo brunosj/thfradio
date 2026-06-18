@@ -26,7 +26,7 @@ export default function ChannelToggle({
   const baseButton =
     variant === 'ticker'
       ? 'px-2 py-0.5 text-xs font-mono uppercase transition-colors cursor-pointer'
-      : 'px-4 py-2 text-sm font-mono uppercase transition-colors cursor-pointer';
+      : 'px-3 py-1.5 lg:px-4 lg:py-2 text-sm font-mono uppercase transition-colors cursor-pointer';
 
   const containerClass =
     variant === 'ticker'
@@ -37,7 +37,7 @@ export default function ChannelToggle({
     <div
       className={
         variant === 'calendar'
-          ? 'flex justify-center pb-6'
+          ? 'flex justify-center pb-2 lg:pb-6'
           : 'flex items-center'
       }
       role='group'

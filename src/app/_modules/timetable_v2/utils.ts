@@ -109,3 +109,20 @@ export function generateTwoWeekRange(startDate = new Date()) {
   const start = startOfDay(startDate);
   return Array.from({ length: 14 }, (_, i) => addDays(start, i));
 }
+
+/** Next day in range (after fromDay) that has at least one show. */
+export function findNextDayWithShows(
+  days: Date[],
+  entriesByDay: { date: Date; events: CalendarEntry[] }[],
+  fromDay: Date,
+): Date | null {
+  const fromIndex = days.findIndex((d) => isSameDay(d, fromDay));
+  if (fromIndex === -1) return null;
+
+  for (let i = fromIndex + 1; i < days.length; i++) {
+    if (entriesByDay[i]?.events.length > 0) {
+      return days[i];
+    }
+  }
+  return null;
+}

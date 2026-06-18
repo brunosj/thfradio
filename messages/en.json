@@ -23,6 +23,8 @@
   "programme": "Schedule",
   "upcomingShows": "Check out our upcoming shows",
   "failedToLoad": "Failed to load schedule data. Please try again later.",
+  "noShowsThisDay": "No shows scheduled for this day.",
+  "nextDayWithShows": "Next day with shows",
   "liveChannels": {
     "label": "Live channel",
     "thf1": "THF1",

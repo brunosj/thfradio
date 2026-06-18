@@ -15,11 +15,13 @@ export default function LiveTicker() {
 
   return (
     <div className='w-full bg-white border-b border-thf-blue-500'>
-      <div className='layout flex items-stretch py-2 font-mono'>
-        <div className='hidden lg:flex shrink-0 items-center pr-4 mr-2 border-r border-thf-blue-500 text-xs uppercase text-thf-blue-500'>
-          <span className='font-semibold tracking-wide'>Live Now</span>
+      <div className='layout flex items-stretch py-2'>
+        <div className='hidden lg:flex shrink-0 items-center pr-4 mr-2 border-r border-thf-blue-500'>
+          <span className='text-[11px] font-medium uppercase tracking-widest leading-none text-thf-blue-500/70'>
+            Live Now
+          </span>
         </div>
-        <div className='flex flex-1 min-w-0 items-stretch'>
+        <div className='flex flex-1 min-w-0 flex-col lg:flex-row lg:gap-1 lg:items-stretch'>
           <LiveChannelRow
             key={1}
             channelId={1}

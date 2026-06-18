@@ -113,6 +113,8 @@
     "thf2": "THF2"
   },
   "failedToLoad": "Programmdaten konnten nicht geladen werden. Bitte versuche es später erneut.",
+  "noShowsThisDay": "An diesem Tag sind keine Shows geplant.",
+  "nextDayWithShows": "Nächster Tag mit Shows",
   "chat": {
     "fermer": "Schließen",
     "pseudo": "Pseudonym",

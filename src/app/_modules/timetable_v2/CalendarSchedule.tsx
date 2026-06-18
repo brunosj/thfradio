@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { TimetableV2 } from '.';
+import MobileTimetable from './MobileTimetable';
 import BarsSpinner from '@/app/_common/ui/BarsSpinner';
 import { isChannel2Available } from '@/app/_lib/liveChannels';
 import ChannelToggle from '@/app/_modules/live-radio/ChannelToggle';
@@ -53,7 +54,7 @@ const CalendarSchedule = ({
 
   return (
     <section
-      className='bg-dark-blue py-8 scroll-mt-24 text-white'
+      className='bg-dark-blue py-4 lg:py-8 scroll-mt-24 text-white'
       id='schedule'
     >
       {/* <SectionHeader title={title} text={subtitleText} textHtml={textHtml} /> */}
@@ -75,9 +76,14 @@ const CalendarSchedule = ({
             {t('failedToLoad')}
           </div>
         ) : (
-          <div className='overflow-x-auto pb-6 pl-6 lg:pl-16'>
-            <TimetableV2 calendarEntries={activeEntries} />
-          </div>
+          <>
+            <div className='hidden lg:block overflow-x-auto pb-6 pl-6 lg:pl-16'>
+              <TimetableV2 calendarEntries={activeEntries} />
+            </div>
+            <div className='lg:hidden px-4 pb-4'>
+              <MobileTimetable calendarEntries={activeEntries} />
+            </div>
+          </>
         )}
       </div>
     </section>
