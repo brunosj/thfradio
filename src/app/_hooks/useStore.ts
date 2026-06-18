@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { LiveChannelId } from '@/app/_lib/liveChannels';
 
 export enum ActivePlayer {
   MIXCLOUD,
@@ -9,6 +10,17 @@ export enum ActivePlayer {
 interface GlobalStore {
   activePlayer: ActivePlayer | undefined;
   activePlayerSet: (activePlayer: ActivePlayer) => void;
+
+  /** Live audio stream (LiveTicker + mobile header player) */
+  activeStreamChannel: LiveChannelId;
+  setActiveStreamChannel: (channel: LiveChannelId) => void;
+
+  liveStreamPlaying: boolean;
+  setLiveStreamPlaying: (playing: boolean) => void;
+
+  /** Timetable grid view only */
+  activeTimetableChannel: LiveChannelId;
+  setActiveTimetableChannel: (channel: LiveChannelId) => void;
 
   showKey: string | undefined;
   showKeySet: (showKey: string) => void;
@@ -25,6 +37,15 @@ interface GlobalStore {
 export const useGlobalStore = create<GlobalStore>((set) => ({
   activePlayer: undefined,
   activePlayerSet: (activePlayer) => set({ activePlayer }),
+
+  activeStreamChannel: 1,
+  setActiveStreamChannel: (channel) => set({ activeStreamChannel: channel }),
+
+  liveStreamPlaying: false,
+  setLiveStreamPlaying: (playing) => set({ liveStreamPlaying: playing }),
+
+  activeTimetableChannel: 1,
+  setActiveTimetableChannel: (channel) => set({ activeTimetableChannel: channel }),
 
   showKey: undefined,
   showKeySet: (showKey) =>
@@ -48,6 +69,5 @@ export const useGlobalStore = create<GlobalStore>((set) => ({
       activePlayer: undefined,
       showKey: undefined,
       trackId: undefined,
-      // Keep currentShowUrl for history purposes
     }),
 }));

@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
-import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
+import { useEffect } from 'react';
 import { TimetableV2 } from '.';
 import BarsSpinner from '@/app/_common/ui/BarsSpinner';
-import { fetchCalendar } from '@/app/_lib/calendar';
+import { isChannel2Available } from '@/app/_lib/liveChannels';
+import ChannelToggle from '@/app/_modules/live-radio/ChannelToggle';
+import { useGlobalStore } from '@/hooks/useStore';
+import { useCalendarData } from '@/hooks/useCalendarStore';
 import { useTranslations } from 'next-intl';
 import SectionHeader from '@/common/layout/section/SectionHeader';
 
@@ -15,7 +17,6 @@ export type CalendarScheduleProps = {
   programmeTextHtml?: string;
 };
 
-// Loading fallback component
 const TimetableLoading = () => (
   <div className='w-full text-center  min-h-[60lvh]  flex items-center justify-center'>
     <BarsSpinner color='#ff6314' />
@@ -27,26 +28,23 @@ const CalendarSchedule = ({
   programmeText,
   programmeTextHtml,
 }: CalendarScheduleProps = {}) => {
-  const [isPending, startTransition] = useTransition();
-  const [calendarEntries, setCalendarEntries] = useState<CalendarEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { ch1, ch2, isLoading, error } = useCalendarData();
   const t = useTranslations();
+  const activeTimetableChannel = useGlobalStore(
+    (state) => state.activeTimetableChannel,
+  );
+  const setActiveTimetableChannel = useGlobalStore(
+    (state) => state.setActiveTimetableChannel,
+  );
 
-  // Use React 18's useTransition for non-blocking data fetching
+  const channel2Available = isChannel2Available(ch2);
+  const activeEntries = activeTimetableChannel === 2 ? ch2 : ch1;
+
   useEffect(() => {
-    startTransition(async () => {
-      try {
-        const data = await fetchCalendar();
-        setCalendarEntries(data);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error fetching calendar:', err);
-        setError(true);
-        setIsLoading(false);
-      }
-    });
-  }, []); // Empty dependency array to run only once on mount
+    if (activeTimetableChannel === 2 && !channel2Available) {
+      setActiveTimetableChannel(1);
+    }
+  }, [activeTimetableChannel, channel2Available, setActiveTimetableChannel]);
 
   const title = programmeTitle?.trim() ? programmeTitle.trim() : t('programme');
   const textHtml = programmeTextHtml?.trim() ? programmeTextHtml : undefined;
@@ -58,10 +56,19 @@ const CalendarSchedule = ({
       className='bg-dark-blue py-8 scroll-mt-24 text-white'
       id='schedule'
     >
-      <SectionHeader title={title} text={subtitleText} textHtml={textHtml} />
+      {/* <SectionHeader title={title} text={subtitleText} textHtml={textHtml} /> */}
+
+      {!isLoading && !error && channel2Available && (
+        <ChannelToggle
+          channel2Available={channel2Available}
+          activeChannel={activeTimetableChannel}
+          onChannelChange={setActiveTimetableChannel}
+          variant='calendar'
+        />
+      )}
 
       <div className=''>
-        {isLoading || isPending ? (
+        {isLoading ? (
           <TimetableLoading />
         ) : error ? (
           <div className='m-auto text-center p-12 bg-red-900/20 rounded-xl border border-red-900/30 text-white'>
@@ -69,7 +76,7 @@ const CalendarSchedule = ({
           </div>
         ) : (
           <div className='overflow-x-auto pb-6 pl-6 lg:pl-16'>
-            <TimetableV2 calendarEntries={calendarEntries} />
+            <TimetableV2 calendarEntries={activeEntries} />
           </div>
         )}
       </div>

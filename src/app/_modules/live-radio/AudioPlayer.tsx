@@ -1,5 +1,6 @@
 import { useRef, forwardRef, useImperativeHandle } from 'react';
 import usePlayerState from '@/hooks/usePlayerState';
+import type { LiveChannelId } from '@/app/_lib/liveChannels';
 import { Pause } from '@/common/assets/PauseIcon';
 import { Play } from '@/common/assets/PlayIcon';
 
@@ -7,6 +8,7 @@ interface AudioPlayerProps {
   iconFill: string;
   iconClassName: string;
   audioSrc: string;
+  channelId?: LiveChannelId;
 }
 
 export type AudioPlayerRef = {
@@ -14,30 +16,36 @@ export type AudioPlayerRef = {
 };
 
 const LivePlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(
-  ({ iconClassName, iconFill, audioSrc }, ref) => {
-    const AUDIO_SRC = audioSrc;
-
+  ({ iconClassName, iconFill, audioSrc, channelId }, ref) => {
     const player = useRef<HTMLAudioElement>(
-      null
+      null,
     ) as React.MutableRefObject<HTMLAudioElement>;
     const source = useRef<HTMLSourceElement>(
-      null
+      null,
     ) as React.MutableRefObject<HTMLSourceElement>;
 
     const { isPlaying, play, pause } = usePlayerState({
       audioRef: player,
       sourceRef: source,
-      url: AUDIO_SRC,
+      url: audioSrc,
+      channelId,
     });
 
-    // Expose methods to parent components via ref
     useImperativeHandle(ref, () => ({
-      pause,
+      pause: () => {
+        void pause();
+      },
     }));
+
+    const audioId =
+      channelId !== undefined
+        ? `thfradio-live-player-${channelId}`
+        : 'thfradio-live-player';
 
     return (
       <section className='flex items-center'>
         <button
+          type='button'
           className='cursor-pointer'
           onClick={isPlaying ? pause : play}
           aria-label={
@@ -51,13 +59,13 @@ const LivePlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(
           )}
         </button>
 
-        <audio hidden id='thfradio-live-player' preload='none' ref={player}>
+        <audio hidden id={audioId} preload='none' ref={player}>
           <source ref={source} type='audio/mpeg' />
           Your browser does not support the audio element.
         </audio>
       </section>
     );
-  }
+  },
 );
 
 LivePlayer.displayName = 'LivePlayer';

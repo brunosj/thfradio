@@ -1,5 +1,6 @@
 import { DataProvider } from "./DataContext";
 import { ChatProvider } from "./ChatContext";
+import { AppProviders } from "./AppProviders";
 import type { TagsList } from "@/types/ResponsesInterface";
 import { fetchTags } from "@/lib/tags";
 
@@ -25,7 +26,9 @@ export async function DataProviderWrapper({
   const { tagsList } = await fetchInitialData();
   return (
     <DataProvider initialTagsList={tagsList}>
-      <ChatProvider>{children}</ChatProvider>
+      <ChatProvider>
+        <AppProviders>{children}</AppProviders>
+      </ChatProvider>
     </DataProvider>
   );
 }

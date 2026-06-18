@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
 import nodeIcal from 'node-ical';
-import {
-  isWithinInterval,
-  startOfDay,
-  endOfDay,
-  addDays,
-  endOfWeek,
-  addWeeks,
-} from 'date-fns';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
 import type { CalendarComponent, VEvent } from 'node-ical';
+import {
+  getTwoWeekBounds,
+  isWithinTwoWeekBounds,
+} from '@/app/_lib/calendarRange';
 
 // Set revalidation period to 5 minutes
 export const revalidate = 300;
@@ -32,9 +28,7 @@ export async function GET() {
       }
     );
 
-    const now = startOfDay(new Date());
-    // Fetch two weeks of data instead of just the current week
-    const endOfTwoWeeks = endOfDay(addDays(endOfWeek(addWeeks(now, 1)), 1));
+    const bounds = getTwoWeekBounds();
     const veventEntries = Object.values(calendarEntries) as VEvent[];
 
     const upcomingShows: CalendarEntry[] = veventEntries
@@ -42,10 +36,7 @@ export async function GET() {
       .filter((show: VEvent) => {
         const showStart = new Date(show.start);
         const showEnd = new Date(show.end);
-        return (
-          isWithinInterval(showStart, { start: now, end: endOfTwoWeeks }) &&
-          isWithinInterval(showEnd, { start: now, end: endOfTwoWeeks })
-        );
+        return isWithinTwoWeekBounds(showStart, showEnd, bounds);
       })
       .map((event: VEvent, index) => {
         const startTime = new Date(event.start).toISOString();

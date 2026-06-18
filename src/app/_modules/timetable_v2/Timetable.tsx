@@ -4,6 +4,7 @@ import { addDays, startOfDay, format } from 'date-fns';
 import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
 import WeekGrid from './WeekGrid';
 import { useLocale } from 'next-intl';
+import { DAY_COLUMN_WIDTH } from './utils';
 
 interface TimetableV2Props {
   calendarEntries: CalendarEntry[];
@@ -31,17 +32,17 @@ export default function TimetableV2({
 
     return (
       <div
-        className={`w-full py-2 px-3 text-center border-r border-gray-700 h-10 border-b
+        className={`w-full py-1 px-3 text-center border-r border-gray-700 h-8 border-b
                 ${isToday ? 'bg-thf-blue-500/20' : 'bg-dark-blue'}`}
       >
         <div className='flex items-center justify-center space-x-2'>
-          <p className='text-sm uppercase text-gray-400'>{dayName}</p>
+          <p className='text-xs uppercase text-gray-400'>{dayName}</p>
           <p
-            className={`text-lg ${isToday ? 'font-bold text-orange-400' : 'text-white'}`}
+            className={`text-base ${isToday ? 'font-bold text-orange-400' : 'text-white'}`}
           >
             {dayNumber}
           </p>
-          <p className='text-sm uppercase text-gray-400'>{month}</p>
+          <p className='text-xs uppercase text-gray-400'>{month}</p>
         </div>
       </div>
     );
@@ -57,12 +58,16 @@ export default function TimetableV2({
           {/* Headers row */}
           <div className='flex z-30  border-gray-700 shadow-md transition-shadow duration-200'>
             {/* Empty corner for time column - sticky in both directions */}
-            <div className='w-16 h-10 shrink-0 sticky left-0 z-40 bg-dark-blue border-r border-gray-700 flex items-center justify-center border-b'></div>
+            <div className='w-16 h-8 shrink-0 sticky left-0 z-40 bg-dark-blue border-r border-gray-700 flex items-center justify-center border-b'></div>
 
             {/* Day headers - sticky vertically */}
             <div className='flex'>
               {days.map((day, index) => (
-                <div className='shrink-0 w-[280px] bg-dark-blue' key={index}>
+                <div
+                  className='shrink-0 bg-dark-blue'
+                  style={{ width: `${DAY_COLUMN_WIDTH}px` }}
+                  key={index}
+                >
                   {formatDayHeader(day)}
                 </div>
               ))}

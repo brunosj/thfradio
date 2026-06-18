@@ -107,6 +107,11 @@
   },
   "upcomingShows": "Kommende Shows",
   "programme": "Programm",
+  "liveChannels": {
+    "label": "Live-Kanal",
+    "thf1": "THF1",
+    "thf2": "THF2"
+  },
   "failedToLoad": "Programmdaten konnten nicht geladen werden. Bitte versuche es später erneut.",
   "chat": {
     "fermer": "Schließen",

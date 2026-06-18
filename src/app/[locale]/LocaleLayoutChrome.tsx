@@ -29,9 +29,11 @@ export function LocaleLayoutChrome({
 
   return (
     <>
-      <LiveTicker />
       <div className="relative">
-        <Header />
+        <div className="sticky top-0 z-50 w-full">
+          <Header />
+          <LiveTicker />
+        </div>
         <main>{children}</main>
       </div>
       <Footer />

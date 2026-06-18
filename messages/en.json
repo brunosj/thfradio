@@ -23,6 +23,11 @@
   "programme": "Schedule",
   "upcomingShows": "Check out our upcoming shows",
   "failedToLoad": "Failed to load schedule data. Please try again later.",
+  "liveChannels": {
+    "label": "Live channel",
+    "thf1": "THF1",
+    "thf2": "THF2"
+  },
   "today": "Today",
   "previousWeek": "Previous week",
   "nextWeek": "Next week",

@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import logo from '@/assets/logo_white.png';
-import AudioPlayer from '@/modules/live-radio/AudioPlayer';
 import { SlSpeech } from 'react-icons/sl';
 import { Bars3Icon } from '@/common/assets/Bars3Icon';
 import { XMarkIcon } from '@/common/assets/XMarkIcon';
@@ -80,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className='sticky w-full z-50 top-0 pt-4 bg-thf-blue-500 text-white pb-4 lg:pb-0 opacity-100 h-16'>
+    <header className='w-full pt-4 bg-thf-blue-500 text-white pb-4 lg:pb-0 opacity-100 h-16'>
       <div className='layout flex items-center justify-between'>
         {/* Logo (left aligned) */}
         <div className='flex items-center gap-6'>
@@ -128,14 +127,6 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* Mobile Menu Controls (right side) */}
           <div className='lg:hidden flex items-center space-x-3'>
-            <AudioPlayer
-              iconFill='white'
-              iconClassName='w-6 h-6'
-              audioSrc={
-                process.env.LIVE_RADIO_STREAM ||
-                'https://thf-radio-7ec0e6ee.radiocult.fm/stream'
-              }
-            />
             <button
               onClick={handleToggleMenu}
               className='text-white'

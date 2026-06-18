@@ -1,30 +1,41 @@
 // File: WeekGrid.tsx
 import React from 'react';
-import { isSameDay, parseISO, differenceInMinutes } from 'date-fns';
+import { isSameDay, parseISO } from 'date-fns';
 import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
 import CalendarEventItem from './CalendarEventItem';
-import { entryEndIso, entryStartIso } from './utils';
+import {
+  DAY_COLUMN_WIDTH,
+  END_DISPLAY_HOUR,
+  entryEndIso,
+  entryStartIso,
+  getBroadcastGridHour,
+  getEventDurationMinutes,
+  getBroadcastStartMinutes,
+  HOUR_HEIGHT,
+  MIN_EVENT_HEIGHT,
+  START_HOUR,
+} from './utils';
 
 interface WeekGridProps {
   days: Date[];
   calendarEntries: CalendarEntry[];
 }
 
-export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
-  // Constants
-  const HOUR_HEIGHT = 80; // Reduced from 100px to 80px per hour
-  const START_HOUR = 8; // 8am
-  const END_HOUR = 24; // Midnight (24 for calculations)
+function formatGridHour(hour: number): string {
+  const displayHour = hour >= 24 ? hour - 24 : hour;
+  return `${String(displayHour).padStart(2, '0')}:00`;
+}
 
-  // Create an array of hours from 10am to midnight
+export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
   const hours = Array.from(
-    { length: END_HOUR - START_HOUR },
-    (_, i) => i + START_HOUR
+    { length: END_DISPLAY_HOUR - START_HOUR },
+    (_, i) => i + START_HOUR,
   );
 
-  // Group entries by day
+  const gridHeight = hours.length * HOUR_HEIGHT;
+  const now = new Date();
+
   const entriesByDay = days.map((day) => {
-    // Get all entries for this day
     const dayEntries = calendarEntries.filter((entry) => {
       try {
         const startIso = entryStartIso(entry);
@@ -41,7 +52,6 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
 
   return (
     <div className='relative w-full min-w-fit'>
-      {/* Time grid */}
       <div className='flex flex-col'>
         {hours.map((hour, hourIndex) => (
           <div
@@ -49,7 +59,6 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
             className='flex w-full'
             style={{ height: `${HOUR_HEIGHT}px` }}
           >
-            {/* Hour label on the left - now position:sticky with perfectly aligned borders */}
             <div
               className='w-16 h-full flex-shrink-0 sticky left-0 z-20 bg-dark-blue border-r border-gray-700'
               style={{
@@ -60,25 +69,34 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
             >
               <div className='h-full flex items-start justify-end pr-3 pl-2'>
                 <span className='text-xs text-gray-400 pt-1'>
-                  {hour === 0 ? '00:00' : `${hour}:00`}
+                  {formatGridHour(hour)}
                 </span>
               </div>
             </div>
 
-            {/* Day columns */}
             <div className='flex flex-nowrap'>
               {days.map((day, dayIndex) => {
-                const isCurrentHour =
-                  new Date().getHours() === hour && isSameDay(new Date(), day);
+                const broadcastHour = getBroadcastGridHour(
+                  now,
+                  day,
+                  START_HOUR,
+                  END_DISPLAY_HOUR,
+                );
+                const isCurrentHour = broadcastHour === hour;
 
                 return (
                   <div
                     key={`${dayIndex}-${hourIndex}`}
-                    className={`w-[280px] flex-shrink-0 border-b border-r border-gray-700 relative
+                    className={`flex-shrink-0 border-b border-r border-gray-700 relative
                               ${isCurrentHour ? 'bg-thf-blue-500/20' : ''}`}
-                    style={{ height: `${HOUR_HEIGHT}px` }}
+                    style={{
+                      width: `${DAY_COLUMN_WIDTH}px`,
+                      height: `${HOUR_HEIGHT}px`,
+                    }}
                   >
-                    {/* This is just the grid cell */}
+                    {hour === 24 && (
+                      <div className='absolute inset-x-0 top-0 border-t border-dashed border-gray-500/60 pointer-events-none' />
+                    )}
                   </div>
                 );
               })}
@@ -87,63 +105,63 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
         ))}
       </div>
 
-      {/* Events layer with absolute positioning */}
       <div className='absolute top-0 left-0 right-0 bottom-0 pointer-events-none'>
         <div className='flex h-full'>
-          {/* Hour spacer column - needs to be the same width as the sticky time column*/}
-          <div className='w-16 flex-shrink-0'></div>
+          <div className='w-16 flex-shrink-0' />
 
-          {/* Event columns */}
           <div className='flex flex-nowrap'>
             {entriesByDay.map(({ entries }, dayIndex) => (
               <div
                 key={dayIndex}
-                className='w-[280px] flex-shrink-0 relative h-full'
+                className='flex-shrink-0 relative'
+                style={{
+                  width: `${DAY_COLUMN_WIDTH}px`,
+                  height: `${gridHeight}px`,
+                }}
               >
                 {entries.map((entry, entryIndex) => {
                   try {
                     const startIso = entryStartIso(entry);
                     const endIso = entryEndIso(entry);
                     if (!startIso || !endIso) return null;
+
                     const startTime = parseISO(startIso);
                     const endTime = parseISO(endIso);
-
-                    // Only display if the event starts within our time range
                     const startHour = startTime.getHours();
-                    if (startHour < START_HOUR || startHour >= END_HOUR)
-                      return null;
 
-                    // Calculate the hour offset (relative to our 10am start)
-                    const hourOffset = startHour - START_HOUR;
-                    const startMinutes = startTime.getMinutes();
+                    if (startHour < START_HOUR) return null;
 
-                    // Calculate top position from the start of the grid
+                    const startMinutes = getBroadcastStartMinutes(startTime);
+                    const gridStartMinutes = START_HOUR * 60;
                     const topPosition =
-                      hourOffset * HOUR_HEIGHT +
-                      (startMinutes * HOUR_HEIGHT) / 60;
+                      ((startMinutes - gridStartMinutes) * HOUR_HEIGHT) / 60;
 
-                    // Calculate duration and height
-                    const durationMinutes = differenceInMinutes(
+                    const durationMinutes = getEventDurationMinutes(
+                      startTime,
                       endTime,
-                      startTime
                     );
-                    // Convert duration to proper height based on new HOUR_HEIGHT
+                    const rawHeight = (durationMinutes * HOUR_HEIGHT) / 60;
+                    const maxHeight = gridHeight - topPosition;
                     const heightInPixels = Math.max(
-                      35,
-                      (durationMinutes * HOUR_HEIGHT) / 60
+                      MIN_EVENT_HEIGHT,
+                      Math.min(rawHeight, maxHeight),
                     );
+
+                    if (topPosition >= gridHeight) return null;
 
                     return (
                       <div
                         key={entryIndex}
-                        className='absolute left-1 right-1 pointer-events-auto border-t-2 border-orange-500 rounded-t-sm overflow-hidden'
+                        className='group/event absolute left-1 right-1 pointer-events-auto border-t-2 border-orange-500 rounded-t-sm z-10 hover:z-50'
                         style={{
                           top: `${topPosition}px`,
                           height: `${heightInPixels}px`,
-                          zIndex: 10,
                         }}
                       >
-                        <CalendarEventItem event={entry} />
+                        <CalendarEventItem
+                          event={entry}
+                          slotHeightPx={heightInPixels}
+                        />
                       </div>
                     );
                   } catch {
