@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { IoClose, IoMove, IoExpand, IoContract } from "react-icons/io5";
+import { IoClose, IoExpand, IoContract } from "react-icons/io5";
 import { useTranslations } from "next-intl";
+import ReactPlayer from "react-player";
 
 interface StreamStatus {
   live: boolean;
@@ -33,13 +34,9 @@ export default function VideoStreamPopup() {
   // Check streaming status
   const checkStreamStatus = async () => {
     try {
-      // First try the backend API
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/health/stream`,
-        {
-          cache: "no-store",
-        },
-      );
+      const response = await fetch("/api/stream-status", {
+        cache: "no-store",
+      });
 
       if (response.ok) {
         const data: StreamStatus = await response.json();
@@ -48,8 +45,6 @@ export default function VideoStreamPopup() {
           setHlsUrl(data.hlsUrl);
         }
       } else {
-        // Fallback: always show the popup if we can't check status
-        // Adjust this based on your actual streaming setup
         setIsLive(false);
       }
     } catch (error) {
@@ -148,13 +143,15 @@ export default function VideoStreamPopup() {
     };
   }, [isDragging, dragOffset]);
 
-  // Handle popup visibility
+  // Handle popup visibility — reset dismissed state when stream comes back online
+  const prevIsLive = useRef(false);
   useEffect(() => {
-    if (isLive && !hasBeenDismissed) {
-      setIsOpen(true);
-    } else {
-      setIsOpen(false);
+    if (isLive && !prevIsLive.current) {
+      setHasBeenDismissed(false);
     }
+    prevIsLive.current = isLive;
+
+    setIsOpen(isLive && !hasBeenDismissed);
   }, [isLive, hasBeenDismissed]);
 
   const handleClose = () => {
@@ -233,17 +230,14 @@ export default function VideoStreamPopup() {
             className={`relative w-full flex-grow ${!isFullPage ? "" : "h-full"}`}
             style={!isFullPage ? { aspectRatio: "16/9" } : {}}
           >
-            <video
+            <ReactPlayer
+              url={videoUrl}
+              playing
               controls
-              autoPlay
-              playsInline
-              className="h-full w-full bg-black"
-              src={videoUrl}
-              crossOrigin="anonymous"
-            >
-              <source src={videoUrl} type="application/x-mpegURL" />
-              Your browser does not support the video tag.
-            </video>
+              playsinline
+              width="100%"
+              height="100%"
+            />
           </div>
         </div>
       )}
