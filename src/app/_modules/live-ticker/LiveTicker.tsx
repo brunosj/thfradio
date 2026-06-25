@@ -5,6 +5,7 @@ import { enUS, de } from 'date-fns/locale';
 import LiveChannelRow from '@/modules/live-ticker/LiveChannelRow';
 import useLiveStreamPlayer from '@/hooks/useLiveStreamPlayer';
 import { useCalendarData } from '@/hooks/useCalendarStore';
+import { isChannel2Available } from '@/app/_lib/liveChannels';
 
 export default function LiveTicker() {
   const t = useTranslations();
@@ -12,6 +13,7 @@ export default function LiveTicker() {
   const localeModule = locale === 'de' ? de : enUS;
   const { ch1, ch2 } = useCalendarData({ enablePolling: true });
   const { isPlaying, activeStreamChannel, toggle } = useLiveStreamPlayer();
+  const channel2Available = isChannel2Available(ch2);
 
   return (
     <div className='w-full bg-white border-b border-thf-blue-500'>
@@ -33,17 +35,19 @@ export default function LiveTicker() {
               void toggle(1);
             }}
           />
-          <LiveChannelRow
-            key={2}
-            channelId={2}
-            entries={ch2}
-            localeModule={localeModule}
-            t={t}
-            isPlaying={isPlaying && activeStreamChannel === 2}
-            onToggle={() => {
-              void toggle(2);
-            }}
-          />
+          {channel2Available && (
+            <LiveChannelRow
+              key={2}
+              channelId={2}
+              entries={ch2}
+              localeModule={localeModule}
+              t={t}
+              isPlaying={isPlaying && activeStreamChannel === 2}
+              onToggle={() => {
+                void toggle(2);
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
