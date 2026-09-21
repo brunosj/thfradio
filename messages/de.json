@@ -92,6 +92,11 @@
       "name": "Impressum",
       "path": "/imprint",
       "lang": "de"
+    },
+    {
+      "name": "Awareness",
+      "path": "/awareness",
+      "lang": "de"
     }
   ],
   "notFound": {

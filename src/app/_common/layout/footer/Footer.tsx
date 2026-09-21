@@ -11,7 +11,7 @@ const followMenuKeys = [
   'Mixcloud',
   'Soundcloud',
 ] as const;
-const extraMenuKeys = ['privacy', 'imprint'] as const;
+const extraMenuKeys = ['privacy', 'imprint', 'awareness'] as const;
 const contactMenuKeys = ['support'] as const;
 
 const Footer = () => {

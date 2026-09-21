@@ -104,6 +104,11 @@
       "name": "Imprint",
       "path": "/imprint",
       "lang": "en"
+    },
+    {
+      "name": "Awareness",
+      "path": "/awareness",
+      "lang": "en"
     }
   ],
   "notFound": {
