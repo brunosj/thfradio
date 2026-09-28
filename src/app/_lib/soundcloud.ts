@@ -207,46 +207,63 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
 
     // Define cutoff date for filtering (May 1, 2025)
     const cutoffDate = new Date('2025-05-01T00:00:00Z');
-    const limit = 500;
+    // SoundCloud caps page size at 200
+    const pageSize = 200;
+    const maxPages = 30;
+    const pageDelayMs = 300;
 
-    // Created_at parameter doesn't work with /users/{id}/tracks endpoint
-    // Just request with limit and we'll filter client-side
-    const tracksResponse = await fetch(
-      `https://api.soundcloud.com/users/${userId}/tracks?limit=${limit}`,
-      {
+    // Created_at parameter doesn't work with /users/{id}/tracks endpoint, and
+    // results aren't strictly ordered by created_at, so fetch every page and
+    // filter client-side
+    let nextUrl: string | null =
+      `https://api.soundcloud.com/users/${userId}/tracks?limit=${pageSize}&linked_partitioning=true`;
+    const shows: CloudShowTypes[] = [];
+
+    for (let page = 1; nextUrl && page <= maxPages; page++) {
+      if (page > 1) {
+        await new Promise((resolve) => setTimeout(resolve, pageDelayMs));
+      }
+
+      const tracksResponse = await fetch(nextUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',
         },
-      }
-    );
-
-    if (!tracksResponse.ok) {
-      const errorText = await tracksResponse
-        .text()
-        .catch(() => 'Could not get error text');
-      console.error('SoundCloud API response error:', {
-        status: tracksResponse.status,
-        statusText: tracksResponse.statusText,
-        error: errorText,
       });
-      return [];
-    }
 
-    const data = await tracksResponse.json();
-    // Process shows individually to prevent a single track with malformed tags from breaking everything
-    const shows: CloudShowTypes[] = [];
-    for (const track of data) {
-      try {
-        // Filter tracks by created_at date
-        const trackCreatedDate = new Date(track.created_at);
-        if (trackCreatedDate >= cutoffDate) {
-          shows.push(normalizeSoundcloudShow(track));
-        }
-      } catch (err) {
-        console.error(`Error processing track ${track.id}:`, err);
-        // Continue with other tracks
+      if (!tracksResponse.ok) {
+        const errorText = await tracksResponse
+          .text()
+          .catch(() => 'Could not get error text');
+        console.error('SoundCloud API response error:', {
+          page,
+          status: tracksResponse.status,
+          statusText: tracksResponse.statusText,
+          error: errorText,
+        });
+        break;
       }
+
+      const data: {
+        collection?: SoundcloudShowType[];
+        next_href?: string | null;
+      } = await tracksResponse.json();
+      const tracks = data.collection ?? [];
+
+      // Process shows individually to prevent a single track with malformed tags from breaking everything
+      for (const track of tracks) {
+        try {
+          const trackCreatedDate = new Date(track.created_at);
+          if (trackCreatedDate >= cutoffDate) {
+            shows.push(normalizeSoundcloudShow(track));
+          }
+        } catch (err) {
+          console.error(`Error processing track ${track.id}:`, err);
+          // Continue with other tracks
+        }
+      }
+
+      nextUrl = data.next_href ?? null;
     }
 
     return shows;
