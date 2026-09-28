@@ -3,8 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
+    const expected = process.env.REVALIDATE_TOKEN;
     const token = request.headers.get('authorization');
-    if (token !== `Bearer ${process.env.REVALIDATE_TOKEN}`) {
+    if (!expected || token !== `Bearer ${expected}`) {
       return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
     }
 
