@@ -138,5 +138,15 @@
     "errors": {
       "sendFailed": "Failed to send message. Please try again."
     }
+  },
+  "videoStream": {
+    "title": "Live video",
+    "unmute": "Unmute",
+    "mute": "Mute",
+    "minimize": "Minimize",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "close": "Close video",
+    "open": "Watch live video"
   }
 }

@@ -140,5 +140,15 @@
     "errors": {
       "sendFailed": "Nachricht konnte nicht gesendet werden. Bitte versuche es erneut."
     }
+  },
+  "videoStream": {
+    "title": "Live-Video",
+    "unmute": "Ton an",
+    "mute": "Ton aus",
+    "minimize": "Verkleinern",
+    "fullscreen": "Vollbild",
+    "exitFullscreen": "Vollbild beenden",
+    "close": "Video schließen",
+    "open": "Live-Video ansehen"
   }
 }
