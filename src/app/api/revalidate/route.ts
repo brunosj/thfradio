@@ -1,4 +1,5 @@
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { SHOWS_CACHE_TAG } from '@/lib/shows';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -41,12 +42,12 @@ export async function POST(request: NextRequest) {
         revalidatePath('/info', 'page');
         break;
       case 'show':
-        // Revalidate shows listing page
-        revalidatePath('/shows', 'page');
-        // Revalidate the specific show page if we have a slug
-        if (entry?.slug) {
-          revalidatePath(`/shows/${entry.slug}`, 'page');
-        }
+        // Sent by thfradio.space when a host saves show info. Drop the cached
+        // show data, then rebuild the list and show pages in every language
+        // (real routes live under /[locale]/...).
+        revalidateTag(SHOWS_CACHE_TAG);
+        revalidatePath('/[locale]/shows', 'page');
+        revalidatePath('/[locale]/shows/[slug]', 'page');
         break;
       case 'news':
         // Revalidate news listing page
