@@ -18,12 +18,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const content = await fetchShowBySlug(slug, locale);
-  const image = content?.image || '';
+  const image: string = content?.image || '';
 
   return createMetadata({
-    title: content.title,
-    description: content.description,
-    image: `${CMS_URL}${image}`,
+    title: content?.title,
+    description: content?.teaserSentence || content?.description,
+    // Intranet images are full URLs; old-backend ones are paths.
+    image: image.startsWith('http') ? image : `${CMS_URL}${image}`,
   });
 }
 
@@ -70,6 +71,7 @@ export async function generateMetadata({
 export default async function ShowPage({ params }: { params: Params }) {
   const { locale, slug } = await params;
   const content = await fetchShowBySlug(slug, locale);
+  if (!content?.title) notFound();
 
   return <ShowContent content={content} />;
 }
