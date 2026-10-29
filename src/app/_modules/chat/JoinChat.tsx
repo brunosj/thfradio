@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useChatState } from '@/app/_context/ChatContext';
 import { useTranslations } from 'next-intl';
+import LiveVideoPlayer from '@/app/_modules/video-stream/LiveVideoPlayer';
 import {
   isGlobalChatOverlaySuppressed,
   normalizeAppPath,
@@ -13,13 +14,16 @@ export default function JoinChat() {
   const { isChatOpen, setIsChatOpen } = useChatState();
   const t = useTranslations();
 
-  if (isGlobalChatOverlaySuppressed(normalizeAppPath(pathname))) {
-    return null;
-  }
+  const chatHidden = isGlobalChatOverlaySuppressed(normalizeAppPath(pathname));
 
+  // Bottom right dock: the live video player (while the video stream is on
+  // air), then the chat button. Wraps on phones: the open player above, the
+  // folded one beside the chat button. Stays even where the chat is hidden.
   return (
     <div className='fixed bottom-2 right-2 z-50'>
-      <div className='flex flex-col items-end gap-2'>
+      <div className='flex max-w-[calc(100vw-1rem)] flex-row flex-wrap items-end justify-end gap-2'>
+        <LiveVideoPlayer />
+        {!chatHidden && (
         <button
           onClick={() => setIsChatOpen(!isChatOpen)}
           className='inline-flex items-center p-3 rounded-xl bg-orange-500 text-white focus:outline-none focus:ring-4 font-mono font-semibold border border-white hover:cursor-pointer hover:scale-105 duration-300 animate-bounce'
@@ -30,6 +34,7 @@ export default function JoinChat() {
           </span>
           <span className='lg:hidden'>{isChatOpen ? 'X' : t('chat.join')}</span>
         </button>
+        )}
       </div>
     </div>
   );

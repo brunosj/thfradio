@@ -7,7 +7,6 @@ import JoinChat from "@/modules/chat/JoinChat";
 import { GlobalChatOverlay } from "@/modules/chat/GlobalChatOverlay";
 import Footer from "@/app/_common/layout/footer/Footer";
 import CloudPlayer from "@/app/_modules/player/CloudPlayer";
-import VideoStreamPopup from "@/app/_modules/video-stream/VideoStreamPopup";
 import { normalizeAppPath } from "@/modules/chat/chatRouteUtils";
 
 export function LocaleLayoutChrome({
@@ -40,7 +39,6 @@ export function LocaleLayoutChrome({
       <CloudPlayer />
       <JoinChat />
       <GlobalChatOverlay />
-      <VideoStreamPopup />
     </>
   );
 }
