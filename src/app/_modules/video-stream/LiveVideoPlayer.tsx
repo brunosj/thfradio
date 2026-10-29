@@ -9,7 +9,7 @@
 //   opens again by itself the next time the stream goes on air.
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { FiMaximize, FiVolume2, FiX } from 'react-icons/fi';
+import { FiMaximize, FiPlay, FiVolume2, FiX } from 'react-icons/fi';
 import { useGlobalStore } from '@/hooks/useStore';
 import { pauseLiveStream } from '@/app/_lib/liveStreamAudio';
 
@@ -118,14 +118,27 @@ function LiveVideo({
   videoRef: React.MutableRefObject<HTMLVideoElement | null>;
   onClick: () => void;
 }) {
+  const t = useTranslations();
   const ref = videoRef;
+  // The browser refused to start it (e.g. iPhone in Low Power Mode): tap to play
+  const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
     let hls: HlsInstance | null = null;
     let cancelled = false;
-    const play = () => video.play().catch(() => {});
+    // iOS only autoplays inline when the video is muted as an attribute too
+    // (React sets just the property)
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    const play = () =>
+      video
+        .play()
+        .then(() => setBlocked(false))
+        .catch(() => setBlocked(true));
     const playNatively = () => {
       video.src = url;
       play();
@@ -184,15 +197,29 @@ function LiveVideo({
   }, [muted, ref]);
 
   return (
-    <video
-      ref={ref}
-      autoPlay
-      muted
-      playsInline
-      onClick={onClick}
-      className='absolute inset-0 h-full w-full cursor-zoom-in bg-black'
-      onVolumeChange={(e) => onMutedChange(e.currentTarget.muted)}
-    />
+    <>
+      <video
+        ref={ref}
+        autoPlay
+        muted
+        playsInline
+        onClick={onClick}
+        onPlaying={() => setBlocked(false)}
+        className='absolute inset-0 h-full w-full cursor-zoom-in bg-black'
+        onVolumeChange={(e) => onMutedChange(e.currentTarget.muted)}
+      />
+      {blocked && (
+        <button
+          type='button'
+          // play() right in the tap: iOS only allows it there
+          onClick={() => ref.current?.play().then(() => setBlocked(false)).catch(() => {})}
+          aria-label={t('videoStart')}
+          className='absolute inset-0 m-auto flex h-14 w-14 items-center justify-center rounded-full bg-white text-dark-blue shadow-lg hover:bg-orange-500 hover:text-white'
+        >
+          <FiPlay className='h-6 w-6 translate-x-[1px]' fill='currentColor' />
+        </button>
+      )}
+    </>
   );
 }
 
@@ -261,6 +288,12 @@ export default function LiveVideoPlayer() {
 
   const unmute = () => {
     takeOverSound();
+    // Right in the tap: iOS only allows sound from here
+    const v = liveVideo.current;
+    if (v) {
+      v.muted = false;
+      void v.play().catch(() => {});
+    }
     setMuted(false);
   };
   // Sound turned on another way → it gets the sound too
