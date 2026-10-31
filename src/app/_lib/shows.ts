@@ -217,8 +217,16 @@ export async function fetchProgrammeShows(locale: string): Promise<ShowTypes[]> 
 export async function fetchShowBySlug(slug: string, locale: string) {
   if (intranetShowsEnabled()) {
     try {
+      // Route params can arrive still URL-encoded ("fu%C3%9Findertuer"):
+      // decode first so the slug is encoded exactly once.
+      let plainSlug = slug;
+      try {
+        plainSlug = decodeURIComponent(slug);
+      } catch {
+        // Not valid encoding: use as is.
+      }
       const data = await fetchIntranet<{ show: Partial<ShowTypes> }>(
-        `/${encodeURIComponent(slug)}`,
+        `/${encodeURIComponent(plainSlug)}`,
         locale,
       );
       if (data?.show) {
