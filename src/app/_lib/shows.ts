@@ -146,21 +146,72 @@ async function fetchBackendShow(slug: string, locale: string) {
   return await response.json();
 }
 
-export async function fetchProgrammeShows(locale: string): Promise<ShowTypes[]> {
-  if (intranetShowsEnabled()) {
-    try {
-      const data = await fetchIntranet<{ shows: Partial<ShowTypes>[] }>('', locale);
-      if (data?.shows) return data.shows.map(fromIntranet);
-    } catch (error) {
-      console.error('Intranet shows failed, falling back to old backend:', error);
-    }
-  }
+/** "Café Ölbaum!" → "cafeolbaum" — for matching shows across both sources. */
+function normTitle(title: string | undefined): string {
+  return (title ?? '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '');
+}
+
+/**
+ * Where thfradio.space has nothing, keep what the old backend had.
+ * Host-written values always win.
+ */
+function fillFromBackend(show: ShowTypes, old: ShowTypes | undefined): ShowTypes {
+  if (!old) return show;
+  return {
+    ...show,
+    image: show.image || old.image,
+    imageFullWidth: show.imageFullWidth || old.imageFullWidth,
+    description: show.description || old.description,
+    teaserSentence: show.teaserSentence || old.teaserSentence,
+  };
+}
+
+/**
+ * Intranet shows first, then every old-backend show that isn't on the
+ * intranet (yet), so no show drops off the list during the move.
+ */
+function mergeShows(intranet: ShowTypes[], backend: ShowTypes[]): ShowTypes[] {
+  const bySlug = new Map(backend.map((s) => [s.slug, s]));
+  const byTitle = new Map(backend.map((s) => [normTitle(s.title), s]));
+  const matched = new Set<ShowTypes>();
+
+  const merged = intranet.map((show) => {
+    const old = bySlug.get(show.slug) ?? byTitle.get(normTitle(show.title));
+    if (old) matched.add(old);
+    return fillFromBackend(show, old);
+  });
+  const intranetSlugs = new Set(merged.map((s) => s.slug));
+  const leftovers = backend.filter((s) => !matched.has(s) && !intranetSlugs.has(s.slug));
+  return [...merged, ...leftovers];
+}
+
+async function backendShowsOrEmpty(locale: string): Promise<ShowTypes[]> {
   try {
-    return await fetchBackendShows(locale);
+    const shows = await fetchBackendShows(locale);
+    return Array.isArray(shows) ? shows : [];
   } catch (error) {
-    console.error('Error fetching programme shows:', error);
+    console.error('Error fetching programme shows from old backend:', error);
     return [];
   }
+}
+
+export async function fetchProgrammeShows(locale: string): Promise<ShowTypes[]> {
+  if (intranetShowsEnabled()) {
+    const [intranet, backend] = await Promise.all([
+      fetchIntranet<{ shows: Partial<ShowTypes>[] }>('', locale).catch((error) => {
+        console.error('Intranet shows failed, falling back to old backend:', error);
+        return null;
+      }),
+      backendShowsOrEmpty(locale),
+    ]);
+    if (intranet?.shows) return mergeShows(intranet.shows.map(fromIntranet), backend);
+    return backend;
+  }
+  return backendShowsOrEmpty(locale);
 }
 
 export async function fetchShowBySlug(slug: string, locale: string) {
@@ -170,7 +221,13 @@ export async function fetchShowBySlug(slug: string, locale: string) {
         `/${encodeURIComponent(slug)}`,
         locale,
       );
-      if (data?.show) return fromIntranet(data.show);
+      if (data?.show) {
+        const show = fromIntranet(data.show);
+        if (show.image && show.imageFullWidth && show.description) return show;
+        // Something missing on the intranet: borrow it from the old backend.
+        const old = await fetchBackendShow(show.slug, locale).catch(() => null);
+        return fillFromBackend(show, old?.title ? old : undefined);
+      }
       // Not on the intranet (yet): the old backend may still have it.
     } catch (error) {
       console.error(`Intranet show ${slug} failed, falling back to old backend:`, error);
