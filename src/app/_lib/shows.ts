@@ -157,14 +157,16 @@ function normTitle(title: string | undefined): string {
 
 /**
  * Where thfradio.space has nothing, keep what the old backend had.
- * Host-written values always win.
+ * Host-written values always win. Pictures: if thfradio.space has any
+ * picture of the show, only its pictures are used.
  */
 function fillFromBackend(show: ShowTypes, old: ShowTypes | undefined): ShowTypes {
   if (!old) return show;
+  const hasPicture = Boolean(show.image || show.imageFullWidth);
   return {
     ...show,
-    image: show.image || old.image,
-    imageFullWidth: show.imageFullWidth || old.imageFullWidth,
+    image: hasPicture ? show.image : old.image,
+    imageFullWidth: hasPicture ? show.imageFullWidth : old.imageFullWidth,
     description: show.description || old.description,
     teaserSentence: show.teaserSentence || old.teaserSentence,
   };
@@ -231,7 +233,7 @@ export async function fetchShowBySlug(slug: string, locale: string) {
       );
       if (data?.show) {
         const show = fromIntranet(data.show);
-        if (show.image && show.imageFullWidth && show.description) return show;
+        if ((show.image || show.imageFullWidth) && show.description) return show;
         // Something missing on the intranet: borrow it from the old backend.
         const old = await fetchBackendShow(show.slug, locale).catch(() => null);
         return fillFromBackend(show, old?.title ? old : undefined);
