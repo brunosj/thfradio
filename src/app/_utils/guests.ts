@@ -59,20 +59,39 @@ export const compactTitle = (s: string) =>
     .normalize('NFKD')
     .replace(/[^a-z0-9]/g, '');
 
+/** "Frequent Flyers w/ Tropical Timewarp" → "Frequent Flyers" (the show without its guest / host part). */
+const withoutGuestPart = (title: string) =>
+  title.replace(/\s*\(?\s*(?:w\/|with|feat\.|ft\.)\s.*$/i, '').trim();
+
+/** Leading "the" dropped: "theflightzone" → "flightzone". */
+const withoutThe = (key: string) => key.replace(/^the(?=[a-z0-9]{5})/, '');
+
 /**
- * Recording title → slug of the programme show it belongs to. The longest
- * show name wins, so "Tina & Friends w/ …" goes to "Tina & Friends", not "Tina".
+ * Recording / timetable title → slug of the programme show it belongs to.
+ * The longest show name wins, so "Tina & Friends w/ …" goes to "Tina & Friends", not "Tina".
+ * A show also matches by its name without the "w/ …" part and without a leading
+ * "The" ("The Flight Zone w/ Loganic" ← "Flight Zone (r)").
  * THF's umbrella shows and guest titles never match.
  */
 export function showMatcher(shows: { slug?: string; title?: string }[]) {
   const keys = shows
     .filter((s): s is { slug: string; title: string } => !!s.slug && !!s.title && !isHiddenShow(s.title) && !isGuestTitle(s.title))
-    .map((s) => ({ slug: s.slug, key: compactTitle(s.title) }))
+    .flatMap((s) => {
+      const full = compactTitle(s.title);
+      const base = compactTitle(withoutGuestPart(s.title));
+      const out = [{ slug: s.slug, key: full }];
+      // Shortened names only when they are still a real name (5+ characters)
+      for (const k of [base, withoutThe(full), withoutThe(base)]) {
+        if (k.length >= 5 && k !== full) out.push({ slug: s.slug, key: k });
+      }
+      return out;
+    })
     .filter((s) => s.key.length >= 3)
     .sort((a, b) => b.key.length - a.key.length);
   return (recordingTitle: string): string | null => {
     if (isGuestTitle(recordingTitle)) return null;
     const t = compactTitle(recordingTitle);
-    return keys.find((k) => t.startsWith(k.key))?.slug ?? null;
+    const tNoThe = withoutThe(t);
+    return keys.find((k) => t.startsWith(k.key) || tNoThe.startsWith(k.key))?.slug ?? null;
   };
 }
