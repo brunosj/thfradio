@@ -10,10 +10,12 @@ import {
   entryEndIso,
   entryStartIso,
   findNextDayWithShows,
+  entryTitle,
   getEntryAction,
   groupSeries,
 } from './utils';
 import { MobileSeriesItem } from './SeriesBlock';
+import { RerunIcon } from './RerunIcon';
 import { keepWithName } from '@/utils/titles';
 
 interface MobileShowListProps {
@@ -82,7 +84,7 @@ export default function MobileShowList({
         const endDate = parseISO(endIso);
         const startTime = format(startDate, 'HH:mm');
         const endTime = format(endDate, 'HH:mm');
-        const showTitle = entry.summary ?? entry.title ?? '';
+        const { title: showTitle, rerun } = entryTitle(entry);
         const isCurrentShow = now >= startDate && now <= endDate;
         const action = getEntryAction(entry);
         const key = `${startIso}-${index}`;
@@ -101,7 +103,10 @@ export default function MobileShowList({
             >
               {startTime} – {endTime}
             </span>
-            <span className='text-sm leading-snug wrap-break-word'>{keepWithName(showTitle)}</span>
+            <span className='text-sm leading-snug wrap-break-word'>
+              {keepWithName(showTitle)}
+              {rerun && <RerunIcon className='ml-1.5 -mt-0.5' />}
+            </span>
           </>
         );
 

@@ -1,6 +1,19 @@
 import { format, isWithinInterval, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
+import { entryTitle } from '@/app/_modules/timetable_v2/utils';
+import { RerunIcon } from '@/app/_modules/timetable_v2/RerunIcon';
+
+/** Show title without "(r)"; reruns get the repeat icon. */
+function ShowName({ entry }: { entry: CalendarEntry }) {
+  const { title, rerun } = entryTitle(entry);
+  return (
+    <>
+      {title}
+      {rerun && <RerunIcon className='ml-1.5 -mt-0.5' />}
+    </>
+  );
+}
 
 export function entryIntervalStrings(
   entry: CalendarEntry,
@@ -189,7 +202,7 @@ export function getChannelShowContent(
       <div className={tickerRow}>
         <LiveIndicator />
         <span className={tickerTitle}>
-          {currentShow.summary ?? currentShow.title}
+          <ShowName entry={currentShow} />
         </span>
         <span className={tickerMeta}>
           {formattedStartHour}–{formattedEndHour}
@@ -198,7 +211,7 @@ export function getChannelShowContent(
           <>
             <span className={tickerLabel}>{t('nextShow')}</span>
             <span className={tickerTitle}>
-              {nextShow.summary ?? nextShow.title}
+              <ShowName entry={nextShow} />
             </span>
             <span className={tickerMeta}>
               {nextShowStartTime}–{nextShowEndTime}
@@ -225,7 +238,7 @@ export function getChannelShowContent(
           <span className={tickerLabel}>{t('nextShow')}</span>
           <span className={tickerShowWhen}>
             <span className={tickerTitle}>
-              {nextShow.summary ?? nextShow.title}
+              <ShowName entry={nextShow} />
             </span>
             <span className={tickerMuted}>{t('on')}</span>
             <span className={tickerDate}>{nextShowDate}</span>

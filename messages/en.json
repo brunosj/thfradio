@@ -33,6 +33,7 @@
   "nextDayWithShows": "Next day with shows",
   "timetableOpenShow": "{title}, {start}–{end}: open show page",
   "timetablePlayRecording": "{title}, {start}–{end}: play recording",
+  "rerun": "Rerun",
   "weekSchedule": "Week schedule",
   "closeProgramme": "Hide the programme",
   "liveChannels": {

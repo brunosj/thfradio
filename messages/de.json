@@ -130,6 +130,7 @@
   "nextDayWithShows": "Nächster Tag mit Shows",
   "timetableOpenShow": "{title}, {start}–{end}: Showseite öffnen",
   "timetablePlayRecording": "{title}, {start}–{end}: Aufnahme abspielen",
+  "rerun": "Wiederholung",
   "weekSchedule": "Wochenplan",
   "closeProgramme": "Programm ausblenden",
   "chat": {

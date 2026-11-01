@@ -7,7 +7,8 @@ import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
 import { Link } from '@/i18n/routing';
 import { Play } from '@/common/assets/PlayIcon';
 import { useGlobalStore } from '@/hooks/useStore';
-import { getEntryAction } from './utils';
+import { entryTitle, getEntryAction } from './utils';
+import { RerunIcon } from './RerunIcon';
 import { keepWithName } from '@/utils/titles';
 
 interface CalendarEventItemProps {
@@ -34,7 +35,7 @@ export default function CalendarEventItem({
 
   const startTime = format(startDate, 'HH:mm');
   const endTime = format(endDate, 'HH:mm');
-  const showTitle = event.summary ?? event.title ?? '';
+  const { title: showTitle, rerun } = entryTitle(event);
 
   const now = new Date();
   const isCurrentShow = now >= startDate && now <= endDate;
@@ -107,6 +108,7 @@ export default function CalendarEventItem({
           />
         )}
         {keepWithName(showTitle)}
+        {rerun && <RerunIcon className='ml-1 -mt-0.5' />}
         {action?.kind === 'show' && (
           <span
             aria-hidden='true'

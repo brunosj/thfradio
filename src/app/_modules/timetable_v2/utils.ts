@@ -158,7 +158,7 @@ export function getEntryAction(entry: CalendarEntry): EntryAction {
 // with the series as heading and each slot with its time and name.
 // ---------------------------------------------------------------------------
 
-export type SeriesSlot = { entry: CalendarEntry; name: string; start: Date; end: Date };
+export type SeriesSlot = { entry: CalendarEntry; name: string; start: Date; end: Date; rerun: boolean };
 
 export type TimetableItem =
   | { kind: 'single'; entry: CalendarEntry; start: Date; end: Date }
@@ -210,7 +210,8 @@ export function groupSeries(entries: CalendarEntry[]): TimetableItem[] {
   };
 
   for (const t of timed) {
-    const split = splitSeriesTitle(t.entry.summary ?? t.entry.title ?? '');
+    const { title: plainTitle, rerun } = entryTitle(t.entry);
+    const split = splitSeriesTitle(plainTitle);
     const key = split ? seriesKey(split.series) : '';
     const last = run?.slots[run.slots.length - 1];
     const joins =
@@ -223,11 +224,31 @@ export function groupSeries(entries: CalendarEntry[]): TimetableItem[] {
     if (!joins) flush();
     if (split) {
       if (!run) run = { key, title: split.series, slots: [] };
-      run.slots.push({ entry: t.entry, name: split.name, start: t.start, end: t.end });
+      run.slots.push({ entry: t.entry, name: split.name, start: t.start, end: t.end, rerun });
     } else {
       items.push({ kind: 'single', entry: t.entry, start: t.start, end: t.end });
     }
   }
   flush();
   return items;
+}
+
+// ---------------------------------------------------------------------------
+// Reruns: marked "(r)" in the calendar (or type "rerun" from thfradio.space).
+// The mark is dropped from the title and shown as a repeat icon instead.
+// ---------------------------------------------------------------------------
+
+const RERUN_MARK = /\s*\(\s*(?:r|rerun|wdh\.?)\s*\)/gi;
+const RERUN_PREFIX = /^\s*(?:rerun|re-run|wiederholung)\s*[:\-–]\s*/i;
+
+/** "Show (r)" → { title: "Show", rerun: true } */
+export function splitRerun(rawTitle: string, type?: string): { title: string; rerun: boolean } {
+  const marked = RERUN_PREFIX.test(rawTitle) || new RegExp(RERUN_MARK.source, 'i').test(rawTitle);
+  const title = rawTitle.replace(RERUN_PREFIX, '').replace(RERUN_MARK, '').replace(/\s+/g, ' ').trim();
+  return { title: title || rawTitle.trim(), rerun: marked || type === 'rerun' };
+}
+
+/** Display title of a timetable entry, without the rerun mark. */
+export function entryTitle(entry: CalendarEntry): { title: string; rerun: boolean } {
+  return splitRerun(entry.summary ?? entry.title ?? '', entry.type);
 }

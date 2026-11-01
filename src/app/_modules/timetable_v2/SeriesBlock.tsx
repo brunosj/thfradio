@@ -9,6 +9,7 @@ import { Link } from '@/i18n/routing';
 import { Play } from '@/common/assets/PlayIcon';
 import { useGlobalStore } from '@/hooks/useStore';
 import { getEntryAction, type SeriesSlot } from './utils';
+import { RerunIcon } from './RerunIcon';
 
 type SeriesItem = { title: string; start: Date; end: Date; slots: SeriesSlot[] };
 
@@ -43,6 +44,7 @@ function SlotRow({
       <span className={`min-w-0 flex-1 truncate ${slot.name ? '' : 'opacity-60'}`} title={full}>
         {name}
       </span>
+      {slot.rerun && <RerunIcon />}
       {action?.kind === 'recording' && <Play className='h-3 w-3 shrink-0' fill='currentColor' />}
       {action?.kind === 'show' && (
         <span aria-hidden className='shrink-0 opacity-60'>
