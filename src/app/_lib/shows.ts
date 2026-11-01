@@ -54,11 +54,53 @@ function fullImageUrl(path: string | undefined): string | null {
   return path.startsWith('/') ? `${base}${path}` : `${base}/uploads/${path}`;
 }
 
+type RecordingPhoto = {
+  trackId: string;
+  originalUrl: string;
+  squareUrl: string | null;
+  exact: boolean;
+};
+
+/** Clean photos (no THF graphic) per SoundCloud track id, from thfradio.space. */
+async function fetchRecordingPhotos(): Promise<Map<string, string>> {
+  const base = (process.env.INTRANET_API_URL || 'https://www.thfradio.space').replace(/\/$/, '');
+  const key = process.env.INTRANET_API_KEY || process.env.CALENDAR_2_KEY;
+  if (!key) return new Map();
+  try {
+    const res = await fetch(`${base}/api/public/recording-photos`, {
+      headers: { Authorization: `Bearer ${key}` },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(60000),
+    });
+    if (!res.ok) return new Map(); // e.g. 404 until thfradio.space has the endpoint
+    const data = (await res.json()) as { photos?: RecordingPhoto[] };
+    // Any clean photo beats the cover with the graphic (radio team's call):
+    // made for this recording / its guest / its day, or the show's photo.
+    return new Map(
+      (data.photos ?? [])
+        .filter((p) => p.squareUrl || p.originalUrl)
+        .map((p) => [String(p.trackId), (p.squareUrl || p.originalUrl) as string]),
+    );
+  } catch (error) {
+    console.error('Archive: clean recording photos from thfradio.space failed:', error);
+    return new Map();
+  }
+}
+
 /**
- * Recordings uploaded without a cover get their show's picture (from
- * thfradio.space / the show page) instead of the THF Radio logo.
+ * Archive pictures:
+ * 1. the clean photo from thfradio.space (no THF graphic), where there is one;
+ * 2. otherwise the SoundCloud / Mixcloud cover;
+ * 3. no cover at all (SoundCloud shows the THF Radio logo): the show's picture.
  */
-async function withShowPictures(recordings: CloudShowTypes[]): Promise<CloudShowTypes[]> {
+async function withShowPictures(input: CloudShowTypes[]): Promise<CloudShowTypes[]> {
+  const photos = await fetchRecordingPhotos();
+  const recordings = photos.size
+    ? input.map((r) => {
+        const photo = r.platform === 'soundcloud' ? photos.get(String(r.id)) : undefined;
+        return photo ? { ...r, picture: photo, pictures: { ...r.pictures, extra_large: photo } } : r;
+      })
+    : input;
   if (!recordings.some((r) => hasNoCover(r.picture))) return recordings;
   try {
     const programme = await fetchProgrammeShows('en');
