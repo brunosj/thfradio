@@ -1,6 +1,7 @@
 import type { CloudShowTypes, ShowTypes } from '@/types/ResponsesInterface';
 import { fetchMixcloudShows } from './mixcloud';
 import { fetchSoundcloudShows } from './soundcloud';
+import { showMatcher } from '@/utils/guests';
 
 type ShowsType = {
   data: ShowTypes[];
@@ -36,9 +37,47 @@ export async function fetchCloudShowsWithStatus(): Promise<{
   const mixcloudOnly = mixcloudShows.filter((s) => !onSoundcloud.has(recordingKey(s.name)));
 
   return {
-    shows: [...mixcloudOnly, ...soundcloud.shows],
+    shows: await withShowPictures([...mixcloudOnly, ...soundcloud.shows]),
     complete: soundcloud.ok && soundcloud.shows.length > 0,
   };
+}
+
+/** No cover of its own: SoundCloud shows the THF Radio avatar instead. */
+const hasNoCover = (picture: string | undefined) =>
+  !picture || picture.includes('/avatars-') || picture.includes('placeholder');
+
+/** Old backend pictures are bare file names under /uploads. */
+function fullImageUrl(path: string | undefined): string | null {
+  if (!path) return null;
+  if (path.startsWith('http')) return path.replace(/^http:\/\//, 'https://');
+  const base = process.env.NEXT_PUBLIC_BACKEND_URL ?? '';
+  return path.startsWith('/') ? `${base}${path}` : `${base}/uploads/${path}`;
+}
+
+/**
+ * Recordings uploaded without a cover get their show's picture (from
+ * thfradio.space / the show page) instead of the THF Radio logo.
+ */
+async function withShowPictures(recordings: CloudShowTypes[]): Promise<CloudShowTypes[]> {
+  if (!recordings.some((r) => hasNoCover(r.picture))) return recordings;
+  try {
+    const programme = await fetchProgrammeShows('en');
+    const match = showMatcher(programme);
+    const pictureBySlug = new Map(
+      programme
+        .map((s) => [s.slug, fullImageUrl(s.image) ?? fullImageUrl(s.imageFullWidth)] as const)
+        .filter((e): e is readonly [string, string] => Boolean(e[0] && e[1])),
+    );
+    return recordings.map((r) => {
+      if (!hasNoCover(r.picture)) return r;
+      const slug = match((r.name ?? '').split('//')[0]);
+      const picture = slug ? pictureBySlug.get(slug) : undefined;
+      return picture ? { ...r, picture, pictures: { ...r.pictures, extra_large: picture } } : r;
+    });
+  } catch (error) {
+    console.error('Archive: show pictures for recordings without a cover failed:', error);
+    return recordings;
+  }
 }
 
 export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
