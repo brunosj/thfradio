@@ -44,7 +44,7 @@ Der Key, den thfradio.de schon als `CALENDAR_2_KEY` hat, funktioniert also auch 
 
 | Datei | Was |
 |---|---|
-| `src/app/_lib/shows.ts` | Mit `SHOWS_SOURCE=intranet` kommen die Shows von thfradio.space. Wenn das fehlschlägt oder eine Show dort fehlt, greift automatisch das alte Backend |
+| `src/app/_lib/shows.ts` | Mit `SHOWS_SOURCE=intranet` kommen die Shows von thfradio.space. Solange das alte Backend läuft, geht nichts verloren: Die Liste zeigt zusätzlich jede alte Show, die es in thfradio.space (noch) nicht gibt. Fehlt in thfradio.space ein Bild oder Text, wird der alte genommen. Was der Host geschrieben hat, gewinnt immer. Ist thfradio.space nicht erreichbar, kommt alles aus dem alten Backend |
 | `src/app/api/revalidate/route.ts` | `model: "show"` leert den Show-Cache (Tag `shows`) und baut `/de|en/shows` und alle Show-Seiten neu. Vorher wurden falsche Pfade ohne Sprache neu gebaut |
 | `src/app/[locale]/shows/[slug]/page.tsx` | Kommt mit vollen Bild-URLs klar. Eine unbekannte Show zeigt die 404-Seite statt eines Fehlers |
 | `env.sample` | Neue Variablen dokumentiert |
@@ -109,9 +109,9 @@ deutschen Felder sind optional. Fehlt die deutsche Version, zeigt die deutsche S
 - **Andere Stellen, die Shows ändern,** schicken noch keinen Webhook: Bookers (Termine
   verschieben), Admin, und die App über `app/api/app/show-info`. Die Website ist dort nach
   spätestens 5 Minuten trotzdem aktuell. Die App-Route speichert die deutschen Texte noch nicht.
-- **Alte Bilder:** Die Bilder auf dem alten Backend (`/uploads/...`) werden nicht übernommen.
-  Entweder laden die Hosts sie neu hoch, oder ein Skript lädt sie herunter und über
-  `admin-api /show-artwork/upload` wieder hoch.
+- **Alte Bilder:** Das Import-Skript in thfradio.space kopiert die alten Bilder (`/uploads/...`)
+  auf den Hetzner-Speicher, wenn eine Show dort noch kein Bild hat. Bis dahin zeigt die
+  Website das alte Bild weiter an.
 - **Tags / DJs:** Das alte Backend hatte `tags` und `djs`, thfradio.space hat `genres`.
   Die Show-Seiten nutzen beides im Moment nicht, beim Umbau der Filter aber beachten.
 

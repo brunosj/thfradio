@@ -6,33 +6,43 @@ type ShowsType = {
   data: ShowTypes[];
 };
 
+/** Letters and digits of a recording title without its "// date" part. */
+const recordingKey = (name: string | undefined) =>
+  (name ?? '').split('//')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/**
+ * Mixcloud + SoundCloud recordings. `complete` is false when SoundCloud
+ * (the main archive) couldn't be read, so callers don't cache a short list.
+ */
+export async function fetchCloudShowsWithStatus(): Promise<{
+  shows: CloudShowTypes[];
+  complete: boolean;
+}> {
+  const [mixcloudShows, soundcloud] = await Promise.all([
+    fetchMixcloudShows().catch((error) => {
+      console.error('Error fetching Mixcloud shows:', error);
+      return [] as CloudShowTypes[];
+    }),
+    fetchSoundcloudShows()
+      .then((shows) => ({ shows, ok: true }))
+      .catch((error) => {
+        console.error('Error fetching Soundcloud shows:', error);
+        return { shows: [] as CloudShowTypes[], ok: false };
+      }),
+  ]);
+
+  // The same show uploaded to both: keep the SoundCloud one
+  const onSoundcloud = new Set(soundcloud.shows.map((s) => recordingKey(s.name)));
+  const mixcloudOnly = mixcloudShows.filter((s) => !onSoundcloud.has(recordingKey(s.name)));
+
+  return {
+    shows: [...mixcloudOnly, ...soundcloud.shows],
+    complete: soundcloud.ok && soundcloud.shows.length > 0,
+  };
+}
+
 export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
-  // Fetch Mixcloud shows first with caching
-  const mixcloudShows = await fetchMixcloudShows().catch((error) => {
-    console.error('Error fetching Mixcloud shows:', error);
-    return [];
-  });
-
-  // Then try to fetch Soundcloud shows with caching
-  let soundcloudShows: CloudShowTypes[] = [];
-  try {
-    // Check if SoundCloud environment variables are set
-    if (
-      !process.env.SOUNDCLOUD_CLIENT_ID ||
-      !process.env.SOUNDCLOUD_CLIENT_SECRET ||
-      !process.env.SOUNDCLOUD_USER_ID
-    ) {
-      console.error('SoundCloud environment variables missing');
-    }
-
-    soundcloudShows = await fetchSoundcloudShows();
-  } catch (error) {
-    console.error('Error fetching Soundcloud shows:', error);
-  }
-
-  const shows = [...mixcloudShows, ...soundcloudShows];
-
-  return shows;
+  return (await fetchCloudShowsWithStatus()).shows;
 }
 
 // Client-side function to fetch cloud shows from the API
@@ -50,7 +60,9 @@ export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
 
     // On client side, fetch from API
     // The API route handles caching with proper cache tags
-    const response = await fetch('/api/cloudShows');
+    // "?v=2": browsers kept the old 12-hour copy (15 shows) of /api/cloudShows;
+    // a new address makes every browser fetch the full archive.
+    const response = await fetch('/api/cloudShows?v=2');
 
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
@@ -146,31 +158,98 @@ async function fetchBackendShow(slug: string, locale: string) {
   return await response.json();
 }
 
-export async function fetchProgrammeShows(locale: string): Promise<ShowTypes[]> {
-  if (intranetShowsEnabled()) {
-    try {
-      const data = await fetchIntranet<{ shows: Partial<ShowTypes>[] }>('', locale);
-      if (data?.shows) return data.shows.map(fromIntranet);
-    } catch (error) {
-      console.error('Intranet shows failed, falling back to old backend:', error);
-    }
-  }
+/** "Café Ölbaum!" → "cafeolbaum" — for matching shows across both sources. */
+function normTitle(title: string | undefined): string {
+  return (title ?? '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '');
+}
+
+/**
+ * Where thfradio.space has nothing, keep what the old backend had.
+ * Host-written values always win. Pictures: if thfradio.space has any
+ * picture of the show, only its pictures are used.
+ */
+function fillFromBackend(show: ShowTypes, old: ShowTypes | undefined): ShowTypes {
+  if (!old) return show;
+  const hasPicture = Boolean(show.image || show.imageFullWidth);
+  return {
+    ...show,
+    image: hasPicture ? show.image : old.image,
+    imageFullWidth: hasPicture ? show.imageFullWidth : old.imageFullWidth,
+    description: show.description || old.description,
+    teaserSentence: show.teaserSentence || old.teaserSentence,
+  };
+}
+
+/**
+ * Intranet shows first, then every old-backend show that isn't on the
+ * intranet (yet), so no show drops off the list during the move.
+ */
+function mergeShows(intranet: ShowTypes[], backend: ShowTypes[]): ShowTypes[] {
+  const bySlug = new Map(backend.map((s) => [s.slug, s]));
+  const byTitle = new Map(backend.map((s) => [normTitle(s.title), s]));
+  const matched = new Set<ShowTypes>();
+
+  const merged = intranet.map((show) => {
+    const old = bySlug.get(show.slug) ?? byTitle.get(normTitle(show.title));
+    if (old) matched.add(old);
+    return fillFromBackend(show, old);
+  });
+  const intranetSlugs = new Set(merged.map((s) => s.slug));
+  const leftovers = backend.filter((s) => !matched.has(s) && !intranetSlugs.has(s.slug));
+  return [...merged, ...leftovers];
+}
+
+async function backendShowsOrEmpty(locale: string): Promise<ShowTypes[]> {
   try {
-    return await fetchBackendShows(locale);
+    const shows = await fetchBackendShows(locale);
+    return Array.isArray(shows) ? shows : [];
   } catch (error) {
-    console.error('Error fetching programme shows:', error);
+    console.error('Error fetching programme shows from old backend:', error);
     return [];
   }
+}
+
+export async function fetchProgrammeShows(locale: string): Promise<ShowTypes[]> {
+  if (intranetShowsEnabled()) {
+    const [intranet, backend] = await Promise.all([
+      fetchIntranet<{ shows: Partial<ShowTypes>[] }>('', locale).catch((error) => {
+        console.error('Intranet shows failed, falling back to old backend:', error);
+        return null;
+      }),
+      backendShowsOrEmpty(locale),
+    ]);
+    if (intranet?.shows) return mergeShows(intranet.shows.map(fromIntranet), backend);
+    return backend;
+  }
+  return backendShowsOrEmpty(locale);
 }
 
 export async function fetchShowBySlug(slug: string, locale: string) {
   if (intranetShowsEnabled()) {
     try {
+      // Route params can arrive still URL-encoded ("fu%C3%9Findertuer"):
+      // decode first so the slug is encoded exactly once.
+      let plainSlug = slug;
+      try {
+        plainSlug = decodeURIComponent(slug);
+      } catch {
+        // Not valid encoding: use as is.
+      }
       const data = await fetchIntranet<{ show: Partial<ShowTypes> }>(
-        `/${encodeURIComponent(slug)}`,
+        `/${encodeURIComponent(plainSlug)}`,
         locale,
       );
-      if (data?.show) return fromIntranet(data.show);
+      if (data?.show) {
+        const show = fromIntranet(data.show);
+        if ((show.image || show.imageFullWidth) && show.description) return show;
+        // Something missing on the intranet: borrow it from the old backend.
+        const old = await fetchBackendShow(show.slug, locale).catch(() => null);
+        return fillFromBackend(show, old?.title ? old : undefined);
+      }
       // Not on the intranet (yet): the old backend may still have it.
     } catch (error) {
       console.error(`Intranet show ${slug} failed, falling back to old backend:`, error);
