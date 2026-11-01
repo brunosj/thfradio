@@ -24,10 +24,24 @@ export default function ShowContent({ content }: { content: ShowTypes }) {
 
   useEffect(() => {
     async function getFilteredShows() {
-      // Use keyword or fallback to show title for filtering
-      const searchTerm = content.keyword || content.title;
+      // Keyword, show title, and the title without its "w/ …" part
+      // ("Frequent Flyers w/ Tropical Timewarp" → "Frequent Flyers"),
+      // compared as letters and digits only (’ vs ', spaces, dashes).
+      const compact = (s: string) =>
+        s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]/g, '');
+      const shortTitle = (content.title ?? '').replace(
+        /\s*\(?\s*(?:w\/|with|feat\.|ft\.)\s.*$/i,
+        '',
+      );
+      const keys = [
+        ...new Set(
+          [content.keyword, content.title, shortTitle]
+            .map((k) => compact(k ?? ''))
+            .filter((k) => k.length >= 3),
+        ),
+      ];
 
-      if (!searchTerm) {
+      if (keys.length === 0) {
         setFilteredShows([]);
         return;
       }
@@ -35,9 +49,8 @@ export default function ShowContent({ content }: { content: ShowTypes }) {
       // If shows are already in context, filter them
       if (cloudShows && cloudShows.length > 0) {
         const filtered = cloudShows.filter((show) => {
-          const name = show?.name?.replace(/[\s-]/g, '').toLowerCase();
-          const keyword = searchTerm.replace(/[\s-]/g, '').toLowerCase();
-          return new RegExp(keyword, 'i').test(name || '');
+          const name = compact((show?.name ?? '').split('//')[0]);
+          return keys.some((k) => name.includes(k));
         });
         setFilteredShows(filtered);
         return;

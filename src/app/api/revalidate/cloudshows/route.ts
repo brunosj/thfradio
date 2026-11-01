@@ -1,5 +1,6 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
+import { refreshCloudShows } from '@/lib/cloudShowsCache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +11,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Revalidate the API route that fetches shows data
+    // Fetch the archive again (the current list stays until the new one is in)
+    refreshCloudShows();
     revalidatePath('/api/cloudShows');
 
     // Also revalidate pages that display cloud shows
@@ -41,6 +44,8 @@ export async function GET(request: NextRequest) {
 
   try {
     // Revalidate the API route that fetches shows data
+    // Fetch the archive again (the current list stays until the new one is in)
+    refreshCloudShows();
     revalidatePath('/api/cloudShows');
 
     // Also revalidate pages that display cloud shows

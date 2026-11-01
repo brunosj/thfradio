@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchCloudShowsCached } from '@/lib/shows';
+import { getCloudShows } from '@/lib/cloudShowsCache';
 import type { CloudShowTypes } from '@/types/ResponsesInterface';
 
 // In-memory cache for show details
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Use the cached function to get all shows
-    const allShows = await fetchCloudShowsCached();
+    const allShows = await getCloudShows();
 
     // Find the show with the matching URL - case-insensitive matching
     let show = allShows.find((s) => s.url.toLowerCase() === url.toLowerCase());

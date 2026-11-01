@@ -6,33 +6,43 @@ type ShowsType = {
   data: ShowTypes[];
 };
 
+/** Letters and digits of a recording title without its "// date" part. */
+const recordingKey = (name: string | undefined) =>
+  (name ?? '').split('//')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/**
+ * Mixcloud + SoundCloud recordings. `complete` is false when SoundCloud
+ * (the main archive) couldn't be read, so callers don't cache a short list.
+ */
+export async function fetchCloudShowsWithStatus(): Promise<{
+  shows: CloudShowTypes[];
+  complete: boolean;
+}> {
+  const [mixcloudShows, soundcloud] = await Promise.all([
+    fetchMixcloudShows().catch((error) => {
+      console.error('Error fetching Mixcloud shows:', error);
+      return [] as CloudShowTypes[];
+    }),
+    fetchSoundcloudShows()
+      .then((shows) => ({ shows, ok: true }))
+      .catch((error) => {
+        console.error('Error fetching Soundcloud shows:', error);
+        return { shows: [] as CloudShowTypes[], ok: false };
+      }),
+  ]);
+
+  // The same show uploaded to both: keep the SoundCloud one
+  const onSoundcloud = new Set(soundcloud.shows.map((s) => recordingKey(s.name)));
+  const mixcloudOnly = mixcloudShows.filter((s) => !onSoundcloud.has(recordingKey(s.name)));
+
+  return {
+    shows: [...mixcloudOnly, ...soundcloud.shows],
+    complete: soundcloud.ok && soundcloud.shows.length > 0,
+  };
+}
+
 export async function fetchCloudShows(): Promise<CloudShowTypes[]> {
-  // Fetch Mixcloud shows first with caching
-  const mixcloudShows = await fetchMixcloudShows().catch((error) => {
-    console.error('Error fetching Mixcloud shows:', error);
-    return [];
-  });
-
-  // Then try to fetch Soundcloud shows with caching
-  let soundcloudShows: CloudShowTypes[] = [];
-  try {
-    // Check if SoundCloud environment variables are set
-    if (
-      !process.env.SOUNDCLOUD_CLIENT_ID ||
-      !process.env.SOUNDCLOUD_CLIENT_SECRET ||
-      !process.env.SOUNDCLOUD_USER_ID
-    ) {
-      console.error('SoundCloud environment variables missing');
-    }
-
-    soundcloudShows = await fetchSoundcloudShows();
-  } catch (error) {
-    console.error('Error fetching Soundcloud shows:', error);
-  }
-
-  const shows = [...mixcloudShows, ...soundcloudShows];
-
-  return shows;
+  return (await fetchCloudShowsWithStatus()).shows;
 }
 
 // Client-side function to fetch cloud shows from the API

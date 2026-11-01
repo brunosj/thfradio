@@ -58,7 +58,7 @@ function normalizeSoundcloudShow(show: SoundcloudShowType): CloudShowTypes {
       // Clean up tags and format them
       formattedTags = tags
         .filter(
-          (tag) => tag && !tag.includes('soundcloud:') && !tag.includes('geo:')
+          (tag) => tag && !tag.includes('soundcloud:') && !tag.includes('geo:'),
         )
         .map((tag) => {
           const cleanTag = tag.trim();
@@ -181,94 +181,91 @@ async function getSoundcloudToken(): Promise<string | null> {
   }
 }
 
-// Fetch SoundCloud shows - caching is handled by Next.js at the API route level
+// Fetch all SoundCloud shows. Throws when SoundCloud can't be read, so the
+// caller can keep the last good list instead of caching an empty archive.
 export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
-  try {
-    // Verify environment variables are set
-    if (
-      !process.env.SOUNDCLOUD_CLIENT_ID ||
-      !process.env.SOUNDCLOUD_CLIENT_SECRET ||
-      !process.env.SOUNDCLOUD_USER_ID
-    ) {
-      console.error('Missing environment variables for SoundCloud API');
-      return [];
-    }
-
-    const token = await getSoundcloudToken();
-    if (!token) {
-      console.error('Failed to get SoundCloud token');
-      return [];
-    }
-
-    // Add rate limiting delay
-    await waitForRateLimit();
-
-    const userId = process.env.SOUNDCLOUD_USER_ID;
-
-    // Define cutoff date for filtering (May 1, 2025)
-    const cutoffDate = new Date('2025-05-01T00:00:00Z');
-    // SoundCloud caps page size at 200
-    const pageSize = 200;
-    const maxPages = 30;
-    const pageDelayMs = 300;
-
-    // Created_at parameter doesn't work with /users/{id}/tracks endpoint, and
-    // results aren't strictly ordered by created_at, so fetch every page and
-    // filter client-side
-    let nextUrl: string | null =
-      `https://api.soundcloud.com/users/${userId}/tracks?limit=${pageSize}&linked_partitioning=true`;
-    const shows: CloudShowTypes[] = [];
-
-    for (let page = 1; nextUrl && page <= maxPages; page++) {
-      if (page > 1) {
-        await new Promise((resolve) => setTimeout(resolve, pageDelayMs));
-      }
-
-      const tracksResponse = await fetch(nextUrl, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      });
-
-      if (!tracksResponse.ok) {
-        const errorText = await tracksResponse
-          .text()
-          .catch(() => 'Could not get error text');
-        console.error('SoundCloud API response error:', {
-          page,
-          status: tracksResponse.status,
-          statusText: tracksResponse.statusText,
-          error: errorText,
-        });
-        break;
-      }
-
-      const data: {
-        collection?: SoundcloudShowType[];
-        next_href?: string | null;
-      } = await tracksResponse.json();
-      const tracks = data.collection ?? [];
-
-      // Process shows individually to prevent a single track with malformed tags from breaking everything
-      for (const track of tracks) {
-        try {
-          const trackCreatedDate = new Date(track.created_at);
-          if (trackCreatedDate >= cutoffDate) {
-            shows.push(normalizeSoundcloudShow(track));
-          }
-        } catch (err) {
-          console.error(`Error processing track ${track.id}:`, err);
-          // Continue with other tracks
-        }
-      }
-
-      nextUrl = data.next_href ?? null;
-    }
-
-    return shows;
-  } catch (error: unknown) {
-    console.error('Error fetching Soundcloud shows:', error);
-    return [];
+  // Verify environment variables are set
+  if (
+    !process.env.SOUNDCLOUD_CLIENT_ID ||
+    !process.env.SOUNDCLOUD_CLIENT_SECRET ||
+    !process.env.SOUNDCLOUD_USER_ID
+  ) {
+    throw new Error('Missing environment variables for SoundCloud API');
   }
+
+  let token = await getSoundcloudToken();
+  if (!token) {
+    throw new Error('Failed to get SoundCloud token');
+  }
+
+  // Add rate limiting delay
+  await waitForRateLimit();
+
+  const userId = process.env.SOUNDCLOUD_USER_ID;
+
+  // All tracks: the old Mixcloud archive is gone (15 left), so SoundCloud
+  // is the whole archive. SoundCloud caps page size at 200
+  const pageSize = 200;
+  const maxPages = 30;
+  const pageDelayMs = 300;
+
+  // Created_at parameter doesn't work with /users/{id}/tracks endpoint, and
+  // results aren't strictly ordered by created_at, so fetch every page and
+  // filter client-side
+  let nextUrl: string | null =
+    `https://api.soundcloud.com/users/${userId}/tracks?limit=${pageSize}&linked_partitioning=true`;
+  const shows: CloudShowTypes[] = [];
+  let retriedAuth = false;
+
+  for (let page = 1; nextUrl && page <= maxPages; page++) {
+    if (page > 1) {
+      await new Promise((resolve) => setTimeout(resolve, pageDelayMs));
+    }
+
+    const tracksResponse = await fetch(nextUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+
+    if (tracksResponse.status === 401 && !retriedAuth) {
+      // Token no longer accepted: get a fresh one and try this page again
+      retriedAuth = true;
+      tokenCache = null;
+      token = await getSoundcloudToken();
+      if (!token) throw new Error('Failed to get a fresh SoundCloud token');
+      page--;
+      continue;
+    }
+
+    if (!tracksResponse.ok) {
+      const errorText = await tracksResponse
+        .text()
+        .catch(() => 'Could not get error text');
+      throw new Error(
+        `SoundCloud API ${tracksResponse.status} on page ${page}: ${errorText.slice(0, 200)}`,
+      );
+    }
+
+    const data: {
+      collection?: SoundcloudShowType[];
+      next_href?: string | null;
+    } = await tracksResponse.json();
+    const tracks = data.collection ?? [];
+
+    // Process shows individually to prevent a single track with malformed tags from breaking everything
+    for (const track of tracks) {
+      try {
+        shows.push(normalizeSoundcloudShow(track));
+      } catch (err) {
+        console.error(`Error processing track ${track.id}:`, err);
+        // Continue with other tracks
+      }
+    }
+
+    nextUrl = data.next_href ?? null;
+  }
+
+  return shows;
 }

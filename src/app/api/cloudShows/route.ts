@@ -1,34 +1,30 @@
-import { fetchCloudShows } from "@/lib/shows";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import { getCloudShows } from '@/lib/cloudShowsCache';
 
-// Use route segment config for caching (no 2MB limit like unstable_cache)
-// This caches the entire route response for 12 hours
-// Can be invalidated via revalidatePath('/api/cloudShows')
-export const revalidate = 43200; // 12 hours in seconds
+// Served from the server-side archive cache (see lib/cloudShowsCache.ts),
+// not prerendered at build time: a SoundCloud hiccup during a deploy used to
+// freeze an archive without SoundCloud for 12 hours.
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const shows = await fetchCloudShows();
-
+    const shows = await getCloudShows();
     return NextResponse.json(shows, {
       status: 200,
       headers: {
-        // Cache headers for CDN/browser caching
-        "Cache-Control": "public, max-age=43200, stale-while-revalidate=86400",
+        'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
       },
     });
   } catch (error) {
-    console.error("Error in cloud shows API route:", error);
-    // Return empty array with 200 status to not break UI
+    console.error('Error in cloud shows API route:', error);
+    // Return empty array with 200 status to not break UI; not cached
     return NextResponse.json(
       {
         shows: [],
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
       },
-      {
-        status: 200,
-      },
+      { status: 200, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 }
