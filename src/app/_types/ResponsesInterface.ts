@@ -31,7 +31,14 @@ export interface CalendarEntry {
   id: string;
   showId?: string;
   showTitle?: string;
+  /** Only set when /shows/[slug] exists on the website. */
   showSlug?: string;
+  /** Intranet event type: regular | rerun | special | presents | takeover | practice | other */
+  type?: string;
+  imageUrl?: string;
+  /** SoundCloud track id of a rerun's public recording. */
+  recordingTrackId?: string;
+  recordingUrl?: string;
   title: string;
   description?: string;
   startTime: string;

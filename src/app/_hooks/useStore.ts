@@ -22,6 +22,10 @@ interface GlobalStore {
   activeTimetableChannel: LiveChannelId;
   setActiveTimetableChannel: (channel: LiveChannelId) => void;
 
+  /** Week schedule folded out under the live ticker */
+  scheduleOpen: boolean;
+  setScheduleOpen: (open: boolean) => void;
+
   showKey: string | undefined;
   showKeySet: (showKey: string) => void;
 
@@ -46,6 +50,9 @@ export const useGlobalStore = create<GlobalStore>((set) => ({
 
   activeTimetableChannel: 1,
   setActiveTimetableChannel: (channel) => set({ activeTimetableChannel: channel }),
+
+  scheduleOpen: false,
+  setScheduleOpen: (open) => set({ scheduleOpen: open }),
 
   showKey: undefined,
   showKeySet: (showKey) =>

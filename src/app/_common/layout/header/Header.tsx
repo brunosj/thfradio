@@ -53,6 +53,8 @@ const Header: React.FC<HeaderProps> = ({
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     href: string,
   ) => {
+    // "/#schedule" is handled by the week schedule fold-out (CalendarSchedule)
+    if (e.defaultPrevented) return;
     e.preventDefault();
     if (href.startsWith('#')) {
       const targetId = href.substring(1);

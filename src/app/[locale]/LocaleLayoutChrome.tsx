@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Header from "@/app/_common/layout/header/Header";
 import LiveTicker from "@/modules/live-ticker/LiveTicker";
+import CalendarSchedule from "@/app/_modules/timetable_v2/CalendarSchedule";
 import JoinChat from "@/modules/chat/JoinChat";
 import { GlobalChatOverlay } from "@/modules/chat/GlobalChatOverlay";
 import Footer from "@/app/_common/layout/footer/Footer";
@@ -32,6 +33,8 @@ export function LocaleLayoutChrome({
         <div className="sticky top-0 z-50 w-full">
           <Header />
           <LiveTicker />
+          {/* Week schedule, folded out from the ticker */}
+          <CalendarSchedule />
         </div>
         <main>{children}</main>
       </div>

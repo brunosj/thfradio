@@ -2,7 +2,6 @@
 
 import Hero from '@/app/_modules/hero/Hero';
 import HomeShowSection from '@/app/_modules/show-listing/HomeShowsSection';
-import CalendarSchedule from '@/app/_modules/timetable_v2/CalendarSchedule';
 import HomeArchiveSection from '@/app/_modules/archive/HomeArchiveSection';
 import HomeNewsSection from '@/app/_modules/news/HomeNewsSection';
 import type { HomepageTypes, NewsType } from '@/app/_types/ResponsesInterface';
@@ -23,11 +22,6 @@ export default function HomeContent({ page, latestNews }: HomeContentProps) {
 
   return (
     <>
-      <CalendarSchedule
-        programmeTitle={page.programme.title}
-        programmeText={page.programme.text}
-        programmeTextHtml={page.programme.textHtml}
-      />
       <Hero
         description={page.heroText ?? ''}
         images={{ data: page.heroPictures }}

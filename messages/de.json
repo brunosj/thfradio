@@ -128,6 +128,10 @@
   "failedToLoad": "Programmdaten konnten nicht geladen werden. Bitte versuche es später erneut.",
   "noShowsThisDay": "An diesem Tag sind keine Shows geplant.",
   "nextDayWithShows": "Nächster Tag mit Shows",
+  "timetableOpenShow": "{title}, {start}–{end}: Showseite öffnen",
+  "timetablePlayRecording": "{title}, {start}–{end}: Aufnahme abspielen",
+  "weekSchedule": "Wochenplan",
+  "closeProgramme": "Programm ausblenden",
   "chat": {
     "fermer": "Schließen",
     "pseudo": "Pseudonym",
