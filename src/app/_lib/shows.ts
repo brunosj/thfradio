@@ -168,6 +168,15 @@ function normTitle(title: string | undefined): string {
 }
 
 /**
+ * "Takeoff w/ Vincent Grabowski" → "takeoff": the show without its guest part
+ * (and a leading "The"). The old website had some shows twice this way.
+ */
+function baseTitle(title: string | undefined): string {
+  const key = normTitle((title ?? '').replace(/\s*\(?\s*(?:w\/|with|feat\.|ft\.)\s.*$/i, ''));
+  return key.replace(/^the(?=[a-z0-9]{5})/, '');
+}
+
+/**
  * Where thfradio.space has nothing, keep what the old backend had.
  * Host-written values always win. Pictures: if thfradio.space has any
  * picture of the show, only its pictures are used.
@@ -199,7 +208,11 @@ function mergeShows(intranet: ShowTypes[], backend: ShowTypes[]): ShowTypes[] {
     return fillFromBackend(show, old);
   });
   const intranetSlugs = new Set(merged.map((s) => s.slug));
-  const leftovers = backend.filter((s) => !matched.has(s) && !intranetSlugs.has(s.slug));
+  // Old double pages ("Takeoff" + "Takeoff w/ …") count as the same show
+  const intranetBases = new Set(merged.map((s) => baseTitle(s.title)).filter((k) => k.length >= 3));
+  const leftovers = backend.filter(
+    (s) => !matched.has(s) && !intranetSlugs.has(s.slug) && !intranetBases.has(baseTitle(s.title)),
+  );
   return [...merged, ...leftovers];
 }
 
@@ -250,7 +263,23 @@ export async function fetchShowBySlug(slug: string, locale: string) {
         const old = await fetchBackendShow(show.slug, locale).catch(() => null);
         return fillFromBackend(show, old?.title ? old : undefined);
       }
-      // Not on the intranet (yet): the old backend may still have it.
+      // Not on the intranet (yet): the old backend may still have it. If it
+      // was one of the old double pages ("… w/ Louis Largo"), show the
+      // thfradio.space show of the same name instead.
+      const old = await fetchBackendShow(slug, locale).catch(() => null);
+      const key = baseTitle(old?.title);
+      if (key.length >= 3) {
+        const list = await fetchIntranet<{ shows: Partial<ShowTypes>[] }>('', locale);
+        const twin = list?.shows.find((s) => s.slug && baseTitle(s.title) === key);
+        if (twin?.slug) {
+          const twinData = await fetchIntranet<{ show: Partial<ShowTypes> }>(
+            `/${encodeURIComponent(twin.slug)}`,
+            locale,
+          );
+          if (twinData?.show) return fillFromBackend(fromIntranet(twinData.show), old);
+        }
+      }
+      if (old) return old;
     } catch (error) {
       console.error(`Intranet show ${slug} failed, falling back to old backend:`, error);
     }
