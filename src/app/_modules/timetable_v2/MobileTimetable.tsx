@@ -10,6 +10,7 @@ import {
   generateTwoWeekRange,
   groupEntriesByDay,
 } from './utils';
+import { useScrollToLive } from './useScrollToLive';
 
 interface MobileTimetableProps {
   calendarEntries: CalendarEntry[];
@@ -21,6 +22,9 @@ export default function MobileTimetable({
   const today = useMemo(() => startOfDay(new Date()), []);
   const [selectedDay, setSelectedDay] = useState(() => startOfDay(new Date()));
   const hasAppliedInitialFallback = useRef(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  // Opening the programme jumps to the show on air (or the next one)
+  useScrollToLive(listRef, calendarEntries.length > 0);
 
   const days = useMemo(() => generateTwoWeekRange(), []);
 
@@ -57,7 +61,7 @@ export default function MobileTimetable({
   }, [entriesByDay, days, today]);
 
   return (
-    <div className='w-full  bg-dark-blue'>
+    <div ref={listRef} className='w-full  bg-dark-blue'>
       <div className='p-3'>
         <MobileDayTabs
           days={days}

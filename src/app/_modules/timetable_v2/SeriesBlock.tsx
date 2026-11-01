@@ -101,7 +101,19 @@ function SlotRow({
 }
 
 /** Desktop grid: fills the block's full time span; rows sized by slot length. */
-export function SeriesBlock({ item }: { item: SeriesItem }) {
+export function SeriesBlock({
+  item,
+  from = item.start,
+  to = item.end,
+}: {
+  item: SeriesItem;
+  /** The part of the night this column shows (the block can be cut at 08:00 / 04:00). */
+  from?: Date;
+  to?: Date;
+}) {
+  const shownMinutes = (slot: { start: Date; end: Date }) =>
+    (Math.min(slot.end.getTime(), to.getTime()) - Math.max(slot.start.getTime(), from.getTime())) / 60000;
+  const slots = item.slots.filter((slot) => shownMinutes(slot) > 0);
   const now = Date.now();
   const live = item.start.getTime() <= now && item.end.getTime() > now;
   return (
@@ -112,7 +124,7 @@ export function SeriesBlock({ item }: { item: SeriesItem }) {
     >
       {/* Rows sized by slot length, so each sits on its hour; the title rides in the first one */}
       <div className='flex min-h-0 flex-1 flex-col'>
-        {item.slots.map((slot, i) => (
+        {slots.map((slot, i) => (
           <SlotRow
             key={i}
             slot={slot}
@@ -124,7 +136,7 @@ export function SeriesBlock({ item }: { item: SeriesItem }) {
                 </span>
               ) : undefined
             }
-            style={{ flexGrow: Math.max(1, (slot.end.getTime() - slot.start.getTime()) / 60000), flexBasis: 0 }}
+            style={{ flexGrow: Math.max(1, shownMinutes(slot)), flexBasis: 0 }}
             className='min-h-0 !items-start px-1.5 pt-1 text-sm border-t border-white/15 first:border-t-0'
           />
         ))}
@@ -139,6 +151,8 @@ export function MobileSeriesItem({ item }: { item: SeriesItem }) {
   const live = item.start.getTime() <= now && item.end.getTime() > now;
   return (
     <li
+      data-start={item.start.getTime()}
+      data-end={item.end.getTime()}
       className={`overflow-hidden rounded-lg border-l-2 text-white ${
         live ? 'border-orange-300 bg-thf-blue-500' : 'border-orange-500 bg-thf-blue-500/70'
       }`}

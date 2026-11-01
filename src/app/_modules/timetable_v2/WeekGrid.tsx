@@ -1,16 +1,14 @@
 // File: WeekGrid.tsx
 import React from 'react';
-import { isSameDay, parseISO } from 'date-fns';
+import { differenceInCalendarDays, parseISO } from 'date-fns';
 import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
 import CalendarEventItem from './CalendarEventItem';
 import { SeriesBlock } from './SeriesBlock';
 import {
   DAY_COLUMN_WIDTH,
-  END_DISPLAY_HOUR,
+  entryEndIso,
   entryStartIso,
   getBroadcastGridHour,
-  getEventDurationMinutes,
-  getBroadcastStartMinutes,
   groupSeries,
   HOUR_HEIGHT,
   MIN_EVENT_HEIGHT,
@@ -20,6 +18,8 @@ import {
 interface WeekGridProps {
   days: Date[];
   calendarEntries: CalendarEntry[];
+  /** Last grid hour: 28 = 04:00 (compact), 32 = 08:00 (night shown). */
+  endHour: number;
 }
 
 function formatGridHour(hour: number): string {
@@ -27,28 +27,47 @@ function formatGridHour(hour: number): string {
   return `${String(displayHour).padStart(2, '0')}:00`;
 }
 
-export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
-  const hours = Array.from(
-    { length: END_DISPLAY_HOUR - START_HOUR },
-    (_, i) => i + START_HOUR,
+/** Wall-clock minutes since midnight of `day` (25:30 → 1530). */
+function gridMinutes(date: Date, day: Date): number {
+  return (
+    differenceInCalendarDays(date, day) * 1440 +
+    date.getHours() * 60 +
+    date.getMinutes()
   );
+}
 
+/**
+ * One column per broadcast day (08:00 until 04:00 or 08:00 the next morning).
+ * A show is drawn in every column it overlaps, cut at the column's edges, so
+ * shows after midnight sit under the evening they belong to.
+ */
+export default function WeekGrid({ days, calendarEntries, endHour }: WeekGridProps) {
+  const hours = Array.from({ length: endHour - START_HOUR }, (_, i) => i + START_HOUR);
   const gridHeight = hours.length * HOUR_HEIGHT;
   const now = new Date();
 
-  const entriesByDay = days.map((day) => {
-    const dayEntries = calendarEntries.filter((entry) => {
+  const timed = calendarEntries
+    .map((entry) => {
+      const s = entryStartIso(entry);
+      const e = entryEndIso(entry);
+      if (!s || !e) return null;
       try {
-        const startIso = entryStartIso(entry);
-        if (!startIso) return false;
-        const startDate = parseISO(startIso);
-        return isSameDay(startDate, day);
+        return { entry, start: parseISO(s), end: parseISO(e) };
       } catch {
-        return false;
+        return null;
       }
-    });
+    })
+    .filter((x): x is { entry: CalendarEntry; start: Date; end: Date } => x !== null);
 
-    return { day, entries: dayEntries };
+  const columns = days.map((day) => {
+    const colStart = new Date(day);
+    colStart.setHours(START_HOUR, 0, 0, 0);
+    const colEnd = new Date(day);
+    colEnd.setHours(endHour, 0, 0, 0); // rolls over into the next morning
+    const entries = timed
+      .filter((t) => t.start < colEnd && t.end > colStart)
+      .map((t) => t.entry);
+    return { day, colStart, colEnd, items: groupSeries(entries) };
   });
 
   return (
@@ -77,12 +96,7 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
 
             <div className='flex flex-nowrap'>
               {days.map((day, dayIndex) => {
-                const broadcastHour = getBroadcastGridHour(
-                  now,
-                  day,
-                  START_HOUR,
-                  END_DISPLAY_HOUR,
-                );
+                const broadcastHour = getBroadcastGridHour(now, day, START_HOUR, endHour);
                 const isCurrentHour = broadcastHour === hour;
 
                 return (
@@ -111,7 +125,7 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
           <div className='w-16 flex-shrink-0' />
 
           <div className='flex flex-nowrap'>
-            {entriesByDay.map(({ entries }, dayIndex) => (
+            {columns.map(({ day, colStart, colEnd, items }, dayIndex) => (
               <div
                 key={dayIndex}
                 className='flex-shrink-0 relative'
@@ -120,34 +134,38 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
                   height: `${gridHeight}px`,
                 }}
               >
-                {groupSeries(entries).map((item, entryIndex) => {
-                  const startTime = item.start;
-                  const endTime = item.end;
-                  if (startTime.getHours() < START_HOUR) return null;
+                {items.map((item, entryIndex) => {
+                  // Cut at the column's edges (08:00 / 04:00 or 08:00)
+                  const shownStart = item.start > colStart ? item.start : colStart;
+                  const shownEnd = item.end < colEnd ? item.end : colEnd;
+                  if (shownEnd <= shownStart) return null;
 
-                  const startMinutes = getBroadcastStartMinutes(startTime);
-                  const gridStartMinutes = START_HOUR * 60;
                   const topPosition =
-                    ((startMinutes - gridStartMinutes) * HOUR_HEIGHT) / 60;
-                  if (topPosition >= gridHeight) return null;
+                    ((gridMinutes(shownStart, day) - START_HOUR * 60) * HOUR_HEIGHT) / 60;
+                  if (topPosition < 0 || topPosition >= gridHeight) return null;
 
-                  const durationMinutes = getEventDurationMinutes(startTime, endTime);
-                  const rawHeight = (durationMinutes * HOUR_HEIGHT) / 60;
-                  const maxHeight = gridHeight - topPosition;
+                  const rawHeight =
+                    ((gridMinutes(shownEnd, day) - gridMinutes(shownStart, day)) * HOUR_HEIGHT) / 60;
                   const heightInPixels = Math.max(
                     MIN_EVENT_HEIGHT,
-                    Math.min(rawHeight, maxHeight),
+                    Math.min(rawHeight, gridHeight - topPosition),
                   );
+                  // For "jump to what's on air" (useScrollToLive)
+                  const marks = {
+                    'data-start': item.start.getTime(),
+                    'data-end': item.end.getTime(),
+                  };
 
                   if (item.kind === 'series') {
                     // One block for a night / takeover, a row per slot
                     return (
                       <div
-                        key={item.key}
+                        key={`${item.key}-${dayIndex}`}
+                        {...marks}
                         className='absolute left-1 right-1 pointer-events-auto border-t-2 border-orange-500 rounded-t-sm z-10'
                         style={{ top: `${topPosition}px`, height: `${heightInPixels}px` }}
                       >
-                        <SeriesBlock item={item} />
+                        <SeriesBlock item={item} from={shownStart} to={shownEnd} />
                       </div>
                     );
                   }
@@ -155,6 +173,7 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
                   return (
                     <div
                       key={entryIndex}
+                      {...marks}
                       className='group/event absolute left-1 right-1 pointer-events-auto border-t-2 border-orange-500 rounded-t-sm z-10 hover:z-50 focus-within:z-50'
                       style={{
                         top: `${topPosition}px`,

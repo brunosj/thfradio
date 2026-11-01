@@ -88,6 +88,8 @@ export default function MobileShowList({
         const isCurrentShow = now >= startDate && now <= endDate;
         const action = getEntryAction(entry);
         const key = `${startIso}-${index}`;
+        // For "jump to what's on air" (useScrollToLive)
+        const marks = { 'data-start': startDate.getTime(), 'data-end': endDate.getTime() };
 
         const surfaceClasses = `min-h-11 rounded-lg border-l-2 border-orange-500 px-3 py-2.5
               ${
@@ -114,6 +116,7 @@ export default function MobileShowList({
           return (
             <li
               key={key}
+              {...marks}
               className={`${surfaceClasses} flex flex-col justify-center gap-0.5`}
             >
               {timeAndTitle}
@@ -146,7 +149,7 @@ export default function MobileShowList({
         );
 
         return (
-          <li key={key}>
+          <li key={key} {...marks}>
             {action.kind === 'show' ? (
               <Link href={action.href} className={actionClasses} aria-label={ariaLabel}>
                 {inner}

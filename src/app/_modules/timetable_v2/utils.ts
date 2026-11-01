@@ -5,8 +5,25 @@ import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
 export const HOUR_HEIGHT = 56;
 export const DAY_COLUMN_WIDTH = 280;
 export const START_HOUR = 8;
-/** Grid extends to 04:00 the next morning (shown on the start day column). */
+/** Compact grid: a broadcast day runs 08:00 – 04:00 the next morning. */
 export const END_DISPLAY_HOUR = 28;
+/** With the night shown: 08:00 – 08:00, the whole broadcast day. */
+export const NIGHT_END_HOUR = 32;
+
+/**
+ * The broadcast day a moment belongs to: before 08:00 still counts as the
+ * evening before (Monday 02:00 is in Sunday's column).
+ */
+export function broadcastDay(date: Date): Date {
+  const day = startOfDay(date);
+  return date.getHours() < START_HOUR ? addDays(day, -1) : day;
+}
+
+/** Between 04:00 and 08:00 the compact grid can't show what's on air. */
+export function isLateNight(date: Date = new Date()): boolean {
+  const h = date.getHours();
+  return h >= END_DISPLAY_HOUR - 24 && h < START_HOUR;
+}
 export const MIN_EVENT_HEIGHT = 24;
 
 export function entryStartIso(entry: CalendarEntry): string | undefined {

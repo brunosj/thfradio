@@ -108,7 +108,7 @@ const CalendarSchedule = () => {
     >
       <div className='overflow-hidden'>
         {mounted && (
-          <div className='max-h-[calc(100dvh-9rem)] overflow-y-auto overscroll-contain pt-4 pb-6 lg:pb-8'>
+          <div data-schedule-scroller className='max-h-[calc(100dvh-9rem)] overflow-y-auto overscroll-contain pt-4 pb-6 lg:pb-8'>
             {!isLoading && !error && channel2Available && (
               <ChannelToggle
                 channel2Available={channel2Available}

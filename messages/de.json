@@ -144,6 +144,8 @@
   "weekSchedule": "Wochenplan",
   "openProgramme": "Programm anzeigen",
   "closeProgramme": "Programm ausblenden",
+  "showNight": "Nacht bis 08:00 zeigen",
+  "hideNight": "Nacht ausblenden",
   "nextUp": "Als Nächstes",
   "showsAllTab": "All Shows",
   "showsResidents": "Residents",

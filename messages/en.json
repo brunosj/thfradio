@@ -47,6 +47,8 @@
   "weekSchedule": "Week schedule",
   "openProgramme": "Show the programme",
   "closeProgramme": "Hide the programme",
+  "showNight": "Show the night until 08:00",
+  "hideNight": "Hide the night",
   "nextUp": "Next up",
   "showsAllTab": "All Shows",
   "showsResidents": "Residents",
