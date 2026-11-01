@@ -58,7 +58,7 @@
     },
     "latest": {
       "name": "Archiv",
-      "path": "/shows"
+      "path": "/latest"
     },
     "info": {
       "name": "Info",

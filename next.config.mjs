@@ -17,14 +17,6 @@ const nextConfig = {
   // These settings help prevent duplicate locale prefixes in URLs
   skipTrailingSlashRedirect: true,
   skipMiddlewareUrlNormalize: true,
-  // The archive moved into the shows page (All Shows / Residents / Guests);
-  // query strings like ?show=slug are kept.
-  async redirects() {
-    return [
-      { source: '/:locale(de|en)/latest', destination: '/:locale/shows', permanent: true },
-      { source: '/latest', destination: '/shows', permanent: true },
-    ];
-  },
   async rewrites() {
     return {
       beforeFiles: [

@@ -1,9 +1,10 @@
 'use client';
 
-// Archive page (menu "Archiv", /shows): All Shows (every episode, filter by
-// show and genre), Residents (programme shows, A–Z, link to the show page;
-// filter current / archive) and Guests (THF Presents nights and takeovers
-// from the archive, by DJ / act, newest first or A–Z; click plays).
+// Two pages share this:
+// - Shows (menu "Shows", /shows): Residents (programme shows, A–Z, link to the
+//   show page; filter current / archive) and Guests (THF Presents nights and
+//   takeovers from the archive, by DJ / act, newest first or A–Z; click plays).
+// - Archiv (menu "Archiv", /latest): every episode, filter by show and genre.
 // Square photo tiles with the title, a thin rule and two small labels.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { parseISO } from 'date-fns';
@@ -224,8 +225,11 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 export default function ShowsDirectory({
   shows,
   activeFlagReliable = false,
+  mode = 'shows',
 }: {
   shows: ShowTypes[];
+  /** "shows": Residents / Guests tabs; "archive": every episode */
+  mode?: 'shows' | 'archive';
   /** The show source marks running shows itself (thfradio.space); the old backend marks all as active. */
   activeFlagReliable?: boolean;
 }) {
@@ -233,7 +237,7 @@ export default function ShowsDirectory({
   // The archive (guests, genres, "last" date) loads with the DataProvider.
   const { cloudShows, isLoadingShows, showsError } = useData();
   const { ch1, ch2 } = useCalendarData();
-  const [tab, setTab] = useState<Tab>('all');
+  const [tab, setTab] = useState<Tab>(mode === 'archive' ? 'all' : 'residents');
   const [filter, setFilter] = useState<ResidentFilter>('all');
   const [sort, setSort] = useState<GuestSort>('date');
   const [query, setQuery] = useState('');
@@ -242,9 +246,18 @@ export default function ShowsDirectory({
 
   // Tab from the URL (?tab=residents / ?tab=guests), so it can be linked.
   useEffect(() => {
-    const param = new URLSearchParams(window.location.search).get('tab');
+    if (mode === 'archive') return;
+    // Old links to the episode list (/shows?show=… or ?tab=all) now live under /latest
+    const search = new URLSearchParams(window.location.search);
+    if (search.has('show') || search.get('tab') === 'all') {
+      search.delete('tab');
+      const qs = search.toString();
+      window.location.replace(window.location.pathname.replace(/\/shows\/?$/, '/latest') + (qs ? `?${qs}` : ''));
+      return;
+    }
+    const param = search.get('tab');
     if (param === 'guests' || param === 'residents') setTab(param);
-  }, []);
+  }, [mode]);
 
   const archive = useMemo(() => (cloudShows ? processShows(cloudShows) : []), [cloudShows]);
   const upcoming = useMemo(() => upcomingByShow([...ch1, ...ch2]), [ch1, ch2]);
@@ -345,7 +358,7 @@ export default function ShowsDirectory({
     setTab(next);
     setLimit(PAGE);
     const url = new URL(window.location.href);
-    if (next === 'all') url.searchParams.delete('tab');
+    if (next === 'residents') url.searchParams.delete('tab');
     else url.searchParams.set('tab', next);
     if (next !== 'all') url.searchParams.delete('show');
     window.history.replaceState(null, '', url.toString());
@@ -359,8 +372,10 @@ export default function ShowsDirectory({
   return (
     <section className='bg-dark-blue text-white min-h-[80vh] pb-16 lg:pb-24'>
       <div className='layout pt-8 lg:pt-12 pb-5 lg:pb-6 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between'>
-        <div className='-mx-6 px-6 sm:mx-0 sm:px-0 flex items-baseline gap-x-5 sm:gap-x-7 lg:gap-x-10 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden' role='tablist'>
-          {(['all', 'residents', 'guests'] as const).map((id) => (
+        <div className='-mx-6 px-6 sm:mx-0 sm:px-0 flex items-baseline gap-x-5 sm:gap-x-7 lg:gap-x-10 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden' role={mode === 'archive' ? undefined : 'tablist'}>
+          {mode === 'archive' ? (
+            <h1 className={tabClass(true)}>{t('menu.latest.name')}</h1>
+          ) : (['residents', 'guests'] as const).map((id) => (
             <button
               key={id}
               type='button'
@@ -369,7 +384,7 @@ export default function ShowsDirectory({
               onClick={() => switchTab(id)}
               className={`${tabClass(tab === id)} shrink-0`}
             >
-              {id === 'all' ? t('showsAllTab') : id === 'residents' ? t('showsResidents') : t('showsGuests')}
+              {id === 'residents' ? t('showsResidents') : t('showsGuests')}
             </button>
           ))}
         </div>

@@ -17,9 +17,9 @@ interface HeaderProps {
   setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// "latest" = Archiv: the shows page with All Shows / Residents / Guests;
-// "shop" = Merch, the SumUp store (opens in a new tab)
-const menuKeys = ['programme', 'latest', 'shop', 'info'] as const;
+// "shows" = Residents / Guests (/shows), "latest" = Archiv, every episode (/latest).
+// "shop" (Merch, SumUp store) is left out until the shop is ready: add it back here.
+const menuKeys = ['programme', 'shows', 'latest', 'info'] as const;
 
 const Header: React.FC<HeaderProps> = ({
   isOpen: externalIsOpen,

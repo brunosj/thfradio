@@ -58,7 +58,7 @@ const HomeArchiveSection = ({
           loading={!isVisible || isLoadingShows || !cloudShows}
           error={!cloudShows?.length && showsError ? t('archiveLoadError') : null}
           pageSize={20}
-          fullArchiveHref='/shows'
+          fullArchiveHref='/latest'
         />
       </div>
     </section>

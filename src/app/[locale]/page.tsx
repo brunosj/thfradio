@@ -44,5 +44,6 @@ export default async function HomePage({ params }: { params: Params }) {
     notFound();
   }
 
-  return <HomeContent page={page} picks={mixCommunityPicks(picks)} videos={videos} />;
+  // Community Picks are left out for now (Staff Picks stay)
+  return <HomeContent page={page} picks={{ ...mixCommunityPicks(picks), community: [] }} videos={videos} />;
 }

@@ -3,7 +3,6 @@
 import Hero from '@/app/_modules/hero/Hero';
 import HomeArchiveSection from '@/app/_modules/archive/HomeArchiveSection';
 import PicksSection from '@/app/_modules/picks/PicksSection';
-import MerchSection from '@/app/_modules/merch/MerchSection';
 import VideosSection from '@/app/_modules/videos/VideosSection';
 import type { HomepageTypes } from '@/app/_types/ResponsesInterface';
 import type { Picks } from '@/lib/picks';
@@ -30,7 +29,7 @@ export default function HomeContent({ page, picks, videos }: HomeContentProps) {
         showButtons={true}
         picturePosition='right'
       />
-      <MerchSection />
+      {/* Merch section: back when the shop is ready (MerchSection) */}
       <HomeArchiveSection
         title={page.archive.title ?? ''}
         text={page.archive.text ?? ''}
