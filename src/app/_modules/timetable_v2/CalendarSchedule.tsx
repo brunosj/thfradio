@@ -55,16 +55,26 @@ const CalendarSchedule = () => {
       history.replaceState(null, '', window.location.pathname + window.location.search);
     }
     const onClick = (e: MouseEvent) => {
+      const isOpen = useGlobalStore.getState().scheduleOpen;
+      const target = e.target as HTMLElement | null;
       // Plain left clicks only: new tab / window keeps working as usual
-      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const a = (e.target as HTMLElement | null)?.closest?.('a');
-      if (!a || a.target === '_blank') return;
-      const href = a.getAttribute('href');
-      if (!href) return;
-      const url = new URL(href, window.location.href);
-      if (url.origin === window.location.origin && url.hash === SCHEDULE_HASH) {
+      const plain = e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
+      const a = target?.closest?.('a');
+      const href = a && a.target !== '_blank' ? a.getAttribute('href') : null;
+      const url = href ? new URL(href, window.location.href) : null;
+      if (plain && url && url.origin === window.location.origin && url.hash === SCHEDULE_HASH) {
+        // "Programm" in the menu: opens the schedule, a second click folds it in
         e.preventDefault();
-        setOpen(true);
+        setOpen(!isOpen);
+        return;
+      }
+      // A click anywhere else (outside the schedule and its ticker button) folds it in
+      if (
+        isOpen &&
+        !target?.closest?.('#week-schedule') &&
+        !target?.closest?.('[aria-controls="week-schedule"]')
+      ) {
+        setOpen(false);
       }
     };
     const onKey = (e: KeyboardEvent) => {
