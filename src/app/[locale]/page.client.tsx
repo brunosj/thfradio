@@ -1,45 +1,44 @@
 'use client';
 
 import Hero from '@/app/_modules/hero/Hero';
-import HomeShowSection from '@/app/_modules/show-listing/HomeShowsSection';
-import CalendarSchedule from '@/app/_modules/timetable_v2/CalendarSchedule';
 import HomeArchiveSection from '@/app/_modules/archive/HomeArchiveSection';
-import HomeNewsSection from '@/app/_modules/news/HomeNewsSection';
-import type { HomepageTypes, NewsType } from '@/app/_types/ResponsesInterface';
+import PicksSection from '@/app/_modules/picks/PicksSection';
+import MerchSection from '@/app/_modules/merch/MerchSection';
+import VideosSection from '@/app/_modules/videos/VideosSection';
+import type { HomepageTypes } from '@/app/_types/ResponsesInterface';
+import type { Picks } from '@/lib/picks';
+import type { Video } from '@/lib/videos';
 
 interface HomeContentProps {
   page: HomepageTypes;
-  latestNews: NewsType[];
+  picks: Picks;
+  videos: Video[];
 }
 
-export default function HomeContent({ page, latestNews }: HomeContentProps) {
+export default function HomeContent({ page, picks, videos }: HomeContentProps) {
   if (!page) {
     return <div>Loading...</div>;
   }
 
-  const galleryPictures = (page.pictureGallery ?? []).map((url) => ({
-    url,
-  }));
-
   return (
     <>
-      <CalendarSchedule
-        programmeTitle={page.programme.title}
-        programmeText={page.programme.text}
-        programmeTextHtml={page.programme.textHtml}
-      />
+      <PicksSection picks={picks} />
+      <VideosSection videos={videos} />
       <Hero
         description={page.heroText ?? ''}
         images={{ data: page.heroPictures }}
         showButtons={true}
         picturePosition='right'
       />
+      <MerchSection />
       <HomeArchiveSection
         title={page.archive.title ?? ''}
         text={page.archive.text ?? ''}
         textHtml={page.archive.textHtml}
       />
-      {/* <HomeNewsSection
+      {/* News + show gallery are switched off (to bring back: import the sections,
+          fetch the news in page.tsx again)
+      <HomeNewsSection
         title={page.news.title ?? ''}
         text={page.news.text ?? ''}
         textHtml={page.news.textHtml}

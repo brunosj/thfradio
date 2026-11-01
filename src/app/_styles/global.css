@@ -28,6 +28,18 @@
   --color-orange-900: #331404;
 
   --breakpoint-lg: 67.5rem; /* 1080px */
+
+  /* Square corners everywhere, like the show cards. Only pills and circles
+     (rounded-full: genre chips, play buttons) stay round. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
+  --radius: 0;
 }
 
 /* * {
@@ -300,4 +312,60 @@ input[type='range']:focus::-ms-fill-upper {
   .thf-audio-player .rap-volume-container {
     @apply hidden;
   }
+}
+
+/* Archive player slider (CloudPlayer): orange up to the playhead, white thumb.
+   Selectors beat the generic input[type='range'] rules above. */
+input[type='range'].player-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type='range'].player-range:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+input[type='range'].player-range::-webkit-slider-runnable-track,
+input[type='range'].player-range:focus::-webkit-slider-runnable-track {
+  height: 4px;
+  background: linear-gradient(to right, #ff6314 var(--progress, 0%), rgb(255 255 255 / 0.18) var(--progress, 0%));
+}
+input[type='range'].player-range::-moz-range-track,
+input[type='range'].player-range:focus::-moz-range-track {
+  height: 4px;
+  background: rgb(255 255 255 / 0.18);
+}
+input[type='range'].player-range::-moz-range-progress {
+  height: 4px;
+  background: #ff6314;
+}
+input[type='range'].player-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 0;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+  transition: transform 0.15s;
+}
+input[type='range'].player-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 0;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+}
+input[type='range'].player-range:hover::-webkit-slider-thumb,
+input[type='range'].player-range:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+input[type='range'].player-range:focus-visible {
+  outline: 2px solid #ff6314;
+  outline-offset: 4px;
 }

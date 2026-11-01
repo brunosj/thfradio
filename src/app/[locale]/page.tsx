@@ -2,12 +2,13 @@ import { Metadata } from 'next';
 import { createMetadata } from '@/utils/metadata';
 import HomeContent from './page.client';
 import { fetchHomePage } from '@/lib/pages';
-import { fetchNews } from '@/lib/news';
+import { fetchPicks, mixCommunityPicks } from '@/lib/picks';
+import { fetchVideos } from '@/lib/videos';
 import { notFound } from 'next/navigation';
 import type { HomepageTypes } from '@/types/ResponsesInterface';
 type Params = Promise<{ locale: string }>;
 
-// Revalidate this page every 12 hours (same as API cache)
+// Rebuilt at least every 12 hours; the picks fetch (5 min) makes it more often
 export const revalidate = 43200;
 
 export async function generateMetadata({
@@ -33,12 +34,15 @@ export async function generateMetadata({
 
 export default async function HomePage({ params }: { params: Params }) {
   const { locale } = await params;
-  const page: HomepageTypes | null = await fetchHomePage(locale);
-  const latestNews = await fetchNews(locale);
+  const [page, picks, videos] = await Promise.all([
+    fetchHomePage(locale) as Promise<HomepageTypes | null>,
+    fetchPicks(),
+    fetchVideos(),
+  ]);
 
   if (!page) {
     notFound();
   }
 
-  return <HomeContent page={page} latestNews={latestNews} />;
+  return <HomeContent page={page} picks={mixCommunityPicks(picks)} videos={videos} />;
 }

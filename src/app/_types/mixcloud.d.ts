@@ -1,11 +1,30 @@
+// Mixcloud Widget API (https://www.mixcloud.com/developers/widget/)
+type MixcloudEvent<T extends unknown[] = []> = {
+  on: (cb: (...args: T) => void) => void;
+  off: (cb: (...args: T) => void) => void;
+};
+
+export type MixcloudWidget = {
+  ready: Promise<void>;
+  pause: () => Promise<void> | void;
+  play: () => Promise<void>;
+  togglePlay: () => Promise<void>;
+  /** seconds */
+  seek: (seconds: number) => Promise<boolean | void>;
+  getDuration: () => Promise<number>;
+  events: {
+    /** position, duration in seconds */
+    progress: MixcloudEvent<[number, number]>;
+    play: MixcloudEvent;
+    pause: MixcloudEvent;
+    ended: MixcloudEvent;
+  };
+};
+
 declare global {
   interface Window {
     Mixcloud: {
-      PlayerWidget: (iframe: HTMLIFrameElement) => {
-        ready: Promise<void>;
-        pause: () => void;
-        play: () => Promise<void>;
-      };
+      PlayerWidget: (iframe: HTMLIFrameElement) => MixcloudWidget;
     };
   }
 }

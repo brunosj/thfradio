@@ -31,7 +31,14 @@ export interface CalendarEntry {
   id: string;
   showId?: string;
   showTitle?: string;
+  /** Only set when /shows/[slug] exists on the website. */
   showSlug?: string;
+  /** Intranet event type: regular | rerun | special | presents | takeover | practice | other */
+  type?: string;
+  imageUrl?: string;
+  /** SoundCloud track id of a rerun's public recording. */
+  recordingTrackId?: string;
+  recordingUrl?: string;
   title: string;
   description?: string;
   startTime: string;
@@ -61,6 +68,9 @@ export interface MixcloudShowType {
     name: string;
     url: string;
   }>;
+  created_time?: string;
+  /** Length in seconds */
+  audio_length?: number;
 }
 
 export interface SoundcloudShowType {
@@ -69,6 +79,10 @@ export interface SoundcloudShowType {
   id: string;
   artwork_url: string;
   tag_list: string;
+  /** SoundCloud's one free-text genre field (may hold "House, Techno") */
+  genre?: string | null;
+  /** Length in milliseconds */
+  duration?: number;
   created_at: string;
   user?: {
     avatar_url?: string;
@@ -93,6 +107,10 @@ export interface CloudShowTypes {
     name: string;
     url: string;
   }>;
+  /** Cleaned genres for browsing (see utils/genres.ts cleanGenres) */
+  genres?: string[];
+  /** Length in seconds, if the platform tells us */
+  durationSec?: number | null;
   date: string;
 }
 

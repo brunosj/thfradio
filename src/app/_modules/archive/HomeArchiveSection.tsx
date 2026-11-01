@@ -1,13 +1,13 @@
 'use client';
 
+// Homepage: the whole archive with genre family chips (after NTS Explore),
+// right under the hero. Shows load when the section comes into view.
 import { useEffect, useState } from 'react';
-import SectionHeader from '@/common/layout/section/SectionHeader';
-import BarsSpinner from '@/common/ui/BarsSpinner';
-import UIButton from '@/common/ui/UIButton';
-import { processShows } from '@/utils/showUtils';
-import CloudShowsComponent from './CloudShowsComponent';
-import { useData } from '@/context/DataContext';
 import { useTranslations } from 'next-intl';
+import BarsSpinner from '@/common/ui/BarsSpinner';
+import { useData } from '@/context/DataContext';
+import type { CloudShowTypes } from '@/types/ResponsesInterface';
+import ArchiveBrowser, { type ArchiveProgrammeShow } from './ArchiveBrowser';
 
 interface HomeArchiveSectionProps {
   title: string;
@@ -18,75 +18,79 @@ interface HomeArchiveSectionProps {
 
 const HomeArchiveSection = ({
   title,
-  text,
-  textHtml,
-  backgroundColor = 'bg-thf-blue-500',
+  backgroundColor = 'bg-dark-blue',
 }: HomeArchiveSectionProps) => {
   const t = useTranslations();
-  const { cloudShows, isLoadingShows, tagsList, loadCloudShows, showsError } =
-    useData();
+  const { cloudShows, isLoadingShows, showsError } = useData();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Use Intersection Observer to load shows when section comes into view
+    const element = document.getElementById('latest');
+    if (!element) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
+        // The DataProvider loads the archive once on mount; this only reveals it
         if (entry.isIntersecting) {
           setIsVisible(true);
-          loadCloudShows();
           observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { rootMargin: '400px 0px' },
     );
-
-    const element = document.getElementById('latest');
-    if (element) {
-      observer.observe(element);
-    }
-
+    observer.observe(element);
     return () => observer.disconnect();
-  }, [loadCloudShows]);
-
-  // Get only the 8 latest shows
-  const latestShows = cloudShows ? processShows(cloudShows).slice(0, 8) : [];
+  }, []);
 
   return (
     <section
-      className={`${backgroundColor} scroll-mt-24 sectionPb min-h-[60lvh]`}
+      className={`${backgroundColor} text-white scroll-mt-24 sectionPb min-h-[60lvh] border-t border-white/10`}
       id='latest'
     >
-      <SectionHeader title={title} text={text} textHtml={textHtml} />
-      <div className='flex w-full m-auto flex-col'>
-        {!isVisible || isLoadingShows || !cloudShows ? (
-          <div className='m-auto text-center pb-12'>
-            <BarsSpinner color='#ff6314' />
-          </div>
-        ) : showsError ? (
-          <div className='m-auto text-center pb-12 text-red-500'>
-            <p>Error loading shows. Please try again later.</p>
-          </div>
-        ) : (
-          <>
-            <CloudShowsComponent items={latestShows} tagsList={tagsList} />
-
-            {latestShows.length > 0 && (
-              <div className='layout text-center pt-12'>
-                <UIButton
-                  path='/latest'
-                  color='white-orange'
-                  className='inline-block'
-                  ariaLabel='View all shows'
-                >
-                  {t('viewAllShows')}
-                </UIButton>
-              </div>
-            )}
-          </>
-        )}
+      {/* Same heading as the picks above; the CMS intro text is left out on purpose */}
+      <div className='layout mx-auto w-full max-w-[1600px] pt-12 lg:pt-16 mb-4 lg:mb-6'>
+        <div role='heading' aria-level={2} className='font-sans font-bold text-2xl lg:text-3xl leading-none'>
+          {title || t('fromTheArchive')}
+        </div>
+      </div>
+      <div className='layout mx-auto w-full max-w-[1600px]'>
+        <ArchiveContent
+          shows={cloudShows}
+          loading={!isVisible || isLoadingShows || !cloudShows}
+          error={!cloudShows?.length && showsError ? t('archiveLoadError') : null}
+          pageSize={20}
+          fullArchiveHref='/shows'
+        />
       </div>
     </section>
   );
 };
+
+/** Spinner / error / the browser — shared with the archive page (All Shows). */
+export function ArchiveContent({
+  shows,
+  loading,
+  error,
+  pageSize,
+  autoLoad,
+  fullArchiveHref,
+  programme,
+}: {
+  shows: CloudShowTypes[] | null;
+  loading: boolean;
+  error: string | null;
+  pageSize?: number;
+  autoLoad?: boolean;
+  fullArchiveHref?: string;
+  programme?: ArchiveProgrammeShow[];
+}) {
+  if (loading || !shows)
+    return (
+      <div className='flex justify-center py-12'>
+        <BarsSpinner color='#ff6314' />
+      </div>
+    );
+  if (error) return <p className='py-12 text-center font-mono text-sm text-orange-400'>{error}</p>;
+  return <ArchiveBrowser shows={shows} pageSize={pageSize} autoLoad={autoLoad} fullArchiveHref={fullArchiveHref} programme={programme} />;
+}
 
 export default HomeArchiveSection;

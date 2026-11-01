@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { LiveChannelId } from '@/app/_lib/liveChannels';
+import type { Video } from '@/lib/videos';
 
 export enum ActivePlayer {
   MIXCLOUD,
@@ -21,6 +22,22 @@ interface GlobalStore {
   /** Timetable grid view only */
   activeTimetableChannel: LiveChannelId;
   setActiveTimetableChannel: (channel: LiveChannelId) => void;
+
+  /** The player shows its tap-to-start strip above the bar (iOS) */
+  playerTapNeeded: boolean;
+  setPlayerTapNeeded: (v: boolean) => void;
+
+  /** Bumped to ask the archive player to pause (e.g. a video starts) */
+  pauseSignal: number;
+  requestPause: () => void;
+
+  /** YouTube video in the small player next to the chat button */
+  video: Video | null;
+  setVideo: (video: Video | null) => void;
+
+  /** Week schedule folded out under the live ticker */
+  scheduleOpen: boolean;
+  setScheduleOpen: (open: boolean) => void;
 
   showKey: string | undefined;
   showKeySet: (showKey: string) => void;
@@ -46,6 +63,18 @@ export const useGlobalStore = create<GlobalStore>((set) => ({
 
   activeTimetableChannel: 1,
   setActiveTimetableChannel: (channel) => set({ activeTimetableChannel: channel }),
+
+  playerTapNeeded: false,
+  setPlayerTapNeeded: (v) => set({ playerTapNeeded: v }),
+
+  pauseSignal: 0,
+  requestPause: () => set((s) => ({ pauseSignal: s.pauseSignal + 1 })),
+
+  video: null,
+  setVideo: (video) => set({ video }),
+
+  scheduleOpen: false,
+  setScheduleOpen: (open) => set({ scheduleOpen: open }),
 
   showKey: undefined,
   showKeySet: (showKey) =>

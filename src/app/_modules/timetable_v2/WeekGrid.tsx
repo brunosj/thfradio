@@ -3,14 +3,15 @@ import React from 'react';
 import { isSameDay, parseISO } from 'date-fns';
 import type { CalendarEntry } from '@/app/_types/ResponsesInterface';
 import CalendarEventItem from './CalendarEventItem';
+import { SeriesBlock } from './SeriesBlock';
 import {
   DAY_COLUMN_WIDTH,
   END_DISPLAY_HOUR,
-  entryEndIso,
   entryStartIso,
   getBroadcastGridHour,
   getEventDurationMinutes,
   getBroadcastStartMinutes,
+  groupSeries,
   HOUR_HEIGHT,
   MIN_EVENT_HEIGHT,
   START_HOUR,
@@ -119,54 +120,53 @@ export default function WeekGrid({ days, calendarEntries }: WeekGridProps) {
                   height: `${gridHeight}px`,
                 }}
               >
-                {entries.map((entry, entryIndex) => {
-                  try {
-                    const startIso = entryStartIso(entry);
-                    const endIso = entryEndIso(entry);
-                    if (!startIso || !endIso) return null;
+                {groupSeries(entries).map((item, entryIndex) => {
+                  const startTime = item.start;
+                  const endTime = item.end;
+                  if (startTime.getHours() < START_HOUR) return null;
 
-                    const startTime = parseISO(startIso);
-                    const endTime = parseISO(endIso);
-                    const startHour = startTime.getHours();
+                  const startMinutes = getBroadcastStartMinutes(startTime);
+                  const gridStartMinutes = START_HOUR * 60;
+                  const topPosition =
+                    ((startMinutes - gridStartMinutes) * HOUR_HEIGHT) / 60;
+                  if (topPosition >= gridHeight) return null;
 
-                    if (startHour < START_HOUR) return null;
+                  const durationMinutes = getEventDurationMinutes(startTime, endTime);
+                  const rawHeight = (durationMinutes * HOUR_HEIGHT) / 60;
+                  const maxHeight = gridHeight - topPosition;
+                  const heightInPixels = Math.max(
+                    MIN_EVENT_HEIGHT,
+                    Math.min(rawHeight, maxHeight),
+                  );
 
-                    const startMinutes = getBroadcastStartMinutes(startTime);
-                    const gridStartMinutes = START_HOUR * 60;
-                    const topPosition =
-                      ((startMinutes - gridStartMinutes) * HOUR_HEIGHT) / 60;
-
-                    const durationMinutes = getEventDurationMinutes(
-                      startTime,
-                      endTime,
-                    );
-                    const rawHeight = (durationMinutes * HOUR_HEIGHT) / 60;
-                    const maxHeight = gridHeight - topPosition;
-                    const heightInPixels = Math.max(
-                      MIN_EVENT_HEIGHT,
-                      Math.min(rawHeight, maxHeight),
-                    );
-
-                    if (topPosition >= gridHeight) return null;
-
+                  if (item.kind === 'series') {
+                    // One block for a night / takeover, a row per slot
                     return (
                       <div
-                        key={entryIndex}
-                        className='group/event absolute left-1 right-1 pointer-events-auto border-t-2 border-orange-500 rounded-t-sm z-10 hover:z-50'
-                        style={{
-                          top: `${topPosition}px`,
-                          height: `${heightInPixels}px`,
-                        }}
+                        key={item.key}
+                        className='absolute left-1 right-1 pointer-events-auto border-t-2 border-orange-500 rounded-t-sm z-10'
+                        style={{ top: `${topPosition}px`, height: `${heightInPixels}px` }}
                       >
-                        <CalendarEventItem
-                          event={entry}
-                          slotHeightPx={heightInPixels}
-                        />
+                        <SeriesBlock item={item} />
                       </div>
                     );
-                  } catch {
-                    return null;
                   }
+
+                  return (
+                    <div
+                      key={entryIndex}
+                      className='group/event absolute left-1 right-1 pointer-events-auto border-t-2 border-orange-500 rounded-t-sm z-10 hover:z-50 focus-within:z-50'
+                      style={{
+                        top: `${topPosition}px`,
+                        height: `${heightInPixels}px`,
+                      }}
+                    >
+                      <CalendarEventItem
+                        event={item.entry}
+                        slotHeightPx={heightInPixels}
+                      />
+                    </div>
+                  );
                 })}
               </div>
             ))}

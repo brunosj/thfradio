@@ -126,3 +126,129 @@ export function findNextDayWithShows(
   }
   return null;
 }
+
+/**
+ * What clicking a timetable entry does:
+ * - a show slug (reruns carry the original show's slug) → open /shows/[slug]
+ * - otherwise a public recording (reruns) → play it in the site player
+ * - otherwise nothing (entry stays non-clickable)
+ */
+export type EntryAction =
+  | { kind: 'show'; href: string }
+  | { kind: 'recording'; trackId: string; url: string }
+  | null;
+
+export function getEntryAction(entry: CalendarEntry): EntryAction {
+  if (entry.showSlug) {
+    return { kind: 'show', href: `/shows/${encodeURIComponent(entry.showSlug)}` };
+  }
+  if (entry.recordingTrackId) {
+    return {
+      kind: 'recording',
+      trackId: entry.recordingTrackId,
+      url: entry.recordingUrl ?? '',
+    };
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Series blocks: back-to-back slots of one night / takeover
+// ("THF Presents: HABITUS w/ ELSA", "… w/ APRS", …) are shown as one block
+// with the series as heading and each slot with its time and name.
+// ---------------------------------------------------------------------------
+
+export type SeriesSlot = { entry: CalendarEntry; name: string; start: Date; end: Date; rerun: boolean };
+
+export type TimetableItem =
+  | { kind: 'single'; entry: CalendarEntry; start: Date; end: Date }
+  | { kind: 'series'; key: string; title: string; start: Date; end: Date; slots: SeriesSlot[] };
+
+/** Max gap between two slots of one block. */
+const SERIES_GAP_MS = 15 * 60 * 1000;
+
+/** "THF Presents: HABITUS w/ ELSA" → { series: "THF Presents: HABITUS", name: "ELSA" } */
+export function splitSeriesTitle(title: string): { series: string; name: string } | null {
+  const clean = title.replace(/\((\s*w\/[^)]*)\)/i, '$1').replace(/\s+/g, ' ').trim();
+  const m = clean.match(/^(.+?)\s+(?:w\/|with)\s*(.*)$/i);
+  if (!m || m[1].trim().length < 3) return null;
+  return { series: m[1].trim(), name: m[2].trim() };
+}
+
+const seriesKey = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/** Entries in start order, with back-to-back slots of one series merged. */
+export function groupSeries(entries: CalendarEntry[]): TimetableItem[] {
+  const timed = entries
+    .map((entry) => {
+      const s = entryStartIso(entry);
+      const e = entryEndIso(entry);
+      return s && e ? { entry, start: parseISO(s), end: parseISO(e) } : null;
+    })
+    .filter((x): x is { entry: CalendarEntry; start: Date; end: Date } => x !== null)
+    .sort((a, b) => a.start.getTime() - b.start.getTime());
+
+  const items: TimetableItem[] = [];
+  let run: { key: string; title: string; slots: SeriesSlot[] } | null = null;
+
+  const flush = () => {
+    if (!run) return;
+    if (run.slots.length > 1) {
+      items.push({
+        kind: 'series',
+        key: `${run.key}-${run.slots[0].start.getTime()}`,
+        title: run.title,
+        start: run.slots[0].start,
+        end: run.slots[run.slots.length - 1].end,
+        slots: run.slots,
+      });
+    } else {
+      const s = run.slots[0];
+      items.push({ kind: 'single', entry: s.entry, start: s.start, end: s.end });
+    }
+    run = null;
+  };
+
+  for (const t of timed) {
+    const { title: plainTitle, rerun } = entryTitle(t.entry);
+    const split = splitSeriesTitle(plainTitle);
+    const key = split ? seriesKey(split.series) : '';
+    const last = run?.slots[run.slots.length - 1];
+    const joins =
+      !!run &&
+      !!split &&
+      run.key === key &&
+      !!last &&
+      t.start.getTime() >= last.end.getTime() - 60 * 1000 &&
+      t.start.getTime() - last.end.getTime() <= SERIES_GAP_MS;
+    if (!joins) flush();
+    if (split) {
+      if (!run) run = { key, title: split.series, slots: [] };
+      run.slots.push({ entry: t.entry, name: split.name, start: t.start, end: t.end, rerun });
+    } else {
+      items.push({ kind: 'single', entry: t.entry, start: t.start, end: t.end });
+    }
+  }
+  flush();
+  return items;
+}
+
+// ---------------------------------------------------------------------------
+// Reruns: marked "(r)" in the calendar (or type "rerun" from thfradio.space).
+// The mark is dropped from the title and shown as a repeat icon instead.
+// ---------------------------------------------------------------------------
+
+const RERUN_MARK = /\s*\(\s*(?:r|rerun|wdh\.?)\s*\)/gi;
+const RERUN_PREFIX = /^\s*(?:rerun|re-run|wiederholung)\s*[:\-–]\s*/i;
+
+/** "Show (r)" → { title: "Show", rerun: true } */
+export function splitRerun(rawTitle: string, type?: string): { title: string; rerun: boolean } {
+  const marked = RERUN_PREFIX.test(rawTitle) || new RegExp(RERUN_MARK.source, 'i').test(rawTitle);
+  const title = rawTitle.replace(RERUN_PREFIX, '').replace(RERUN_MARK, '').replace(/\s+/g, ' ').trim();
+  return { title: title || rawTitle.trim(), rerun: marked || type === 'rerun' };
+}
+
+/** Display title of a timetable entry, without the rerun mark. */
+export function entryTitle(entry: CalendarEntry): { title: string; rerun: boolean } {
+  return splitRerun(entry.summary ?? entry.title ?? '', entry.type);
+}

@@ -1,137 +1,67 @@
 'use client';
 
+// Compact footer: name + one line about THF Radio on the left, four small
+// link columns (menu, follow, contact, legal) on the right.
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 
 // Define menu keys as const arrays for type safety
-const menuKeys = ['news', 'shows', 'programme', 'latest', 'info'] as const;
-const followMenuKeys = [
-  'Instagram',
-  'Facebook',
-  'Mixcloud',
-  'Soundcloud',
-] as const;
+const menuKeys = ['news', 'programme', 'latest', 'shop', 'info'] as const;
+const followMenuKeys = ['Instagram', 'Facebook', 'Mixcloud', 'Soundcloud'] as const;
 const extraMenuKeys = ['privacy', 'imprint', 'awareness'] as const;
-const contactMenuKeys = ['support'] as const;
+
+type Item = { name: string; path: string };
+
+function Column({ title, items }: { title: string; items: (Item | undefined)[] }) {
+  const list = items.filter((i): i is Item => !!i);
+  if (!list.length) return null;
+  return (
+    <div>
+      {/* p, not h4: the global h4 style would win over these classes */}
+      <p className='mb-2.5 font-mono text-[11px] uppercase tracking-wider text-white/55'>{title}</p>
+      <ul className='space-y-1'>
+        {list.map((item) => {
+          const external = /^(https?:|mailto:)/.test(item.path);
+          return (
+            <li key={item.path}>
+              <Link
+                href={item.path}
+                target={external ? '_blank' : undefined}
+                rel={external ? 'noopener noreferrer' : undefined}
+                className='text-sm text-white/90 transition-colors hover:text-white hover:underline underline-offset-4'
+              >
+                {item.name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
 
 const Footer = () => {
   const t = useTranslations();
+  const follow = t.raw('followMenu') as Item[];
+  const contact = t.raw('contactMenu') as Item[];
+  const extra = t.raw('extraMenu') as Item[];
 
   return (
-    <footer className='bg-thf-blue-500 py-6 lg:py-12 layout'>
-      <nav className='text-white grid grid-cols-2 lg:grid-cols-6 gap-6 lg:gap-24 '>
-        <div className='col-span-2 space-y-6'>
-          <h4 className='font-mono'>THF RADIO</h4>
-          <p className='text-sm lg:text-base'>{t('footerDescription')}</p>
+    <footer className='bg-thf-blue-500 text-white'>
+      <nav className='layout grid grid-cols-2 gap-x-6 gap-y-8 py-8 lg:py-10 md:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))] md:gap-x-10'>
+        <div className='col-span-2 md:col-span-1 max-w-xs'>
+          <p className='font-mono text-sm uppercase tracking-wider'>THF Radio</p>
+          <p className='mt-2 text-xs lg:text-sm leading-relaxed text-white/75'>{t('footerDescription')}</p>
         </div>
-        <div>
-          <h4 className='uppercase text-orange-500 pb-6'>{t('menuTitle')}</h4>
-          {menuKeys.map((key) => {
-            const isExternal = t(`menu.${key}.path`).slice(0, 4) === 'http';
-            return (
-              <Link
-                href={t(`menu.${key}.path`)}
-                rel={isExternal ? 'noopener noreferrer' : ''}
-                target={isExternal ? '_blank' : ''}
-                key={key}
-              >
-                <p className='py-1 textHover text-sm lg:text-base'>
-                  {t(`menu.${key}.name`)}
-                </p>
-              </Link>
-            );
-          })}
-        </div>
-        <div>
-          <h4 className='uppercase text-orange-500 pb-6'>Follow</h4>
-          {followMenuKeys.map((key) => {
-            const menuItem = t
-              .raw('followMenu')
-              .find((item: { name: string }) => item.name === key);
-            if (!menuItem) return null;
-
-            return (
-              <Link
-                href={menuItem.path}
-                rel='noopener noreferrer'
-                target='_blank'
-                key={key}
-              >
-                <p className='py-1 textHover text-sm lg:text-base'>
-                  {menuItem.name}
-                </p>
-              </Link>
-            );
-          })}
-        </div>
-        <div>
-          <h4 className='uppercase text-orange-500 pb-6'>
-            {t('contactTitle')}
-          </h4>
-          {contactMenuKeys.map((key) => {
-            const menuItem = t
-              .raw('contactMenu')
-              .find((item: { name: string }) =>
-                item.name.toLowerCase().includes(key)
-              );
-            if (!menuItem) return null;
-
-            return (
-              <Link
-                href={menuItem.path}
-                rel='noopener noreferrer'
-                target='_blank'
-                key={key}
-              >
-                <p className='py-1 textHover text-sm lg:text-base'>
-                  {menuItem.name}
-                </p>
-              </Link>
-            );
-          })}
-        </div>
-        <div>
-          <h4 className='uppercase text-orange-500 pb-6'>Legal</h4>
-          {extraMenuKeys.map((key) => {
-            const menuItem = t
-              .raw('extraMenu')
-              .find((item: { path: string; name: string }) =>
-                item.path.includes(key)
-              );
-            if (!menuItem) return null;
-
-            return (
-              <Link href={menuItem.path} key={key}>
-                <p className='py-1 textHover text-sm lg:text-base'>
-                  {menuItem.name}
-                </p>
-              </Link>
-            );
-          })}
-        </div>
+        <Column
+          title={t('menuTitle')}
+          items={menuKeys.map((key) => ({ name: t(`menu.${key}.name`), path: t(`menu.${key}.path`) }))}
+        />
+        <Column title='Follow' items={followMenuKeys.map((key) => follow.find((i) => i.name === key))} />
+        {/* All contact entries (the German one isn't called "support") */}
+        <Column title={t('contactTitle')} items={contact} />
+        <Column title='Legal' items={extraMenuKeys.map((key) => extra.find((i) => i.path.includes(key)))} />
       </nav>
-      {/* <div className='ml-auto text-right text-white text-sm'>
-        <p>
-          Built by{' '}
-          <Link
-            href='https://www.landozone.net/'
-            target='_blank'
-            className='textHover text-neutral-300 hover:text-neutral-500'
-          >
-            landozone
-          </Link>
-        </p>
-        <p>
-          Check out the code on{' '}
-          <Link
-            href='https://github.com/brunosj/thfradio-nextjs/'
-            target='_blank'
-            className='textHover text-neutral-300 hover:text-neutral-500'
-          >
-            Github
-          </Link>
-        </p>
-      </div> */}
     </footer>
   );
 };

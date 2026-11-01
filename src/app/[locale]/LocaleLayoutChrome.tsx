@@ -3,11 +3,11 @@
 import { usePathname } from "next/navigation";
 import Header from "@/app/_common/layout/header/Header";
 import LiveTicker from "@/modules/live-ticker/LiveTicker";
+import CalendarSchedule from "@/app/_modules/timetable_v2/CalendarSchedule";
 import JoinChat from "@/modules/chat/JoinChat";
 import { GlobalChatOverlay } from "@/modules/chat/GlobalChatOverlay";
 import Footer from "@/app/_common/layout/footer/Footer";
 import CloudPlayer from "@/app/_modules/player/CloudPlayer";
-import VideoStreamPopup from "@/app/_modules/video-stream/VideoStreamPopup";
 import { normalizeAppPath } from "@/modules/chat/chatRouteUtils";
 
 export function LocaleLayoutChrome({
@@ -33,6 +33,8 @@ export function LocaleLayoutChrome({
         <div className="sticky top-0 z-50 w-full">
           <Header />
           <LiveTicker />
+          {/* Week schedule, folded out from the ticker */}
+          <CalendarSchedule />
         </div>
         <main>{children}</main>
       </div>
@@ -40,7 +42,6 @@ export function LocaleLayoutChrome({
       <CloudPlayer />
       <JoinChat />
       <GlobalChatOverlay />
-      <VideoStreamPopup />
     </>
   );
 }

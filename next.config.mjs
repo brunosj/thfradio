@@ -11,9 +11,20 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   reactStrictMode: true,
+  // Local dev only: lets phones in the same Wi-Fi open the dev server
+  // (http://<this computer's IP>:3005) to test, e.g. playback on iOS.
+  allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '*.local'],
   // These settings help prevent duplicate locale prefixes in URLs
   skipTrailingSlashRedirect: true,
   skipMiddlewareUrlNormalize: true,
+  // The archive moved into the shows page (All Shows / Residents / Guests);
+  // query strings like ?show=slug are kept.
+  async redirects() {
+    return [
+      { source: '/:locale(de|en)/latest', destination: '/:locale/shows', permanent: true },
+      { source: '/latest', destination: '/shows', permanent: true },
+    ];
+  },
   async rewrites() {
     return {
       beforeFiles: [
@@ -45,6 +56,18 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cms.thfradio.com',
         pathname: '/uploads/**',
+      },
+      {
+        // Clean show photos for Staff/Community Picks (thfradio.space)
+        protocol: 'https',
+        hostname: 'video.thfradio.space',
+        pathname: '/**',
+      },
+      {
+        // YouTube thumbnails (video row fallback)
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+        pathname: '/**',
       },
       {
         protocol: 'https',

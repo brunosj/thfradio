@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import logo from '@/assets/logo_white.png';
-import { SlSpeech } from 'react-icons/sl';
 import { Bars3Icon } from '@/common/assets/Bars3Icon';
 import { XMarkIcon } from '@/common/assets/XMarkIcon';
 import JoinChatMobile from '@/modules/chat/JoinChatMobile';
@@ -18,7 +17,9 @@ interface HeaderProps {
   setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const menuKeys = ['shows', 'programme', 'latest', 'info'] as const;
+// "latest" = Archiv: the shows page with All Shows / Residents / Guests;
+// "shop" = Merch, the SumUp store (opens in a new tab)
+const menuKeys = ['programme', 'latest', 'shop', 'info'] as const;
 
 const Header: React.FC<HeaderProps> = ({
   isOpen: externalIsOpen,
@@ -53,6 +54,8 @@ const Header: React.FC<HeaderProps> = ({
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     href: string,
   ) => {
+    // "/#schedule" is handled by the week schedule fold-out (CalendarSchedule)
+    if (e.defaultPrevented) return;
     e.preventDefault();
     if (href.startsWith('#')) {
       const targetId = href.substring(1);
@@ -79,15 +82,12 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className='w-full pt-4 bg-thf-blue-500 text-white pb-4 lg:pb-0 opacity-100 h-16'>
-      <div className='layout flex items-center justify-between'>
+    <header className='w-full bg-thf-blue-500 text-white h-16'>
+      {/* Logo centred in the blue bar; desktop menu tabs sit on its bottom edge */}
+      <div className='layout h-full flex items-center lg:items-stretch justify-between'>
         {/* Logo (left aligned) */}
-        <div className='flex items-center gap-6'>
-          <Link
-            className='w-24 lg:w-32 mt-1 lg:mt-0pb-2 lg:pb-4 block'
-            href='/'
-            aria-label='logo'
-          >
+        <div className='flex items-center gap-6 self-center'>
+          <Link className='block w-24 lg:w-32' href='/' aria-label='logo'>
             <Image quality={75} src={logo} alt='THF Radio Logo' />
           </Link>
           {/* <Link href='/chat' className='block lg:hidden'>
@@ -95,7 +95,7 @@ const Header: React.FC<HeaderProps> = ({
           </Link> */}
         </div>
 
-        <div>
+        <div className='flex items-center lg:items-end'>
           {/* Desktop Menu */}
           <nav className='hidden lg:flex items-stretch rounded-t-xl overflow-hidden'>
             {menuKeys.map((key, index) => {
@@ -109,7 +109,7 @@ const Header: React.FC<HeaderProps> = ({
                 <Link
                   key={key}
                   href={menuPath}
-                  onClick={(e) => handleAnchorLinkClick(e, menuPath)}
+                  onClick={isExternal ? undefined : (e) => handleAnchorLinkClick(e, menuPath)}
                   rel={isExternal ? 'noopener noreferrer' : ''}
                   target={isExternal ? '_blank' : ''}
                   className={`border-t border-l border-white hover:bg-white hover:text-thf-blue-500 duration-300 ${

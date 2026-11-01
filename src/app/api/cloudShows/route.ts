@@ -13,8 +13,11 @@ export async function GET() {
     return NextResponse.json(shows, {
       status: 200,
       headers: {
-        // Cache headers for CDN/browser caching
-        "Cache-Control": "public, max-age=43200, stale-while-revalidate=86400",
+        // Cache headers for CDN/browser caching (not locally, so changes show right away)
+        "Cache-Control":
+          process.env.NODE_ENV === "development"
+            ? "no-store"
+            : "public, max-age=43200, stale-while-revalidate=86400",
       },
     });
   } catch (error) {

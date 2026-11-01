@@ -3,7 +3,7 @@ import { createMetadata } from '@/utils/metadata';
 import ShowContent from './page.client';
 // import type { LocalizationType, ShowTypes } from '@/types/ResponsesInterface';
 import { CMS_URL } from '@/utils/constants';
-import { fetchShowBySlug } from '@/lib/shows';
+import { fetchProgrammeShows, fetchShowBySlug } from '@/lib/shows';
 import { notFound } from 'next/navigation';
 
 type Params = Promise<{ slug: string; locale: string }>;
@@ -70,8 +70,16 @@ export async function generateMetadata({
 
 export default async function ShowPage({ params }: { params: Params }) {
   const { locale, slug } = await params;
-  const content = await fetchShowBySlug(slug, locale);
+  const [content, programme] = await Promise.all([
+    fetchShowBySlug(slug, locale),
+    fetchProgrammeShows(locale).catch(() => []),
+  ]);
   if (!content?.title) notFound();
 
-  return <ShowContent content={content} />;
+  // All show names, so episodes go to the show with the longest matching name
+  const programmeShows = (Array.isArray(programme) ? programme : [])
+    .filter((s: { slug?: string; title?: string }) => s?.slug && s?.title)
+    .map((s: { slug: string; title: string }) => ({ slug: s.slug, title: s.title }));
+
+  return <ShowContent content={content} programme={programmeShows} />;
 }

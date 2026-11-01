@@ -3,6 +3,7 @@ import type {
   SoundcloudShowType,
   CloudShowTag,
 } from '@/types/ResponsesInterface';
+import { cleanGenres } from '@/utils/genres';
 
 // In-memory cache for OAuth token only (not shows data)
 let tokenCache: { token: string; expires: number } | null = null;
@@ -115,6 +116,10 @@ function normalizeSoundcloudShow(show: SoundcloudShowType): CloudShowTypes {
     },
     date: show.created_at ?? new Date().toISOString(),
     tags: formattedTags,
+    // The intranet's upload dialog writes the first genre into `genre` and
+    // all of them into tag_list; older uploads have free text in either.
+    genres: cleanGenres([show.genre, ...formattedTags.map((t) => t.name)]),
+    durationSec: show.duration ? Math.round(show.duration / 1000) : null,
   };
 }
 
@@ -190,6 +195,12 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
       !process.env.SOUNDCLOUD_CLIENT_SECRET ||
       !process.env.SOUNDCLOUD_USER_ID
     ) {
+      if (process.env.NODE_ENV === 'development') {
+        // Local development without SoundCloud credentials: sample shows so
+        // the archive (genre chips, tiles) can be reviewed. Never in production.
+        console.warn('SoundCloud credentials missing: using development sample shows');
+        return devSampleShows();
+      }
       console.error('Missing environment variables for SoundCloud API');
       return [];
     }
@@ -271,4 +282,74 @@ export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {
     console.error('Error fetching Soundcloud shows:', error);
     return [];
   }
+}
+
+// ---------------------------------------------------------------------------
+// DEVELOPMENT ONLY: sample shows for local review without SoundCloud
+// credentials (see fetchSoundcloudShows). Fake track ids, images from picsum.
+// ---------------------------------------------------------------------------
+const DEV_SAMPLE: Array<[title: string, genre: string, tags: string]> = [
+  ['Tempelhof Tapes w/ Mara Kové', 'Deep House', '"Deep House" Techno Minimal'],
+  ['Feldfunk w/ Juno Ash', 'Ambient', 'Ambient Drone "Field Recording"'],
+  ['Bass Lines Berlin', 'Drum & Bass', 'Jungle "UK Garage" dnb'],
+  ['Morning Coffee w/ Lou', 'Jazz', 'Jazz Soul "Spiritual Jazz"'],
+  ['Disco Dyke Club', 'Disco / Boogie', '"Italo Disco" Boogie "Nu Disco"'],
+  ['Hörspielstunde', 'Talks', 'Hörspiel Interview "Spoken Word"'],
+  ['Dub Session w/ Selector Ras', 'Reggae', 'Dub Dancehall "Lovers Rock"'],
+  ['Late Night Techno', 'Techno', 'Techno "Dub Techno" Acid Hardgroove'],
+  ['Afro Futures', 'Afrobeat', 'Amapiano Highlife Gqom'],
+  ['Broken Hearts Club', 'Broken Beat', '"Broken Beat" Breaks Electro'],
+  ['Rap Kiosk', 'Hip-Hop', '"Boom Bap" Rap Trap'],
+  ['Soul Kitchen w/ Ms. Dee', 'Soul / Rhythm & Blues', 'Soul Funk Gospel'],
+  ['Wave Archive', 'Alternative Rock / Punk', '"Post-Punk" "New Wave" Shoegaze'],
+  ['Cumbia Cósmica', 'Latin', 'Cumbia Salsa Tropical'],
+  ['Slow Motion w/ Ilka', 'Downtempo', 'Downtempo Trip-hop Balearic'],
+  ['Grime Time', 'UK Dance / Grime', 'Grime Dubstep "UK Bass"'],
+  ['Folklore Tapes', 'Folk', 'Folk "Singer-Songwriter" Americana'],
+  ['Neue Klassik', 'Classical', 'Classical Piano Soundtrack'],
+  ['Pop Up Radio', 'Pop', '"Synth-Pop" "City Pop" Hyperpop'],
+  ['Electro Mechanics', 'Electro', 'Electro EBM "Miami Bass"'],
+  ['House Party w/ Tobi', 'House', 'House "Chicago House" Garage'],
+  ['Modular Monday', 'Experimental', 'Modular Noise Experimental'],
+  ['Kiez Talk', 'Talks', 'Talks News Interview'],
+  ['Funk Carioca Hour', 'Baile Funk', '"Baile Funk" Funk Brazil'],
+  ['Beats & Pieces', 'Beats', 'Beats "Lo-Fi" IDM'],
+  ['Trance Formation', 'Trance', 'Trance Progressive Psytrance'],
+  ['Footwork Fridays', 'Footwork', 'Footwork Juke "Jersey Club"'],
+  ['Rumba Rumba', 'Afro-Cuban', 'Latin Jazz Rumba'],
+  ['Night Drive w/ Kai', 'Synthwave', 'Synthwave Darkwave'],
+  ['Ambient Sundays', 'Ambient', '"New Age" Ambient Kosmische'],
+  ['Club Culture Talk', 'Talks', 'Podcast Club'],
+  ['Deep Cuts w/ Sol', 'House', 'House Disco Edits'],
+  ['Jazz Gegenwart', 'Jazz', '"Free Jazz" Fusion'],
+  ['Selector Series 12', 'Techno', 'Techno Rave Hardcore'],
+  ['Feldstudien', 'Field Recording', '"Sound Art" Soundscape'],
+  ['R&B Lounge', 'RnB', 'RnB "Neo Soul"'],
+  // Guests (shows page): THF Presents nights and takeovers
+  ["THF Presents: Records From Your Parent's Attic w/ James Barber", 'Reggae', 'Reggae Rocksteady'],
+  ['THF Presents Kandylion', 'House', 'House Downtempo'],
+  ['THF Presents Fiestuki Takeover w/ Kodemul', 'Cumbia', 'Cumbia Latin'],
+  ['THF Presents: Fiestuki Invites DJ Rankng', 'Dancehall', 'Dancehall Reggaeton'],
+  ['THF Presents: Amour Africain w/ JIUN', 'Afrobeat', 'Afrobeats Amapiano'],
+  ['THF Presents: Partenope (w/ Naga DJ)', 'Electro', 'Electro Breaks'],
+  ['THF Presents: VERSION Takeover', 'Dub', 'Dub Steppers'],
+  ['THF Presents: WUB w/ dj straight girl b2b cowtome', 'Techno', 'Techno Trance'],
+];
+
+function devSampleShows(): CloudShowTypes[] {
+  const day = 24 * 60 * 60 * 1000;
+  const start = new Date('2026-10-27T18:00:00Z').getTime();
+  return DEV_SAMPLE.map(([title, genre, tags], i) => {
+    const created = new Date(start - i * 4.5 * day);
+    return normalizeSoundcloudShow({
+      id: `dev-${i + 1}`,
+      title,
+      permalink_url: `https://soundcloud.com/thfradio/dev-sample-${i + 1}`,
+      artwork_url: `https://picsum.photos/seed/thf-${i + 1}/500/500?large`,
+      genre,
+      tag_list: tags,
+      duration: (60 + (i % 4) * 30) * 60 * 1000,
+      created_at: created.toISOString(),
+    });
+  });
 }

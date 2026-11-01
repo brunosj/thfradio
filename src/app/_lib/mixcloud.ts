@@ -3,6 +3,7 @@ import type {
   MixcloudShowType,
   CloudShowTag,
 } from "@/types/ResponsesInterface";
+import { cleanGenres } from "@/utils/genres";
 
 function normalizeMixcloudShow(show: MixcloudShowType): CloudShowTypes {
   // Ensure the tags array is properly formatted
@@ -21,16 +22,22 @@ function normalizeMixcloudShow(show: MixcloudShowType): CloudShowTypes {
     });
   }
 
+  const picture = show.pictures?.extra_large || "";
+
   return {
     id: show.key,
     name: show.name,
     url: show.url,
     key: show.key,
     platform: "mixcloud",
-    picture: show.pictures?.extra_large || "",
-    pictures: show.pictures,
+    picture,
+    // Only the size the site uses (Mixcloud sends ten), keeps the payload small
+    pictures: { extra_large: picture },
     tags: formattedTags,
-    date: new Date().toISOString(),
+    // Mixcloud tags are its genres
+    genres: cleanGenres(formattedTags.map((t) => t.name)),
+    durationSec: show.audio_length ?? null,
+    date: show.created_time ?? new Date().toISOString(),
   };
 }
 
