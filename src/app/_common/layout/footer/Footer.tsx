@@ -6,7 +6,8 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 
 // Define menu keys as const arrays for type safety
-const menuKeys = ['news', 'programme', 'latest', 'shop', 'info'] as const;
+// No 'shop' until the merch shop is ready
+const menuKeys = ['news', 'programme', 'latest', 'info'] as const;
 const followMenuKeys = ['Instagram', 'Facebook', 'Mixcloud', 'Soundcloud'] as const;
 const extraMenuKeys = ['privacy', 'imprint', 'awareness'] as const;
 
