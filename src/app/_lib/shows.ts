@@ -60,7 +60,9 @@ export async function fetchCloudShowsCached(): Promise<CloudShowTypes[]> {
 
     // On client side, fetch from API
     // The API route handles caching with proper cache tags
-    const response = await fetch('/api/cloudShows');
+    // "?v=2": browsers kept the old 12-hour copy (15 shows) of /api/cloudShows;
+    // a new address makes every browser fetch the full archive.
+    const response = await fetch('/api/cloudShows?v=2');
 
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
