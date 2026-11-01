@@ -10,7 +10,7 @@
   "archiveClear": "Clear",
   "archiveShowCount": "{count, plural, one {# show} other {# shows}}",
   "archiveOfTotal": "of {total}",
-  "archiveBrowseAll": "Browse the whole archive ({total} shows)",
+  "archiveBrowseAll": "Browse the whole archive",
   "archiveShow": "Show",
   "archiveAllShows": "All shows",
   "archiveSearchShows": "Search shows",

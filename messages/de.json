@@ -10,7 +10,7 @@
   "archiveClear": "Zurücksetzen",
   "archiveShowCount": "{count, plural, one {# Sendung} other {# Sendungen}}",
   "archiveOfTotal": "von {total}",
-  "archiveBrowseAll": "Zum gesamten Archiv ({total} Shows)",
+  "archiveBrowseAll": "Zum gesamten Archiv",
   "archiveShow": "Show",
   "archiveAllShows": "Alle Shows",
   "archiveSearchShows": "Shows suchen",

@@ -4,7 +4,7 @@
 // Explore), like Latest Shows on the intranet. Filtering runs over all
 // shows; only `pageSize` tiles are rendered at a time, more on demand.
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { FiArrowRight } from 'react-icons/fi';
 import { Link } from '@/i18n/routing';
 import type { CloudShowTypes } from '@/types/ResponsesInterface';
@@ -37,7 +37,6 @@ export default function ArchiveBrowser({
   programme?: ArchiveProgrammeShow[];
 }) {
   const t = useTranslations();
-  const locale = useLocale();
   const all = useMemo(() => toArchiveShows(shows), [shows]);
 
   // Show of each recording: the programme show its title starts with (longest
@@ -160,7 +159,7 @@ export default function ArchiveBrowser({
             href={fullArchiveHref}
             className='group inline-flex items-center gap-3 rounded-full bg-white px-7 py-3.5 font-sans font-bold text-dark-blue transition-colors duration-200 hover:bg-orange-500 hover:text-white'
           >
-            {t('archiveBrowseAll', { total: all.length.toLocaleString(locale) })}
+            {t('archiveBrowseAll')}
             <FiArrowRight className='h-5 w-5 transition-transform duration-200 group-hover:translate-x-1' aria-hidden />
           </Link>
         </div>
