@@ -11,18 +11,31 @@ type ShowsType = {
 const recordingKey = (name: string | undefined) =>
   (name ?? '').split('//')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
 
+/** The date after "//" in a title ("// 08.11.25", "// 8.11.2025") as 2025-11-08. */
+function recordingDate(name: string | undefined): string | null {
+  const after = (name ?? '').split('//')[1];
+  const m = after?.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (!m) return null;
+  const year = m[3].length === 2 ? `20${m[3]}` : m[3];
+  return `${year}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+}
+
+/** One episode: show + date (just the show when the title has no date). */
+const episodeKey = (name: string | undefined) => `${recordingKey(name)}|${recordingDate(name) ?? ''}`;
+
 /**
- * Mixcloud + SoundCloud recordings. `complete` is false when SoundCloud
- * (the main archive) couldn't be read, so callers don't cache a short list.
+ * Mixcloud + SoundCloud recordings. `complete` is false when SoundCloud (the
+ * main archive) or part of Mixcloud couldn't be read, so callers don't cache
+ * a short list.
  */
 export async function fetchCloudShowsWithStatus(): Promise<{
   shows: CloudShowTypes[];
   complete: boolean;
 }> {
-  const [mixcloudShows, soundcloud] = await Promise.all([
+  const [mixcloud, soundcloud] = await Promise.all([
     fetchMixcloudShows().catch((error) => {
       console.error('Error fetching Mixcloud shows:', error);
-      return [] as CloudShowTypes[];
+      return { shows: [] as CloudShowTypes[], complete: false };
     }),
     fetchSoundcloudShows()
       .then((shows) => ({ shows, ok: true }))
@@ -32,13 +45,18 @@ export async function fetchCloudShowsWithStatus(): Promise<{
       }),
   ]);
 
-  // The same show uploaded to both: keep the SoundCloud one
-  const onSoundcloud = new Set(soundcloud.shows.map((s) => recordingKey(s.name)));
-  const mixcloudOnly = mixcloudShows.filter((s) => !onSoundcloud.has(recordingKey(s.name)));
+  // The same episode uploaded to both: keep the SoundCloud one. Other
+  // episodes of that show that are only on Mixcloud stay. Without a date in
+  // the Mixcloud title we can't tell, so it goes if the show is on SoundCloud.
+  const scEpisodes = new Set(soundcloud.shows.map((s) => episodeKey(s.name)));
+  const scShows = new Set(soundcloud.shows.map((s) => recordingKey(s.name)));
+  const mixcloudOnly = mixcloud.shows.filter((s) =>
+    recordingDate(s.name) ? !scEpisodes.has(episodeKey(s.name)) : !scShows.has(recordingKey(s.name)),
+  );
 
   return {
     shows: await withShowPictures([...mixcloudOnly, ...soundcloud.shows]),
-    complete: soundcloud.ok && soundcloud.shows.length > 0,
+    complete: soundcloud.ok && soundcloud.shows.length > 0 && mixcloud.complete,
   };
 }
 

@@ -9,14 +9,18 @@ import { fetchCloudShowsWithStatus } from './shows';
 // - a failed or incomplete fetch (e.g. SoundCloud 401) never replaces a good
 //   list, it's retried after 15 minutes;
 // - the last good list is also written to .next/cache, so a restart or deploy
-//   starts with the full archive instead of fetching (or failing) first.
+//   starts with the full archive instead of fetching (or failing) first;
+// - a list saved by an older version (other rules for what's in the archive)
+//   is still served after a deploy, but fetched again right away.
 // ---------------------------------------------------------------------------
 
 const MAX_AGE_MS = 6 * 60 * 60 * 1000;
 const RETRY_MS = 15 * 60 * 1000;
 const FILE = path.join(process.cwd(), '.next', 'cache', 'thf-cloud-shows.json');
+/** Raise when the rules change (2: every Mixcloud upload, duplicates per episode) */
+const LIST_VERSION = 2;
 
-type Entry = { shows: CloudShowTypes[]; fetchedAt: number; complete: boolean };
+type Entry = { shows: CloudShowTypes[]; fetchedAt: number; complete: boolean; version?: number };
 
 let memory: Entry | null = null;
 let nextRefreshAt = 0;
@@ -52,7 +56,7 @@ function refresh(): Promise<Entry> {
       nextRefreshAt = Date.now() + RETRY_MS;
       return memory!;
     }
-    memory = { shows, fetchedAt: Date.now(), complete };
+    memory = { shows, fetchedAt: Date.now(), complete, version: LIST_VERSION };
     nextRefreshAt = Date.now() + (complete ? MAX_AGE_MS : RETRY_MS);
     if (complete) await writeDisk(memory);
     return memory;
@@ -76,7 +80,7 @@ export async function getCloudShows(): Promise<CloudShowTypes[]> {
     const disk = await readDisk();
     if (disk) {
       memory = disk;
-      nextRefreshAt = disk.fetchedAt + MAX_AGE_MS;
+      nextRefreshAt = disk.version === LIST_VERSION ? disk.fetchedAt + MAX_AGE_MS : 0;
     }
   }
   if (!memory) return (await refresh()).shows;

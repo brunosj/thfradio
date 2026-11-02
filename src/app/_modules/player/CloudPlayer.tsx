@@ -5,9 +5,10 @@
 // - SoundCloud tracks play in our own <audio> (lib/archiveAudio), started
 //   right inside the click on a tile, so it works on iPhones and in strict
 //   browsers too. This bar shows its state and calls its controls.
-// - The last old Mixcloud shows still play in Mixcloud's widget (hidden
-//   iframe, official widget API); if the browser blocks starting it, the
-//   widget shows above the bar to tap play there.
+// - Mixcloud shows play in Mixcloud's widget (hidden iframe, official widget
+//   API); if the browser blocks starting it, the widget shows above the bar
+//   to tap play there. Browsers without AAC (VS Code's preview) can't play
+//   Mixcloud at all: the bar says so and links to Mixcloud instead.
 import Script from 'next/script';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -25,6 +26,7 @@ import {
   toggleArchive,
   useArchiveAudio,
 } from '@/lib/archiveAudio';
+import { canDecodeAac } from '@/lib/aacSupport';
 import type { MixcloudWidget } from '@/types/mixcloud';
 
 /** Height of the bar; the chat button and the page bottom make room for it. */
@@ -77,6 +79,12 @@ export default function CloudPlayer() {
   const mcRef = useRef<MixcloudWidget | null>(null);
   /** The browser blocked starting the hidden Mixcloud widget: show it to tap play */
   const [needsTap, setNeedsTap] = useState(false);
+  /** Mixcloud streams are AAC only: no AAC, no Mixcloud (no endless loading) */
+  const [aacOk, setAacOk] = useState(true);
+  useEffect(() => {
+    void canDecodeAac().then(setAacOk);
+  }, []);
+  const mcUnsupported = isMixcloud && !aacOk;
   const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const playing = isSoundcloud ? sc.playing : mcPlaying;
@@ -151,12 +159,18 @@ export default function CloudPlayer() {
   const setPlayerTapNeeded = useGlobalStore((s) => s.setPlayerTapNeeded);
   useEffect(() => setPlayerTapNeeded(isMixcloud && needsTap), [isMixcloud, needsTap, setPlayerTapNeeded]);
 
-  // If nothing plays a few seconds after we asked, the browser blocked it
+  // If nothing plays a few seconds after we asked, the browser blocked it.
+  // iPhones / iPads never let the widget start by itself: ask right away.
   const expectPlayback = () => {
     if (tapTimer.current) clearTimeout(tapTimer.current);
-    tapTimer.current = setTimeout(() => {
-      if (!mcPlayingRef.current && mcPositionRef.current < 0.5) setNeedsTap(true);
-    }, 4000);
+    const ua = navigator.userAgent;
+    const appleTouch = /iP(hone|ad|od)/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    tapTimer.current = setTimeout(
+      () => {
+        if (!mcPlayingRef.current && mcPositionRef.current < 0.5) setNeedsTap(true);
+      },
+      appleTouch ? 300 : 4000,
+    );
   };
   useEffect(
     () => () => {
@@ -215,6 +229,10 @@ export default function CloudPlayer() {
 
   /* ---------- controls ---------- */
   const toggle = () => {
+    if (mcUnsupported) {
+      if (/^https:\/\//.test(sourceUrl)) window.open(sourceUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
     if (isSoundcloud) toggleArchive();
     else if (isMixcloud && mcRef.current) {
       const w = mcRef.current;
@@ -304,13 +322,17 @@ export default function CloudPlayer() {
               <button
                 type='button'
                 onClick={toggle}
-                aria-label={failed ? t('playerRetry') : playing ? t('playerPause') : t('playerPlay')}
+                aria-label={
+                  mcUnsupported ? t('playerOnMixcloud') : failed ? t('playerRetry') : playing ? t('playerPause') : t('playerPlay')
+                }
                 data-player-toggle
                 className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-dark-blue transition-colors hover:bg-orange-500 hover:text-white ${
                   blocked ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-dark-blue animate-pulse' : ''
                 }`}
               >
-                {failed ? (
+                {mcUnsupported ? (
+                  <FiArrowUpRight className='h-4 w-4' aria-hidden />
+                ) : failed ? (
                   <FiRotateCw className='h-4 w-4' aria-hidden />
                 ) : playing && !loading ? (
                   <span aria-hidden className='flex gap-[3px]'>
@@ -347,7 +369,17 @@ export default function CloudPlayer() {
                     {title}
                   </p>
                 )}
-                {failed || blocked ? (
+                {mcUnsupported ? (
+                  <a
+                    href={sourceUrl}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='mt-1.5 block truncate font-mono text-[11px] text-orange-400 hover:underline'
+                    role='status'
+                  >
+                    {t('playerMixcloudUnsupported')}
+                  </a>
+                ) : failed || blocked ? (
                   <p className='mt-1.5 font-mono text-[11px] text-orange-400' role='status'>
                     {failed ? t('playerError') : t('playerBlocked')}
                   </p>
@@ -416,16 +448,18 @@ export default function CloudPlayer() {
                 {needsTap && (
                   <p className='px-1 pb-1.5 font-mono text-[11px] uppercase tracking-wider text-dark-blue'>{t('playerTapToStart')}</p>
                 )}
-                {mcReady && (
+                {mcReady && !mcUnsupported && (
                   <iframe
                     key={`mc-${showKey}`}
                     id='mixcloud-player'
                     title='Mixcloud'
                     width='100%'
                     height='60'
-                    allow='autoplay'
+                    // Mixcloud's widget plays protected streams: without
+                    // encrypted-media it waits for a tap inside it
+                    allow='autoplay; encrypted-media'
                     onLoad={(e) => void onMixcloudLoad(e.currentTarget)}
-                    src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&autoplay=1&mini=1&feed=${showKey}&origin=${origin}`}
+                    src={`https://player-widget.mixcloud.com/?hide_cover=1&autoplay=1&mini=1&feed=${showKey}&origin=${origin}`}
                   />
                 )}
               </div>

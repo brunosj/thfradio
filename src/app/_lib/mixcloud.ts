@@ -41,11 +41,16 @@ function normalizeMixcloudShow(show: MixcloudShowType): CloudShowTypes {
   };
 }
 
-export async function fetchMixcloudShows(): Promise<CloudShowTypes[]> {
-  // More reasonable limits to avoid overwhelming the API
+/**
+ * All THF Radio uploads on Mixcloud (about 2,400 in 2026). `complete` is
+ * false when a page couldn't be read, so a short list doesn't replace a good one.
+ */
+export async function fetchMixcloudShows(): Promise<{ shows: CloudShowTypes[]; complete: boolean }> {
   const limit = 100;
-  const maxItems = 2000; // Reduced from 3000 to be more reasonable
+  // Safety stop only; the loop ends at the last page
+  const maxItems = 6000;
   const maxPages = Math.ceil(maxItems / limit);
+  let complete = true;
 
   // Get the API URL, defaulting to a sensible value if not defined
   const mixcloudApi =
@@ -60,10 +65,15 @@ export async function fetchMixcloudShows(): Promise<CloudShowTypes[]> {
         `${mixcloudApi}?offset=${i * limit}&limit=${limit}`,
       );
 
+      // No such account (Mixcloud given up): simply no Mixcloud shows,
+      // not a hiccup that keeps the old list
+      if (response.status === 404) break;
+
       if (!response.ok) {
         console.error(
           `Mixcloud API error on page ${i + 1}: ${response.status} ${response.statusText}`,
         );
+        complete = false;
         continue; // Skip this batch but continue with others
       }
 
@@ -71,6 +81,7 @@ export async function fetchMixcloudShows(): Promise<CloudShowTypes[]> {
 
       if (!data.data || !Array.isArray(data.data)) {
         console.error(`Unexpected Mixcloud API response on page ${i + 1}`);
+        complete = false;
         continue;
       }
 
@@ -83,11 +94,11 @@ export async function fetchMixcloudShows(): Promise<CloudShowTypes[]> {
       }
     } catch (error) {
       console.error(`Error fetching Mixcloud batch ${i + 1}:`, error);
+      complete = false;
       // Continue with next batch despite errors
     }
   }
 
   // Combine all successful results
-  const allShows = results.flat();
-  return allShows.slice(0, maxItems);
+  return { shows: results.flat(), complete };
 }

@@ -28,16 +28,25 @@ function remember<T>(map: Map<string, T>, key: string, value: T) {
   map.set(key, value);
 }
 
-/** The track's HLS playlist (AAC 160, else MP3 128). Throws when there is none. */
-export async function getTrackPlaylist(id: string, fresh = false): Promise<string> {
-  const cached = playlists.get(id);
+export type StreamFormat = 'aac' | 'mp3';
+
+/**
+ * The track's HLS playlist: AAC 160 (MP3 128 if there is none), or MP3 first
+ * for browsers that can't play AAC (e.g. the preview browser in VS Code).
+ * Throws when there is none.
+ */
+export async function getTrackPlaylist(id: string, fresh = false, format: StreamFormat = 'aac'): Promise<string> {
+  const cacheKey = `${id}:${format}`;
+  const cached = playlists.get(cacheKey);
   if (!fresh && cached && cached.expires > Date.now()) return cached.body;
 
   const res = await soundcloudFetch(`${API}/tracks/${id}/streams`);
   if (!res.ok) throw new Error(`SoundCloud streams ${res.status}`);
   const streams = (await res.json()) as Record<string, string | undefined>;
 
-  for (const key of ['hls_aac_160_url', 'hls_mp3_128_url']) {
+  const order = ['hls_aac_160_url', 'hls_mp3_128_url'];
+  if (format === 'mp3') order.reverse();
+  for (const key of order) {
     const url = streams[key];
     if (!url) continue;
     // The API answers with a redirect to the signed playlist on the CDN
@@ -49,7 +58,7 @@ export async function getTrackPlaylist(id: string, fresh = false): Promise<strin
     if (!playlist.ok) continue;
     const body = await playlist.text();
     if (!body.startsWith('#EXTM3U')) continue;
-    remember(playlists, id, { body, expires: Date.now() + PLAYLIST_TTL_MS });
+    remember(playlists, cacheKey, { body, expires: Date.now() + PLAYLIST_TTL_MS });
     return body;
   }
   throw new Error('No playable stream for this track');

@@ -2,15 +2,17 @@ import { NextResponse } from 'next/server';
 import { getTrackPlaylist, isTrackId } from '@/lib/soundcloudStreams';
 
 // HLS playlist of one SoundCloud track for the archive player (lib/archiveAudio).
-// ?fresh=1 skips our cache (the player asks for that when old links expired).
+// ?fresh=1 skips our cache (the player asks for that when old links expired),
+// ?format=mp3 is for browsers that can't play AAC.
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!isTrackId(id)) return new NextResponse('Bad track id', { status: 400 });
-  const fresh = new URL(request.url).searchParams.has('fresh');
+  const search = new URL(request.url).searchParams;
+  const format = search.get('format') === 'mp3' ? 'mp3' : 'aac';
   try {
-    const body = await getTrackPlaylist(id, fresh);
+    const body = await getTrackPlaylist(id, search.has('fresh'), format);
     return new NextResponse(body, {
       headers: {
         'Content-Type': 'application/vnd.apple.mpegurl',

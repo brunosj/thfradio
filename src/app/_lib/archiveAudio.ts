@@ -5,6 +5,7 @@
 // only shows this state and calls the controls below.
 import { create } from 'zustand';
 import { ActivePlayer, registerArchiveStarter, useGlobalStore } from '@/hooks/useStore';
+import { canDecodeAac } from './aacSupport';
 import { loadHls, playsHlsNatively, type HlsClass, type HlsInstance } from './hls';
 
 export interface ArchiveAudioState {
@@ -44,8 +45,38 @@ let retriedAt: number | null = null;
 let durationHint = 0;
 let meta: { title: string; artwork: string | null } | null = null;
 
-const playlistUrl = (id: string, fresh: boolean) =>
-  `/api/soundcloud-stream/${id}/hls${fresh ? `?fresh=${Date.now()}` : ''}`;
+/**
+ * SoundCloud streams come as AAC (better) or MP3. Some browsers can't decode
+ * AAC (the preview browser in VS Code); there we switch to MP3 and remember it.
+ */
+type StreamFormat = 'aac' | 'mp3';
+const FORMAT_KEY = 'thfradio-archive-format';
+let format: StreamFormat = 'aac';
+/** Switched to MP3 because AAC couldn't be decoded: remember once MP3 plays */
+let rememberMp3 = false;
+/** Where this load started and whether sound has run since */
+let loadStartAt = 0;
+let started = false;
+/** No sound this long after a start: switch format or give up, no endless 0:00 */
+const STALL_MS = 12000;
+let stallTimer: ReturnType<typeof setTimeout> | null = null;
+
+const playlistUrl = (id: string, fresh: boolean) => {
+  const query = [format === 'mp3' && 'format=mp3', fresh && `fresh=${Date.now()}`].filter(Boolean).join('&');
+  return `/api/soundcloud-stream/${id}/hls${query ? `?${query}` : ''}`;
+};
+
+function initialFormat(): StreamFormat {
+  try {
+    if (localStorage.getItem(FORMAT_KEY) === 'mp3') return 'mp3';
+  } catch {
+    // storage blocked: just try AAC
+  }
+  // Browsers that say outright they can't do AAC
+  const ms = window.MediaSource;
+  if (ms?.isTypeSupported && !ms.isTypeSupported('audio/mp4; codecs="mp4a.40.2"')) return 'mp3';
+  return 'aac';
+}
 
 function element(): HTMLAudioElement {
   if (audio) return audio;
@@ -59,6 +90,9 @@ function element(): HTMLAudioElement {
 
   a.addEventListener('play', () => set({ playing: true, blocked: false, error: false }));
   a.addEventListener('playing', () => set({ playing: true, loading: false }));
+  // Waiting for sound again (after pause or seek): watch that it comes
+  a.addEventListener('play', () => watchStall());
+  a.addEventListener('pause', () => clearStall());
   a.addEventListener('pause', () => set({ playing: false, loading: false }));
   a.addEventListener('waiting', () => set({ loading: !a.paused }));
   a.addEventListener('canplay', () => set({ loading: false }));
@@ -66,6 +100,7 @@ function element(): HTMLAudioElement {
   a.addEventListener('timeupdate', () => {
     if (!useArchiveAudio.getState().trackId) return;
     lastPosition = a.currentTime;
+    if (!started && !a.paused && a.currentTime > loadStartAt + 0.25) onStarted();
     // Played on well past the last reload: allow another one later
     if (retriedAt !== null && lastPosition > retriedAt + 30) retriedAt = null;
     set({ position: a.currentTime });
@@ -79,10 +114,14 @@ function element(): HTMLAudioElement {
   a.addEventListener('durationchange', onDuration);
   a.addEventListener('loadedmetadata', onDuration);
   a.addEventListener('error', () => {
-    // hls.js reports its own errors; a.error is null again once a newer
-    // track is loading (late events of the old one are ignored)
-    if (hls || !a.error || !useArchiveAudio.getState().trackId) return;
-    onLoadError();
+    // a.error is null again once a newer track is loading (late events of the
+    // old one are ignored)
+    const err = a.error;
+    if (!err || !useArchiveAudio.getState().trackId) return;
+    // The browser can't play this audio: try the other format
+    if (err.code === err.MEDIA_ERR_DECODE || err.code === err.MEDIA_ERR_SRC_NOT_SUPPORTED) onFormatError(true);
+    // hls.js reports network trouble itself
+    else if (!hls) onLoadError();
   });
   audio = a;
   return a;
@@ -90,6 +129,7 @@ function element(): HTMLAudioElement {
 
 function detach() {
   loadToken++;
+  clearStall();
   if (hls) {
     hls.destroy();
     hls = null;
@@ -107,12 +147,44 @@ function play() {
   });
 }
 
+function clearStall() {
+  if (stallTimer) clearTimeout(stallTimer);
+  stallTimer = null;
+}
+
+/** Started but no sound after a while: the format doesn't work here, or the links. */
+function watchStall() {
+  clearStall();
+  if (started) return;
+  const token = loadToken;
+  stallTimer = setTimeout(() => {
+    stallTimer = null;
+    if (token !== loadToken || started || !audio || audio.paused) return;
+    onFormatError(false);
+  }, STALL_MS);
+}
+
+function onStarted() {
+  started = true;
+  clearStall();
+  if (rememberMp3) {
+    rememberMp3 = false;
+    try {
+      localStorage.setItem(FORMAT_KEY, 'mp3');
+    } catch {
+      // storage blocked: the switch just happens again next visit
+    }
+  }
+}
+
 /** Load a track into the element and play, from `startAt` seconds. */
 function load(id: string, startAt: number, fresh: boolean) {
   const a = element();
   detach();
   const token = loadToken;
   const url = playlistUrl(id, fresh);
+  loadStartAt = startAt;
+  started = false;
 
   const playNatively = () => {
     a.src = url;
@@ -128,9 +200,15 @@ function load(id: string, startAt: number, fresh: boolean) {
     if (token !== loadToken) return;
     if (!Hls) return playNatively();
     const h = new Hls({ startPosition: startAt > 0 ? startAt : -1, maxBufferLength: 60 });
+    let recovered = false;
     h.on('hlsError', (_e, data) => {
-      if (!data.fatal || token !== loadToken) return;
-      if (data.type === 'mediaError') h.recoverMediaError();
+      if (token !== loadToken || !data.fatal) return;
+      // The browser can't take this audio codec: try the other format
+      if (/codec/i.test(data.details ?? '')) return onFormatError(true);
+      if (data.type === 'mediaError' && !recovered) {
+        recovered = true;
+        h.recoverMediaError();
+      } else if (data.type === 'mediaError') onFormatError(true);
       else onLoadError();
     });
     hls = h;
@@ -141,6 +219,22 @@ function load(id: string, startAt: number, fresh: boolean) {
   // hls.js is preloaded, so this normally runs right inside the click
   if (window.Hls) start(window.Hls.isSupported() ? window.Hls : null);
   else loadHls().then(start, () => start(null));
+}
+
+/**
+ * This browser can't play the track in the current format (or it hangs):
+ * switch AAC → MP3 once, otherwise treat it as a load error.
+ */
+function onFormatError(decodeFailed: boolean) {
+  const { trackId } = useArchiveAudio.getState();
+  if (!trackId) return;
+  if (format === 'aac') {
+    format = 'mp3';
+    rememberMp3 = decodeFailed;
+    load(trackId, lastPosition, false);
+    return;
+  }
+  onLoadError();
 }
 
 /** Links expired (long pause) or the network dropped: fetch a fresh playlist once, go on where we were. */
@@ -281,6 +375,11 @@ function clearMediaSession() {
 /* ---------- wiring ---------- */
 
 if (typeof window !== 'undefined') {
+  format = initialFormat();
+  // No AAC decoder (VS Code's preview): MP3 from the first track on
+  void canDecodeAac().then((ok) => {
+    if (!ok) format = 'mp3';
+  });
   // trackIdSet in the store starts the track synchronously (inside the click)
   registerArchiveStarter(playArchiveTrack);
 
@@ -297,10 +396,12 @@ if (typeof window !== 'undefined') {
     if (state.pauseSignal !== prev.pauseSignal) pauseArchive();
   });
 
-  // Ready before the first click, so playback can start inside it
+  // Ready before the first click, so playback can start inside it. Not after
+  // the page's 'load' (that waits for every cover image): as soon as the
+  // browser has a moment, at the latest after 2 s
   const preload = () => {
     if (!playsHlsNatively(document.createElement('audio'))) void loadHls().catch(() => {});
   };
-  if (document.readyState === 'complete') setTimeout(preload, 1500);
-  else window.addEventListener('load', () => setTimeout(preload, 1500), { once: true });
+  if ('requestIdleCallback' in window) window.requestIdleCallback(preload, { timeout: 2000 });
+  else setTimeout(preload, 500);
 }
