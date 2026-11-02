@@ -16,6 +16,7 @@ import { FiArrowUpRight, FiMaximize, FiPlay, FiVolume2, FiX } from 'react-icons/
 import { useGlobalStore } from '@/hooks/useStore';
 import { pauseLiveStream } from '@/app/_lib/liveStreamAudio';
 import { keepWithName } from '@/utils/titles';
+import { HLS_SCRIPT, loadScript, type HlsInstance } from '@/app/_lib/hls';
 
 /* ---------- YouTube player API ---------- */
 
@@ -29,52 +30,17 @@ type YTPlayer = {
 };
 type YTNamespace = { Player: new (el: HTMLElement, opts: Record<string, unknown>) => YTPlayer };
 
-/* ---------- hls.js (only where the browser can't play HLS itself) ---------- */
-
-type HlsInstance = {
-  loadSource: (url: string) => void;
-  attachMedia: (el: HTMLVideoElement) => void;
-  on: (event: string, cb: (event: string, data: { fatal?: boolean; type?: string }) => void) => void;
-  startLoad: () => void;
-  recoverMediaError: () => void;
-  destroy: () => void;
-};
-type HlsClass = { new (config?: Record<string, unknown>): HlsInstance; isSupported: () => boolean };
-
 declare global {
   interface Window {
     YT?: YTNamespace;
     onYouTubeIframeAPIReady?: () => void;
-    Hls?: HlsClass;
   }
 }
 
-const HLS_SCRIPT = 'https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js';
 const LIVE_FALLBACK_URL = 'https://video.thfradio.space/hls/live/index.m3u8';
 const STATUS_POLL_MS = 15000;
 const YT_PLAYING = 1;
 const YT_BUFFERING = 3;
-
-const scripts = new Map<string, Promise<void>>();
-function loadScript(src: string): Promise<void> {
-  if (!scripts.has(src)) {
-    scripts.set(
-      src,
-      new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.async = true;
-        s.onload = () => resolve();
-        s.onerror = () => {
-          scripts.delete(src);
-          reject(new Error(`Could not load ${src}`));
-        };
-        document.head.appendChild(s);
-      }),
-    );
-  }
-  return scripts.get(src)!;
-}
 
 let ytReady: Promise<YTNamespace> | null = null;
 function loadYouTubeApi(): Promise<YTNamespace> {

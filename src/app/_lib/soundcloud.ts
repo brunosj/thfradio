@@ -186,6 +186,29 @@ async function getSoundcloudToken(): Promise<string | null> {
   }
 }
 
+/**
+ * GET a SoundCloud API URL with our app token (a fresh token once on 401).
+ * `redirect: 'manual'` lets callers read the Location of the stream URLs.
+ */
+export async function soundcloudFetch(url: string, init: { redirect?: RequestRedirect } = {}): Promise<Response> {
+  let token = await getSoundcloudToken();
+  if (!token) throw new Error('Failed to get SoundCloud token');
+  const get = (t: string) =>
+    fetch(url, {
+      headers: { Authorization: `OAuth ${t}`, Accept: 'application/json; charset=utf-8' },
+      redirect: init.redirect,
+      cache: 'no-store',
+    });
+  let res = await get(token);
+  if (res.status === 401) {
+    tokenCache = null;
+    token = await getSoundcloudToken();
+    if (!token) throw new Error('Failed to get a fresh SoundCloud token');
+    res = await get(token);
+  }
+  return res;
+}
+
 // Fetch all SoundCloud shows. Throws when SoundCloud can't be read, so the
 // caller can keep the last good list instead of caching an empty archive.
 export async function fetchSoundcloudShows(): Promise<CloudShowTypes[]> {

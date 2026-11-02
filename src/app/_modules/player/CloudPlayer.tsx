@@ -1,20 +1,31 @@
 'use client';
 
 // Archive player: our own bar at the bottom of every page (cover, title,
-// play / pause, progress you can click, link to the source, close). The
-// SoundCloud / Mixcloud widget plays the audio in a hidden iframe and is
-// driven through their official widget APIs.
+// play / pause, progress you can drag, link to the source, close).
+// - SoundCloud tracks play in our own <audio> (lib/archiveAudio), started
+//   right inside the click on a tile, so it works on iPhones and in strict
+//   browsers too. This bar shows its state and calls its controls.
+// - The last old Mixcloud shows still play in Mixcloud's widget (hidden
+//   iframe, official widget API); if the browser blocks starting it, the
+//   widget shows above the bar to tap play there.
 import Script from 'next/script';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { FiArrowUpRight, FiX } from 'react-icons/fi';
+import { FiArrowUpRight, FiRotateCw, FiX } from 'react-icons/fi';
 import { Link } from '@/i18n/routing';
 import { Play } from '@/common/assets/PlayIcon';
 import { showMatcher } from '@/utils/guests';
 import { useData } from '@/context/DataContext';
 import { ActivePlayer, useGlobalStore } from '@/hooks/useStore';
+import {
+  seekArchive,
+  setArchiveMeta,
+  skipArchive,
+  stopArchive,
+  toggleArchive,
+  useArchiveAudio,
+} from '@/lib/archiveAudio';
 import type { MixcloudWidget } from '@/types/mixcloud';
-import type { SoundcloudWidget } from '@/types/soundcloud';
 
 /** Height of the bar; the chat button and the page bottom make room for it. */
 export const PLAYER_BAR_HEIGHT = 64;
@@ -30,6 +41,16 @@ const fmt = (sec: number) => {
 /** "Show Name // 22.10.26" → "Show Name" */
 const cleanTitle = (t: string) => t.split('//')[0].trim();
 
+/** Widget calls can throw once its iframe is gone; never let that take the page down. */
+const safely = (fn: () => unknown) => {
+  try {
+    const result = fn();
+    if (result instanceof Promise) result.catch(() => {});
+  } catch {
+    // widget already gone
+  }
+};
+
 export default function CloudPlayer() {
   const t = useTranslations();
   const showKey = useGlobalStore((s) => s.showKey);
@@ -39,37 +60,68 @@ export default function CloudPlayer() {
   const resetPlayer = useGlobalStore((s) => s.resetPlayer);
   const { cloudShows } = useData();
 
-  const [scReady, setScReady] = useState(false);
-  const [mcReady, setMcReady] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const playingRef = useRef(false);
-  const positionRef = useRef(0);
-  /** The browser blocked starting the hidden widget (iOS): show it so people can tap play */
-  const [needsTap, setNeedsTap] = useState(false);
-  const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [position, setPosition] = useState(0); // seconds
-  const [duration, setDuration] = useState(0); // seconds
-  /** Slider position while dragging (seconds), applied on release */
-  const [scrub, setScrub] = useState<number | null>(null);
-  const [scMeta, setScMeta] = useState<{ title?: string; image?: string | null; url?: string } | null>(null);
-
-  const scRef = useRef<SoundcloudWidget | null>(null);
-  const mcRef = useRef<MixcloudWidget | null>(null);
-
   const isSoundcloud = activePlayer === ActivePlayer.SOUNDCLOUD && !!trackId;
   const isMixcloud = activePlayer === ActivePlayer.MIXCLOUD && !!showKey;
   const visible = isSoundcloud || isMixcloud;
 
-  // Title + cover from the archive (fallback: what the SoundCloud widget says)
+  /* ---------- SoundCloud: state of our own audio ---------- */
+  const sc = useArchiveAudio();
+
+  /* ---------- Mixcloud: widget state ---------- */
+  const [mcReady, setMcReady] = useState(false);
+  const [mcPlaying, setMcPlaying] = useState(false);
+  const [mcPosition, setMcPosition] = useState(0);
+  const [mcDuration, setMcDuration] = useState(0);
+  const mcPlayingRef = useRef(false);
+  const mcPositionRef = useRef(0);
+  const mcRef = useRef<MixcloudWidget | null>(null);
+  /** The browser blocked starting the hidden Mixcloud widget: show it to tap play */
+  const [needsTap, setNeedsTap] = useState(false);
+  const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const playing = isSoundcloud ? sc.playing : mcPlaying;
+  const position = isSoundcloud ? sc.position : mcPosition;
+  const duration = isSoundcloud ? sc.duration : mcDuration;
+
+  /** Slider position while dragging (seconds), applied on release */
+  const [scrub, setScrub] = useState<number | null>(null);
+
+  // Title + cover from the archive; for tracks not in it, ask SoundCloud
   const fromArchive = useMemo(() => {
     if (!cloudShows || !currentShowUrl) return null;
     const show = cloudShows.find((s) => s.url === currentShowUrl);
     if (!show) return null;
-    return { title: cleanTitle(show.name || ''), image: show.pictures?.extra_large || show.picture || null };
+    return {
+      title: cleanTitle(show.name || ''),
+      image: show.pictures?.extra_large || show.picture || null,
+      duration: show.durationSec ?? null,
+    };
   }, [cloudShows, currentShowUrl]);
-  const title = fromArchive?.title || (scMeta?.title ? cleanTitle(scMeta.title) : '') || '…';
-  const image = fromArchive?.image || scMeta?.image || null;
-  const sourceUrl = currentShowUrl || scMeta?.url || '';
+  const [trackInfo, setTrackInfo] = useState<{ id: string; title: string; image: string | null; url: string | null; duration: number | null } | null>(null);
+  useEffect(() => {
+    if (!isSoundcloud || !trackId || fromArchive || trackInfo?.id === trackId) return;
+    let cancelled = false;
+    fetch(`/api/soundcloud-stream/${trackId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((info) => {
+        if (cancelled || !info) return;
+        setTrackInfo({ id: trackId, title: info.title || '', image: info.artwork ?? null, url: info.permalink ?? null, duration: info.duration ?? null });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isSoundcloud, trackId, fromArchive, trackInfo?.id]);
+  const info = trackInfo && trackInfo.id === trackId ? trackInfo : null;
+  const title = fromArchive?.title || (info?.title ? cleanTitle(info.title) : '') || '…';
+  const image = fromArchive?.image || info?.image || null;
+  const sourceUrl = currentShowUrl || info?.url || '';
+
+  // Lock screen / media keys: title, cover, length
+  useEffect(() => {
+    if (!isSoundcloud || title === '…') return;
+    setArchiveMeta({ title, artwork: image, duration: fromArchive?.duration ?? info?.duration ?? null });
+  }, [isSoundcloud, title, image, fromArchive?.duration, info?.duration]);
 
   // Show page of what's playing (cover + title link there); loaded once
   const [programme, setProgramme] = useState<{ slug: string; title: string }[] | null>(null);
@@ -86,81 +138,58 @@ export default function CloudPlayer() {
   );
   const showHref = showSlug ? `/shows/${showSlug}` : null;
 
+  /* ---------- Mixcloud widget ---------- */
   useEffect(() => {
-    playingRef.current = playing;
-    if (playing) setNeedsTap(false);
-  }, [playing]);
+    mcPlayingRef.current = mcPlaying;
+    if (mcPlaying) setNeedsTap(false);
+  }, [mcPlaying]);
   useEffect(() => {
-    positionRef.current = position;
-  }, [position]);
+    mcPositionRef.current = mcPosition;
+  }, [mcPosition]);
 
   // Tell the chat button to make room while the tap-to-start strip is open
   const setPlayerTapNeeded = useGlobalStore((s) => s.setPlayerTapNeeded);
-  useEffect(() => setPlayerTapNeeded(needsTap), [needsTap, setPlayerTapNeeded]);
+  useEffect(() => setPlayerTapNeeded(isMixcloud && needsTap), [isMixcloud, needsTap, setPlayerTapNeeded]);
 
   // If nothing plays a few seconds after we asked, the browser blocked it
   const expectPlayback = () => {
     if (tapTimer.current) clearTimeout(tapTimer.current);
     tapTimer.current = setTimeout(() => {
-      if (!playingRef.current && positionRef.current < 0.5) setNeedsTap(true);
+      if (!mcPlayingRef.current && mcPositionRef.current < 0.5) setNeedsTap(true);
     }, 4000);
   };
-  useEffect(() => () => {
-    if (tapTimer.current) clearTimeout(tapTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (tapTimer.current) clearTimeout(tapTimer.current);
+    },
+    [],
+  );
 
-  // New track → reset the bar
+  // New Mixcloud show → reset its state
   useEffect(() => {
     setNeedsTap(false);
-    setPlaying(false);
-    setPosition(0);
-    setDuration(0);
-    setScMeta(null);
-  }, [trackId, showKey, activePlayer]);
+    setMcPlaying(false);
+    setMcPosition(0);
+    setMcDuration(0);
+  }, [showKey, activePlayer]);
 
   // Something else wants the sound (a video): pause, keep the bar
+  // (the SoundCloud audio listens to the same signal itself)
   const pauseSignal = useGlobalStore((s) => s.pauseSignal);
   useEffect(() => {
-    if (!pauseSignal) return;
-    scRef.current?.pause();
-    void mcRef.current?.pause();
+    if (!pauseSignal || !mcRef.current) return;
+    const w = mcRef.current;
+    safely(() => w.pause());
   }, [pauseSignal]);
 
-  // Stop the widget that isn't active
+  // Mixcloud no longer active: forget the widget (its iframe is gone already)
   useEffect(() => {
-    if (!isSoundcloud && scRef.current) {
-      scRef.current.pause();
-      scRef.current = null;
-    }
     if (!isMixcloud && mcRef.current) {
-      void mcRef.current.pause();
+      const w = mcRef.current;
       mcRef.current = null;
+      safely(() => w.pause());
     }
-  }, [isSoundcloud, isMixcloud]);
-
-  const onSoundcloudLoad = (iframe: HTMLIFrameElement) => {
-    if (!window.SC) return;
-    const w = window.SC.Widget(iframe);
-    scRef.current = w;
-    w.bind('ready', () => {
-      w.getDuration((ms) => setDuration(ms / 1000));
-      w.getCurrentSound((s) =>
-        setScMeta(s ? { title: s.title, image: s.artwork_url?.replace('-large', '-t200x200') ?? null, url: s.permalink_url } : null),
-      );
-      w.play();
-      expectPlayback();
-    });
-    w.bind('play', () => setPlaying(true));
-    w.bind('pause', () => setPlaying(false));
-    w.bind('finish', () => setPlaying(false));
-    // Progress also means it's playing: the 'play' event can come before we listen
-    w.bind('playProgress', (e) => {
-      const ms = e?.currentPosition ?? 0;
-      setPosition(ms / 1000);
-      // Only real progress counts (a blocked widget still reports 0:00)
-      if (ms > 500 && !playingRef.current) setPlaying(true);
-    });
-  };
+  }, [isMixcloud]);
 
   const onMixcloudLoad = async (iframe: HTMLIFrameElement) => {
     if (!window.Mixcloud) return;
@@ -168,15 +197,15 @@ export default function CloudPlayer() {
       const w = window.Mixcloud.PlayerWidget(iframe);
       await w.ready;
       mcRef.current = w;
-      w.events.play.on(() => setPlaying(true));
-      w.events.pause.on(() => setPlaying(false));
-      w.events.ended.on(() => setPlaying(false));
+      w.events.play.on(() => setMcPlaying(true));
+      w.events.pause.on(() => setMcPlaying(false));
+      w.events.ended.on(() => setMcPlaying(false));
       w.events.progress.on((pos, dur) => {
-        setPosition(pos);
-        if (dur) setDuration(dur);
-        if (pos > 0.5 && !playingRef.current) setPlaying(true);
+        setMcPosition(pos);
+        if (dur) setMcDuration(dur);
+        if (pos > 0.5 && !mcPlayingRef.current) setMcPlaying(true);
       });
-      setDuration(await w.getDuration());
+      setMcDuration(await w.getDuration());
       expectPlayback();
       await w.play();
     } catch (error) {
@@ -184,40 +213,51 @@ export default function CloudPlayer() {
     }
   };
 
+  /* ---------- controls ---------- */
   const toggle = () => {
-    if (isSoundcloud) scRef.current?.toggle();
-    else if (isMixcloud) void mcRef.current?.togglePlay();
+    if (isSoundcloud) toggleArchive();
+    else if (isMixcloud && mcRef.current) {
+      const w = mcRef.current;
+      safely(() => w.togglePlay());
+    }
   };
 
   const seekTo = (seconds: number) => {
     if (!duration) return;
     const sec = Math.max(0, Math.min(duration - 1, seconds));
-    setPosition(sec);
-    if (isSoundcloud) scRef.current?.seekTo(sec * 1000);
-    else if (isMixcloud) void mcRef.current?.seek(sec);
+    if (isSoundcloud) seekArchive(sec);
+    else if (isMixcloud && mcRef.current) {
+      const w = mcRef.current;
+      setMcPosition(sec);
+      safely(() => w.seek(sec));
+    }
   };
-  const skip = (delta: number) => seekTo(position + delta);
+  const skip = (delta: number) => (isSoundcloud ? skipArchive(delta) : seekTo(position + delta));
   const commitScrub = () => {
     if (scrub !== null) seekTo(scrub);
     setScrub(null);
   };
 
   const close = () => {
-    scRef.current?.pause();
-    void mcRef.current?.pause();
-    scRef.current = null;
-    mcRef.current = null;
+    if (mcRef.current) {
+      const w = mcRef.current;
+      mcRef.current = null;
+      safely(() => w.pause());
+    }
+    stopArchive();
     resetPlayer();
   };
 
   const origin = typeof window === 'undefined' ? '' : encodeURIComponent(window.location.origin);
   const shownPos = scrub ?? position;
   const progress = duration ? Math.min(100, (shownPos / duration) * 100) : 0;
+  const loading = isSoundcloud && sc.loading && !sc.error;
+  const failed = isSoundcloud && sc.error;
+  const blocked = isSoundcloud && sc.blocked && !sc.playing;
 
   return (
     <>
-      <Script src='https://widget.mixcloud.com/media/js/widgetApi.js' strategy='afterInteractive' onLoad={() => setMcReady(true)} onReady={() => setMcReady(true)} />
-      <Script src='https://w.soundcloud.com/player/api.js' strategy='afterInteractive' onLoad={() => setScReady(true)} onReady={() => setScReady(true)} />
+      <Script src='https://widget.mixcloud.com/media/js/widgetApi.js' strategy='lazyOnload' onLoad={() => setMcReady(true)} onReady={() => setMcReady(true)} />
 
       {visible && (
         <>
@@ -264,14 +304,21 @@ export default function CloudPlayer() {
               <button
                 type='button'
                 onClick={toggle}
-                aria-label={playing ? t('playerPause') : t('playerPlay')}
-                className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-dark-blue transition-colors hover:bg-orange-500 hover:text-white'
+                aria-label={failed ? t('playerRetry') : playing ? t('playerPause') : t('playerPlay')}
+                data-player-toggle
+                className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-dark-blue transition-colors hover:bg-orange-500 hover:text-white ${
+                  blocked ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-dark-blue animate-pulse' : ''
+                }`}
               >
-                {playing ? (
+                {failed ? (
+                  <FiRotateCw className='h-4 w-4' aria-hidden />
+                ) : playing && !loading ? (
                   <span aria-hidden className='flex gap-[3px]'>
                     <span className='h-3.5 w-[3px] bg-current' />
                     <span className='h-3.5 w-[3px] bg-current' />
                   </span>
+                ) : loading ? (
+                  <span aria-hidden className='h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent' />
                 ) : (
                   <Play className='h-4 w-4 translate-x-[1px]' fill='currentColor' />
                 )}
@@ -300,29 +347,37 @@ export default function CloudPlayer() {
                     {title}
                   </p>
                 )}
-                {/* Slider: drag or click to jump; applied on release */}
-                <div className='mt-1.5 flex items-center gap-2.5'>
-                  <span className='w-12 shrink-0 font-mono text-[11px] tabular-nums text-white/60'>{fmt(shownPos)}</span>
-                  <input
-                    type='range'
-                    min={0}
-                    max={Math.max(1, Math.floor(duration))}
-                    step={1}
-                    value={Math.floor(shownPos)}
-                    disabled={!duration}
-                    aria-label={t('playerSeek')}
-                    aria-valuetext={`${fmt(shownPos)} / ${fmt(duration)}`}
-                    onChange={(e) => setScrub(Number(e.target.value))}
-                    onPointerUp={commitScrub}
-                    onKeyUp={commitScrub}
-                    onBlur={() => scrub !== null && commitScrub()}
-                    className='player-range min-w-0 flex-1'
-                    style={{ ['--progress' as string]: `${progress}%` }}
-                  />
-                  <span className='w-12 shrink-0 text-right font-mono text-[11px] tabular-nums text-white/60'>
-                    {duration ? fmt(duration) : '--:--'}
-                  </span>
-                </div>
+                {failed || blocked ? (
+                  <p className='mt-1.5 font-mono text-[11px] text-orange-400' role='status'>
+                    {failed ? t('playerError') : t('playerBlocked')}
+                  </p>
+                ) : (
+                  /* Slider: drag or click to jump; applied on release */
+                  <div className='mt-1.5 flex items-center gap-2.5'>
+                    <span className='w-12 shrink-0 font-mono text-[11px] tabular-nums text-white/60' data-player-position>
+                      {fmt(shownPos)}
+                    </span>
+                    <input
+                      type='range'
+                      min={0}
+                      max={Math.max(1, Math.floor(duration))}
+                      step={1}
+                      value={Math.floor(shownPos)}
+                      disabled={!duration}
+                      aria-label={t('playerSeek')}
+                      aria-valuetext={`${fmt(shownPos)} / ${fmt(duration)}`}
+                      onChange={(e) => setScrub(Number(e.target.value))}
+                      onPointerUp={commitScrub}
+                      onKeyUp={commitScrub}
+                      onBlur={() => scrub !== null && commitScrub()}
+                      className='player-range min-w-0 flex-1'
+                      style={{ ['--progress' as string]: `${progress}%` }}
+                    />
+                    <span className='w-12 shrink-0 text-right font-mono text-[11px] tabular-nums text-white/60'>
+                      {duration ? fmt(duration) : '--:--'}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {sourceUrl && (
@@ -347,44 +402,34 @@ export default function CloudPlayer() {
               </button>
             </div>
 
-            {/* The widget itself plays the audio, hidden from view. If the browser
-                blocks starting it (iOS), it shows above the bar to tap play there. */}
-            <div
-              aria-hidden={!needsTap}
-              className={
-                needsTap
-                  ? 'absolute inset-x-0 bottom-full bg-white p-2 shadow-[0_-12px_32px_-8px_rgba(0,0,0,0.6)]'
-                  : 'pointer-events-none absolute h-px w-px overflow-hidden opacity-0'
-              }
-            >
-              {needsTap && (
-                <p className='px-1 pb-1.5 font-mono text-[11px] uppercase tracking-wider text-dark-blue'>{t('playerTapToStart')}</p>
-              )}
-              {isSoundcloud && scReady && (
-                <iframe
-                  key={`sc-${trackId}`}
-                  id='soundcloud-player'
-                  title='SoundCloud'
-                  width='100%'
-                  height='20'
-                  allow='autoplay'
-                  onLoad={(e) => onSoundcloudLoad(e.currentTarget)}
-                  src={`https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${trackId}&auto_play=true&visual=false&show_artwork=false&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&sharing=false&download=false&buying=false&origin=${origin}`}
-                />
-              )}
-              {isMixcloud && mcReady && (
-                <iframe
-                  key={`mc-${showKey}`}
-                  id='mixcloud-player'
-                  title='Mixcloud'
-                  width='100%'
-                  height='60'
-                  allow='autoplay'
-                  onLoad={(e) => void onMixcloudLoad(e.currentTarget)}
-                  src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&autoplay=1&mini=1&feed=${showKey}&origin=${origin}`}
-                />
-              )}
-            </div>
+            {/* Mixcloud: the widget plays the audio, hidden from view. If the
+                browser blocks starting it, it shows above the bar to tap play. */}
+            {isMixcloud && (
+              <div
+                aria-hidden={!needsTap}
+                className={
+                  needsTap
+                    ? 'absolute inset-x-0 bottom-full bg-white p-2 shadow-[0_-12px_32px_-8px_rgba(0,0,0,0.6)]'
+                    : 'pointer-events-none absolute h-px w-px overflow-hidden opacity-0'
+                }
+              >
+                {needsTap && (
+                  <p className='px-1 pb-1.5 font-mono text-[11px] uppercase tracking-wider text-dark-blue'>{t('playerTapToStart')}</p>
+                )}
+                {mcReady && (
+                  <iframe
+                    key={`mc-${showKey}`}
+                    id='mixcloud-player'
+                    title='Mixcloud'
+                    width='100%'
+                    height='60'
+                    allow='autoplay'
+                    onLoad={(e) => void onMixcloudLoad(e.currentTarget)}
+                    src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&autoplay=1&mini=1&feed=${showKey}&origin=${origin}`}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </>
       )}

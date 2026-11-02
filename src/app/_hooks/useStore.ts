@@ -51,6 +51,15 @@ interface GlobalStore {
   resetPlayer: () => void;
 }
 
+/**
+ * Starts an archive track right inside the click (lib/archiveAudio registers
+ * itself here; iPhones only allow sound that starts in the tap itself).
+ */
+let archiveStarter: ((trackId: string) => void) | null = null;
+export function registerArchiveStarter(start: (trackId: string) => void) {
+  archiveStarter = start;
+}
+
 export const useGlobalStore = create<GlobalStore>((set) => ({
   activePlayer: undefined,
   activePlayerSet: (activePlayer) => set({ activePlayer }),
@@ -84,11 +93,13 @@ export const useGlobalStore = create<GlobalStore>((set) => ({
     }),
 
   trackId: undefined,
-  trackIdSet: (trackId) =>
+  trackIdSet: (trackId) => {
     set({
       activePlayer: ActivePlayer.SOUNDCLOUD,
       trackId,
-    }),
+    });
+    archiveStarter?.(trackId);
+  },
 
   currentShowUrl: undefined,
   setCurrentShowUrl: (url) => set({ currentShowUrl: url }),

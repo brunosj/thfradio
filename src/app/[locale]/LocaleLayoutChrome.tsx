@@ -8,6 +8,8 @@ import JoinChat from "@/modules/chat/JoinChat";
 import { GlobalChatOverlay } from "@/modules/chat/GlobalChatOverlay";
 import Footer from "@/app/_common/layout/footer/Footer";
 import CloudPlayer from "@/app/_modules/player/CloudPlayer";
+import PlayerErrorBoundary from "@/app/_modules/player/PlayerErrorBoundary";
+import { useGlobalStore } from "@/hooks/useStore";
 import { normalizeAppPath } from "@/modules/chat/chatRouteUtils";
 
 export function LocaleLayoutChrome({
@@ -18,6 +20,8 @@ export function LocaleLayoutChrome({
   const pathname = usePathname();
   const path = normalizeAppPath(pathname);
   const isStudioChat = path.endsWith("/studio-chat");
+  // A player error hides the bar until the next track, never the page
+  const playerKey = useGlobalStore((s) => s.trackId ?? s.showKey);
 
   if (isStudioChat) {
     return (
@@ -39,7 +43,9 @@ export function LocaleLayoutChrome({
         <main>{children}</main>
       </div>
       <Footer />
-      <CloudPlayer />
+      <PlayerErrorBoundary resetKey={playerKey}>
+        <CloudPlayer />
+      </PlayerErrorBoundary>
       <JoinChat />
       <GlobalChatOverlay />
     </>
