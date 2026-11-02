@@ -2,6 +2,7 @@ import type { CloudShowTypes, ShowTypes } from '@/types/ResponsesInterface';
 import { fetchMixcloudShows } from './mixcloud';
 import { fetchSoundcloudShows } from './soundcloud';
 import { showMatcher } from '@/utils/guests';
+import { tidyArchiveGenres } from '@/utils/genres';
 
 type ShowsType = {
   data: ShowTypes[];
@@ -55,7 +56,8 @@ export async function fetchCloudShowsWithStatus(): Promise<{
   );
 
   return {
-    shows: await withShowPictures([...mixcloudOnly, ...soundcloud.shows]),
+    // One spelling per genre, no show names / non-genres (utils/genres.ts)
+    shows: tidyArchiveGenres(await withShowPictures([...mixcloudOnly, ...soundcloud.shows])),
     complete: soundcloud.ok && soundcloud.shows.length > 0 && mixcloud.complete,
   };
 }

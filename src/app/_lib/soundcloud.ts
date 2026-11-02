@@ -118,7 +118,8 @@ function normalizeSoundcloudShow(show: SoundcloudShowType): CloudShowTypes {
     tags: formattedTags,
     // The intranet's upload dialog writes the first genre into `genre` and
     // all of them into tag_list; older uploads have free text in either.
-    genres: cleanGenres([show.genre, ...formattedTags.map((t) => t.name)]),
+    // More than shown: shows.ts drops non-genres, then keeps 6
+    genres: cleanGenres([show.genre, ...formattedTags.map((t) => t.name)], 12),
     durationSec: show.duration ? Math.round(show.duration / 1000) : null,
   };
 }

@@ -17,8 +17,8 @@ import { fetchCloudShowsWithStatus } from './shows';
 const MAX_AGE_MS = 6 * 60 * 60 * 1000;
 const RETRY_MS = 15 * 60 * 1000;
 const FILE = path.join(process.cwd(), '.next', 'cache', 'thf-cloud-shows.json');
-/** Raise when the rules change (2: every Mixcloud upload, duplicates per episode) */
-const LIST_VERSION = 2;
+/** Raise when the rules change (2: every Mixcloud upload, duplicates per episode; 5: tidied genres) */
+const LIST_VERSION = 5;
 
 type Entry = { shows: CloudShowTypes[]; fetchedAt: number; complete: boolean; version?: number };
 

@@ -80,8 +80,8 @@ export default function ArchiveBrowser({
   };
 
   const byShow = useMemo(() => (showKey ? all.filter((s) => showOf.get(s.id) === showKey) : all), [all, showKey, showOf]);
-  const families = useMemo(() => genreFamilies(byShow), [byShow]);
   const [filter, setFilter] = useState<GenreFilter>(NO_GENRE_FILTER);
+  const families = useMemo(() => genreFamilies(byShow, filter.subs), [byShow, filter.subs]);
   const list = useMemo(() => applyGenreFilter(byShow, filter), [byShow, filter]);
   const [shown, setShown] = useState(pageSize);
   const sentinel = useRef<HTMLDivElement | null>(null);

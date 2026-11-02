@@ -35,7 +35,8 @@ function normalizeMixcloudShow(show: MixcloudShowType): CloudShowTypes {
     pictures: { extra_large: picture },
     tags: formattedTags,
     // Mixcloud tags are its genres
-    genres: cleanGenres(formattedTags.map((t) => t.name)),
+    // More than shown: shows.ts drops non-genres, then keeps 6
+    genres: cleanGenres(formattedTags.map((t) => t.name), 12),
     durationSec: show.audio_length ?? null,
     date: show.created_time ?? new Date().toISOString(),
   };

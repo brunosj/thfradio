@@ -17,22 +17,22 @@ export type GenreFamily = { id: string; label: string; labelDe?: string; match: 
 // Order matters: the first family whose pattern matches wins, so the more
 // specific ones come first ("dubstep" before "dub", "electronica" before "electro").
 export const GENRE_FAMILIES: GenreFamily[] = [
-  { id: 'talks', label: 'Talks / Spoken Word', labelDe: 'Talks / Wortbeiträge', match: /\b(talks?|spoken|podcast|interview|radio ?play|hörspiel|news|storytelling|stories|poetry|lecture)\b/i },
-  { id: 'uk-dance', label: 'UK Dance / Bass', match: /(dubstep|grime|garage|\bukg\b|2[- ]?step|jungle|drum ?(&|and|n|'n')? ?bass|\bd(&|n)b\b|\bbass\b|uk dance|footwork|juke)/i },
+  { id: 'talks', label: 'Talks / Spoken Word', labelDe: 'Talks / Wortbeiträge', match: /(\b(talks?|spoken|podcast|interview|radio ?play|hörspiel|news|stories|poetry|lecture|politics|political|comedy|comedian|sketch|lifestyle|entertainment|architecture|education)\b|storytelling|^arts?$)/i },
+  { id: 'uk-dance', label: 'UK Dance / Bass', match: /(dubstep|grime|garage|\bukg\b|2[- ]?step|jungle|drum ?(&|and|n|'n')? ?bass|\bd(&|n)b\b|\bbass\b|uk dance|footwork|juke|bassline)/i },
   { id: 'reggae', label: 'Reggae / Dub', match: /(reggae|dancehall|\bdub\b(?! ?techno)|roots|ska\b|rocksteady|lovers rock)/i },
   { id: 'disco', label: 'Disco / Boogie', match: /(disco|boogie|italo|\bedits?\b|cosmic)/i },
-  { id: 'electronica', label: 'Electronica / Downtempo', match: /(electronica|\belectronic\b|downtempo|trip[- ]?hop|\bbeats\b|\bidm\b|chill|lo-?fi|leftfield|glitch|balearic)/i },
+  { id: 'electronica', label: 'Electronica / Downtempo', match: /(electronica|\belectronic\b|downtempo|trip[- ]?hop|\bbeats\b|\bidm\b|chill|lo-?fi|leftfield|glitch|balearic|^synths?$)/i },
   { id: 'electro', label: 'Electro / Breaks', match: /(\belectro\b|breaks|breakbeat|broken ?beat|\bebm\b|miami bass)/i },
-  { id: 'house-techno', label: 'House / Techno', match: /(house|techno|minimal|\bacid\b|trance|detroit|progressive|rave|hardcore|gabber|\bdj ?set\b|club|\bedm\b|\bdance\b|\bpsy\b|psy-?trance|\bgoa\b|eurodance|hi-?nrg)/i },
-  { id: 'ambient', label: 'Ambient / Experimental', labelDe: 'Ambient / Experimentell', match: /(ambient|experimental|drone|noise|avant|field record|new ?age|sound ?art|musique|modular|kosmische|soundscape)/i },
-  { id: 'hiphop', label: 'Hip-Hop / RnB', match: /(hip[- ]?hop|\brap\b|\br ?(&|n|'n')? ?b\b|rnb|trap|drill|boom ?bap|g-?funk|memphis|phonk|grime rap)/i },
+  { id: 'house-techno', label: 'House / Techno', match: /(house|techno(?!log)|minimal|\bacid\b|trance|detroit|progressive|rave|hardcore|gabber|\bdj ?set\b|club|\bedm\b|\bdance\b|\bpsy\b|psy-?trance|\bgoa\b|eurodance|hi-?nrg)/i },
+  { id: 'ambient', label: 'Ambient / Experimental', labelDe: 'Ambient / Experimentell', match: /(ambient|experimental|drone|noise|avant|field record|new ?age|sound ?art|musique|modular|kosmische|soundscape|healing|meditat)/i },
+  { id: 'hiphop', label: 'Hip-Hop / RnB', match: /(hip[- ]?hop|\brap\b|\br ?(&|n|'n')? ?b\b|rnb|trap|drill|boom ?bap|g-?funk|memphis|phonk|grime rap|deutschrap|^urban$)/i },
   { id: 'jazz', label: 'Jazz', match: /(jazz|bebop|swing|fusion)/i },
-  { id: 'soul-funk', label: 'Soul / Funk', match: /(soul|funk|rhythm ?(&|and) ?blues|gospel|blues|motown)/i },
-  { id: 'global', label: 'Afro / Latin / Global', match: /(afro|amapiano|\bmpb\b|gqom|kuduro|highlife|latin|cumbia|salsa|baile|brazil|bossa|samba|world|arab|turk|balkan|tropical|reggaeton|dembow|asia|k-?pop|j-?pop|bollywood|(^|[^a-z])ra[iï]($|[^a-z])|chaabi|maghreb|desert blues)/i },
+  { id: 'soul-funk', label: 'Soul / Funk', match: /(soul|funk|rhythm ?(&|and) ?blues|gospel|blues|motown|groove)/i },
+  { id: 'global', label: 'Afro / Latin / Global', match: /(afro|amapiano|\bmpb\b|gqom|kuduro|highlife|latin|cumbia|salsa|baile|brazil|bossa|samba|world|arab|turk|balkan|tropical|reggaeton|dembow|asia|k-?pop|j-?pop|bollywood|(^|[^a-z])ra[iï]($|[^a-z])|chaabi|maghreb|desert blues|brasil|africa|afrika|anatolia|\bsoca\b|\bzouk\b|percussi|^tribal$)/i },
   { id: 'folk', label: 'Folk / Country', match: /(folk|country|americana|bluegrass|acoustic|singer-?songwriter|chanson)/i },
-  { id: 'rock', label: 'Rock / Punk / Wave', match: /(rock|punk|slowcore|sadcore|\bemo\b|indie|alternative|new wave|\bwave\b|shoegaze|metal|grunge|post-?punk|garage rock|psych)/i },
+  { id: 'rock', label: 'Rock / Punk / Wave', match: /(rock|punk|slowcore|sadcore|\bemo\b|indie|alternative|new wave|\bwave\b|shoegaze|metal|grunge|post-?punk|garage rock|psych|industrial)/i },
   { id: 'pop', label: 'Pop', match: /(\bpop\b|synth-?pop|hyperpop|schlager|city ?pop|italo ?pop)/i },
-  { id: 'classical', label: 'Classical / Soundtrack', labelDe: 'Klassik / Soundtrack', match: /(classical|opera|baroque|orchestra|soundtrack|score|piano|minimalism)/i },
+  { id: 'classical', label: 'Classical / Soundtrack', labelDe: 'Klassik / Soundtrack', match: /(classical|opera|baroque|orchestra|soundtrack|\bscore\b|piano|minimalism|\blibrary\b)/i },
 ];
 
 export const OTHER_FAMILY: GenreFamily = { id: 'other', label: 'Other', labelDe: 'Sonstiges', match: /$^/ };
@@ -99,6 +99,15 @@ const CANONICAL: Record<string, string> = {
   jpop: 'J-Pop',
   spokenword: 'Spoken Word',
   talk: 'Talks',
+  comedyradio: 'Comedy',
+  comedian: 'Comedy',
+  political: 'Politics',
+  sonicstorytelling: 'Sonic Storytelling',
+  brasil: 'Brazil',
+  brazilian: 'Brazil',
+  percussive: 'Percussion',
+  psych: 'Psychedelic',
+  postrock: 'Post-Rock',
 };
 
 /** Not a genre: dropped. */
@@ -123,6 +132,18 @@ function titleCase(s: string): string {
 }
 
 /**
+ * Two genres in one tag ("Hip-hop & Rap", "R&B & Soul", "Funk - Soul - Jazz",
+ * "Spoken Word and Poetry") → both, when every part is a genre of its own.
+ * Fixed names stay whole ("Drum & Bass", "Soul / Rhythm & Blues").
+ */
+function splitCombo(tag: string): string[] {
+  if (CANONICAL[keyOf(tag)]) return [tag];
+  const parts = tag.split(/\s+(?:&|and|und|-|–)\s+/i).map((x) => x.trim()).filter(Boolean);
+  if (parts.length < 2) return [tag];
+  return parts.every((x) => familyOf(CANONICAL[keyOf(x)] ?? x) !== OTHER_FAMILY) ? parts : [tag];
+}
+
+/**
  * Free-text genres → clean list: split on , ; | # and on "/" (except the
  * upload dialog's own "Disco / Boogie"-style names), strip stray punctuation,
  * fix known spellings, title-case the rest, drop non-genres ("dj mix",
@@ -134,19 +155,95 @@ export function cleanGenres(raw: string | (string | null | undefined)[] | null |
   const parts = (Array.isArray(raw) ? raw : [raw ?? '']).flatMap((s) => String(s ?? '').split(/[,;|#\n]+/));
   const out = new Map<string, string>();
   for (let part of parts) {
-    part = part.replace(/["'`´]/g, '').replace(/\s+/g, ' ').trim();
+    // Quotes and "(…)" asides go: "Garage (UKG)" → "Garage"
+    part = part.replace(/["'`´]/g, '').replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
     if (!part) continue;
     const whole = CANONICAL[keyOf(part)];
     const pieces = whole ? [whole] : part.split(/\s*\/\s*/);
     for (let p of pieces) {
       p = p.replace(/^[\s.\-–—:+*_~]+|[\s.\-–—:+*_~]+$/g, '').trim();
       if (!p || p.length > 40 || /^\d+$/.test(p) || NOT_A_GENRE.has(p.toLowerCase())) continue;
-      const nice = CANONICAL[keyOf(p)] ?? titleCase(p);
-      const key = nice.toLowerCase();
-      if (!out.has(key)) out.set(key, nice);
+      for (const q of splitCombo(p)) {
+        const nice = CANONICAL[keyOf(q)] ?? titleCase(q);
+        const key = nice.toLowerCase();
+        if (!out.has(key)) out.set(key, nice);
+      }
     }
   }
   return [...out.values()].slice(0, max);
+}
+
+// ---------------------------------------------------------------------------
+// Tidying the whole archive (server, once per archive refresh)
+// ---------------------------------------------------------------------------
+
+/** Spelling key: "Dub-Techno" = "Dubtechno", "Breakbeats" = "Breakbeat", "Folk Music" = "Folk". */
+const spellingKey = (g: string) =>
+  keyOf(g)
+    .replace(/(music|musik)$/, '')
+    .replace(/s$/, '');
+
+/** Lists squeezed into one tag ("Disco Soul Funk Boogie") and crew / label names. */
+const notOneGenre = (g: string) =>
+  g.split(/\s+/).filter((w) => /[a-z0-9]/i.test(w)).length >= 4 || /berlin|presents|collective|records/.test(keyOf(g));
+
+/** Mixed / anything-goes shows: the only entries kept under "Other", as "Eclectic". */
+const ECLECTIC = new Set(['eclectic', 'multigenre', 'multigenres', 'querbeet', 'anythinggoes', 'everything', 'allgenres', 'variousgenres', 'genrefluid']);
+
+/**
+ * Names in a title: the show and its guests.
+ *   "KOX Radio #65 w/ The House Sharks & Lask // 23.07.25" → koxradio, housesharks, lask
+ */
+function titleNames(title: string): Set<string> {
+  const [show, guests = ''] = title.split('//')[0].split(/\s(?:w\/|with|feat\.?|ft\.?)\s/i);
+  const names = [show.replace(/#\s?\d+|\b(ep|episode|vol|part|no)\.?\s?\d+\b|\b\d+\b/gi, ''), ...guests.split(/\s*(?:&|,|\band\b|\bb2b\b)\s*/i)];
+  return new Set(names.map((n) => keyOf(n).replace(/^the/, '')).filter((k) => k.length >= 4));
+}
+
+/**
+ * Archive genres, tidied across all recordings:
+ * - one spelling per genre, the most used one ("Dubtechno" → "Dub Techno");
+ * - no show or guest names as genres ("Koxradio" on KOX Radio episodes);
+ * - only genres that belong to a family; of the rest only mixed /
+ *   anything-goes tags stay, as "Eclectic" (radio formats, people, hashtags go).
+ * Shows keep at most `max` genres.
+ */
+export function tidyArchiveGenres<T extends { name?: string; genres?: string[] }>(shows: T[], max = 6): T[] {
+  // Most used spelling per key
+  const spellings = new Map<string, Map<string, number>>();
+  // How often a tag is the name of the show or its guest
+  const asName = new Map<string, { name: number; all: number }>();
+  for (const s of shows) {
+    const names = titleNames(s.name ?? '');
+    for (const g of s.genres ?? []) {
+      const k = spellingKey(g);
+      const m = spellings.get(k) ?? new Map<string, number>();
+      m.set(g, (m.get(g) ?? 0) + 1);
+      spellings.set(k, m);
+      const n = asName.get(k) ?? { name: 0, all: 0 };
+      n.all++;
+      if (names.has(keyOf(g).replace(/^the/, ''))) n.name++;
+      asName.set(k, n);
+    }
+  }
+  const best = new Map([...spellings].map(([k, m]) => [k, [...m].sort((a, b) => b[1] - a[1])[0][0]]));
+
+  return shows.map((s) => {
+    const out = new Map<string, string>();
+    for (const g of s.genres ?? []) {
+      const k = spellingKey(g);
+      const n = asName.get(k);
+      if (n && n.name / n.all >= 0.5) continue; // a show's name
+      let label = best.get(k) ?? g;
+      if (notOneGenre(label)) continue;
+      if (familyOf(label) === OTHER_FAMILY) {
+        if (!ECLECTIC.has(keyOf(label))) continue;
+        label = 'Eclectic';
+      }
+      if (!out.has(label.toLowerCase())) out.set(label.toLowerCase(), label);
+    }
+    return { ...s, genres: [...out.values()].slice(0, max) };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -163,9 +260,12 @@ const az = (a: string, b: string) => a.localeCompare(b, 'en', { sensitivity: 'ba
 
 /**
  * Genre families across these shows, A–Z ("Other" last), each with its
- * subgenres A–Z. Counts are shows, not genre mentions.
+ * subgenres A–Z. Counts are shows, not genre mentions. In the big archive a
+ * subgenre needs 3 shows for its own chip (rarer ones: search); picked ones
+ * (`keep`) always stay.
  */
-export function genreFamilies(shows: GenreFilterable[]): FamilyCount[] {
+export function genreFamilies(shows: GenreFilterable[], keep: string[] = []): FamilyCount[] {
+  const minShows = shows.length >= 300 ? 3 : 1;
   type Acc = { fam: GenreFamily; shows: Set<string>; subs: Map<string, { label: string; shows: Set<string> }> };
   const fams = new Map<string, Acc>();
   for (const s of shows)
@@ -189,6 +289,7 @@ export function genreFamilies(shows: GenreFilterable[]): FamilyCount[] {
       count: f.shows.size,
       subs: [...f.subs.entries()]
         .map(([key, s]) => ({ key, label: s.label, count: s.shows.size }))
+        .filter((sub) => sub.count >= minShows || keep.includes(sub.key))
         .sort((a, b) => az(a.label, b.label)),
     }))
     .sort((a, b) => (a.id === 'other' ? 1 : b.id === 'other' ? -1 : az(a.label, b.label)));
