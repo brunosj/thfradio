@@ -284,6 +284,7 @@ export default function CloudPlayer() {
 
           <div
             role='region'
+            data-area='player'
             aria-label={t('playerLabel')}
             className='fixed inset-x-0 bottom-0 z-40 border-t border-white/15 bg-dark-blue/95 text-white backdrop-blur-md'
             style={{ height: PLAYER_BAR_HEIGHT }}

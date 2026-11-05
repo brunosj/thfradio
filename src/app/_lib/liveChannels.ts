@@ -3,18 +3,19 @@ import type { CalendarEntry } from '@/types/ResponsesInterface';
 /**
  * Both channels come from our own streaming server (thfradio.space:
  * liquidsoap → Icecast). Fixed on purpose, not read from .env, so an old
- * Radio Cult address left in a server .env can't come back.
+ * Radio Cult address left in a server .env can't come back. ?ref=web tells
+ * the streaming server these listeners came through thfradio.de.
  */
 export const LIVE_CHANNELS = {
   1: {
     id: 1 as const,
     label: 'THF1',
-    streamUrl: 'https://stream.thfradio.space/live.mp3',
+    streamUrl: 'https://stream.thfradio.space/live.mp3?ref=web',
   },
   2: {
     id: 2 as const,
     label: 'THF2',
-    streamUrl: 'https://stream.thfradio.space/live2.mp3',
+    streamUrl: 'https://stream.thfradio.space/live2.mp3?ref=web',
   },
 } as const;
 

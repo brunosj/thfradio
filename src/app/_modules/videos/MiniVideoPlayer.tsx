@@ -401,6 +401,7 @@ export default function MiniVideoPlayer() {
   return (
     <div
       role='region'
+      data-area='video'
       aria-label={mode === 'live' ? t('videoLive') : video!.title}
       className='w-[min(320px,calc(100vw-1.5rem))] sm:w-[380px] border border-white/30 bg-black shadow-2xl'
     >

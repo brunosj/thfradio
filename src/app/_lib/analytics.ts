@@ -20,6 +20,8 @@ export const EVENTS = {
   switchLanguage: 'switch-language',
   /** link to another site, e.g. "out: instagram.com" */
   outbound: (host: string) => `out: ${host}`,
+  /** any link or button, e.g. "click: header · Schedule" (Umami keeps 50 characters) */
+  click: (area: string, label: string) => `click: ${area} · ${label}`.slice(0, 50),
 } as const;
 
 type UmamiWindow = Window & { umami?: { track: (event: string, data?: Record<string, string | number>) => void } };

@@ -239,7 +239,7 @@ export const Chat = ({ variant = 'overlay' }: ChatProps) => {
         ${isOpen ? 'md:h-150 md:opacity-100 md:visible shadow-xl' : 'md:h-0 md:opacity-0 md:invisible'}`;
 
   return (
-    <div className={rootClassName}>
+    <div data-area='chat' className={rootClassName}>
       {/* Header */}
       <div className='flex justify-between items-center bg-orange-500 text-white p-4 h-16 shrink-0'>
         <div className='flex items-center gap-2'>

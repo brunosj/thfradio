@@ -143,6 +143,7 @@ const Header: React.FC<HeaderProps> = ({
       {/* Mobile Menu Overlay */}
       <div
         ref={menuRef}
+        data-area='menu'
         style={{
           right: isOpen ? '0' : '-100%',
           visibility: isOpen ? 'visible' : 'hidden',

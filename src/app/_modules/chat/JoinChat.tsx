@@ -29,7 +29,7 @@ export default function JoinChat() {
   // Bottom right dock: the small video player (live video or a YouTube video,
   // when there is one), then the chat button. The dock stays even where the chat button is hidden.
   return (
-    <div className={`fixed right-3 z-50 transition-[bottom] duration-300 ${tapStripOpen ? 'bottom-[150px]' : playerOpen ? 'bottom-[76px]' : 'bottom-3'}`}>
+    <div data-area='chat' className={`fixed right-3 z-50 transition-[bottom] duration-300 ${tapStripOpen ? 'bottom-[150px]' : playerOpen ? 'bottom-[76px]' : 'bottom-3'}`}>
       {/* Wraps on phones: the open player above, the folded one beside the chat button */}
       <div className='flex max-w-[calc(100vw-1.5rem)] flex-row flex-wrap items-end justify-end gap-2'>
         <MiniVideoPlayer />
