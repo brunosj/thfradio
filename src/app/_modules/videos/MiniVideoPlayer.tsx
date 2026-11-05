@@ -296,11 +296,12 @@ export default function MiniVideoPlayer() {
   const box = useRef<HTMLDivElement>(null);
   const liveVideo = useRef<HTMLVideoElement | null>(null);
 
-  // Folded live video opens again the next time the stream goes on air
+  // Folded live video opens again the next time the stream goes on air.
+  // On phones it starts as the small "Live video" button: a tap opens it.
   const wasOn = useRef(false);
   useEffect(() => {
     if (live.on && !wasOn.current) {
-      setLiveFolded(false);
+      setLiveFolded(window.matchMedia('(max-width: 639px)').matches);
       setLiveMuted(true);
     }
     wasOn.current = live.on;
