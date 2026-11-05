@@ -1,5 +1,6 @@
 import localFont from 'next/font/local';
 import { DataProviderWrapper } from './_context/DataProviderWrapper';
+import Analytics from './_common/Analytics';
 
 import '@/styles/global.css';
 import '@/styles/carousel.css';
@@ -43,6 +44,7 @@ export default function RootLayout({
     <html className={`${SpaceMono.variable} ${NeueMachina.variable}`}>
       <body>
         <DataProviderWrapper>{children}</DataProviderWrapper>
+        <Analytics />
       </body>
     </html>
   );

@@ -3,6 +3,7 @@
 import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { useTransition } from 'react';
+import { EVENTS, track } from '@/app/_lib/analytics';
 
 interface LanguageSwitcherProps {
   isMobile?: boolean;
@@ -19,6 +20,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const [isPending, startTransition] = useTransition();
 
   const handleLocaleChange = (newLocale: string) => {
+    track(EVENTS.switchLanguage, { to: newLocale });
     startTransition(() => {
       router.replace(pathname, { locale: newLocale, scroll: false });
       if (onMobileClick) onMobileClick();

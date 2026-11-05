@@ -12,6 +12,7 @@ import { ActivePlayer, useGlobalStore } from '@/hooks/useStore';
 import type { Pick } from '@/lib/picks';
 import { keepWithName } from '@/utils/titles';
 import { formatDuration } from '@/utils/showUtils';
+import { EVENTS, track } from '@/app/_lib/analytics';
 
 /** Berlin date: poster "FR 23.10.26", card "23. Okt. 26" */
 function pickDate(iso: string, locale: string, style: 'poster' | 'card'): string {
@@ -34,6 +35,7 @@ function usePickPlayer(pick: Pick) {
 
   const isCurrent = activePlayer === ActivePlayer.SOUNDCLOUD && trackId === pick.trackId;
   const play = () => {
+    track(EVENTS.playPick);
     trackIdSet(pick.trackId);
     setCurrentShowUrl(pick.soundcloudUrl);
   };

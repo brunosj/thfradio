@@ -9,6 +9,7 @@ import {
   isGlobalChatOverlaySuppressed,
   normalizeAppPath,
 } from './chatRouteUtils';
+import { EVENTS, track } from '@/app/_lib/analytics';
 
 export default function JoinChat() {
   const pathname = usePathname();
@@ -34,7 +35,10 @@ export default function JoinChat() {
         <MiniVideoPlayer />
         {!chatHidden && (
         <button
-          onClick={() => setIsChatOpen(!isChatOpen)}
+          onClick={() => {
+            if (!isChatOpen) track(EVENTS.openChat);
+            setIsChatOpen(!isChatOpen);
+          }}
           className='inline-flex items-center p-3 rounded-xl bg-orange-500 text-white focus:outline-none focus:ring-4 font-mono font-semibold border border-white hover:cursor-pointer hover:bg-orange-600 transition-colors duration-200 shadow-lg'
           aria-label={t('chat.open')}
         >

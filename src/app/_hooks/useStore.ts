@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { LiveChannelId } from '@/app/_lib/liveChannels';
 import type { Video } from '@/lib/videos';
+import { EVENTS, track } from '@/app/_lib/analytics';
 
 export enum ActivePlayer {
   MIXCLOUD,
@@ -83,17 +84,23 @@ export const useGlobalStore = create<GlobalStore>((set) => ({
   setVideo: (video) => set({ video }),
 
   scheduleOpen: false,
-  setScheduleOpen: (open) => set({ scheduleOpen: open }),
+  setScheduleOpen: (open) => {
+    if (open) track(EVENTS.openSchedule);
+    set({ scheduleOpen: open });
+  },
 
   showKey: undefined,
-  showKeySet: (showKey) =>
+  showKeySet: (showKey) => {
+    if (showKey) track(EVENTS.playMixcloud);
     set({
       activePlayer: ActivePlayer.MIXCLOUD,
       showKey,
-    }),
+    });
+  },
 
   trackId: undefined,
   trackIdSet: (trackId) => {
+    if (trackId) track(EVENTS.playArchive);
     set({
       activePlayer: ActivePlayer.SOUNDCLOUD,
       trackId,

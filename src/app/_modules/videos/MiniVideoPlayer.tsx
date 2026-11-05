@@ -17,6 +17,7 @@ import { useGlobalStore } from '@/hooks/useStore';
 import { pauseLiveStream } from '@/app/_lib/liveStreamAudio';
 import { keepWithName } from '@/utils/titles';
 import { HLS_SCRIPT, loadScript, type HlsInstance } from '@/app/_lib/hls';
+import { EVENTS, track } from '@/app/_lib/analytics';
 
 /* ---------- YouTube player API ---------- */
 
@@ -361,6 +362,7 @@ export default function MiniVideoPlayer() {
       void document.exitFullscreen().catch(() => {});
       return;
     }
+    track(EVENTS.fullscreenVideo, { mode: mode ?? "none" });
     const el = box.current as (HTMLDivElement & { webkitRequestFullscreen?: () => void }) | null;
     const v = liveVideo.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
     if (el?.requestFullscreen) void el.requestFullscreen().catch(() => v?.webkitEnterFullscreen?.());
@@ -370,6 +372,7 @@ export default function MiniVideoPlayer() {
 
   const muted = mode === 'live' ? liveMuted : ytMuted;
   const unmute = () => {
+    track(EVENTS.unmuteVideo, { mode: mode ?? "none" });
     takeOverSound();
     if (mode === 'live') {
       // Right in the tap: iOS only allows sound from here

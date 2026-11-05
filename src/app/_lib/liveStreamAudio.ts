@@ -4,6 +4,7 @@ import {
   type LiveChannelId,
 } from '@/app/_lib/liveChannels';
 import { ActivePlayer, useGlobalStore } from '@/hooks/useStore';
+import { EVENTS, track } from '@/app/_lib/analytics';
 
 let audioElement: HTMLAudioElement | null = null;
 let sourceElement: HTMLSourceElement | null = null;
@@ -86,6 +87,7 @@ export async function playLiveStream(channelId: LiveChannelId) {
 
     await audioElement.load();
     await audioElement.play();
+    track(EVENTS.playLive(channelId === 2 ? 2 : 1));
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       return;
