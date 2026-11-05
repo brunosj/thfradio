@@ -70,7 +70,7 @@ export default function PicksSection({ picks }: { picks: Picks }) {
   const canScroll = !(edges.start && edges.end);
 
   return (
-    <section className='bg-dark-blue text-white pt-8 lg:pt-12 pb-14 lg:pb-24' id='picks'>
+    <section data-area='picks' className='bg-dark-blue text-white pt-8 lg:pt-12 pb-14 lg:pb-24' id='picks'>
       {staff.length > 0 && (
         // No heading: the shows speak for themselves; arrows sit on the row's edges
         <div className='relative'>

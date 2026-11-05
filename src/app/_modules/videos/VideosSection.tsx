@@ -81,7 +81,7 @@ export default function VideosSection({ videos }: { videos: Video[] }) {
 
   const play = (video: Video) => {
     requestPause();
-    void pauseLiveStream();
+    void pauseLiveStream('switch');
     setVideo(video);
   };
 

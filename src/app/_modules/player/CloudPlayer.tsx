@@ -27,6 +27,15 @@ import {
   useArchiveAudio,
 } from '@/lib/archiveAudio';
 import { canDecodeAac } from '@/lib/aacSupport';
+import {
+  archiveEnded,
+  archiveInfo,
+  archivePaused,
+  archivePauseIsSwitch,
+  archivePosition,
+  archiveSounding,
+  seriesName,
+} from '@/lib/listenTracking';
 import type { MixcloudWidget } from '@/types/mixcloud';
 
 /** Height of the bar; the chat button and the page bottom make room for it. */
@@ -101,6 +110,7 @@ export default function CloudPlayer() {
     if (!show) return null;
     return {
       title: cleanTitle(show.name || ''),
+      raw: show.name || '',
       image: show.pictures?.extra_large || show.picture || null,
       duration: show.durationSec ?? null,
     };
@@ -145,6 +155,18 @@ export default function CloudPlayer() {
     [programme, title],
   );
   const showHref = showSlug ? `/shows/${showSlug}` : null;
+
+  // Listening statistics (lib/listenTracking): which show and episode is playing
+  const listenId = isSoundcloud && trackId ? trackId : isMixcloud && showKey ? `mc:${showKey}` : null;
+  const seriesTitle = useMemo(
+    () => (showSlug ? programme?.find((p) => p.slug === showSlug)?.title || '' : ''),
+    [programme, showSlug],
+  );
+  const episodeTitle = fromArchive?.raw || info?.title || (title === '…' ? '' : title);
+  useEffect(() => {
+    if (!listenId || !episodeTitle) return;
+    archiveInfo(listenId, { show: seriesTitle || seriesName(episodeTitle), ep: episodeTitle });
+  }, [listenId, episodeTitle, seriesTitle]);
 
   /* ---------- Mixcloud widget ---------- */
   useEffect(() => {
@@ -193,6 +215,7 @@ export default function CloudPlayer() {
   useEffect(() => {
     if (!pauseSignal || !mcRef.current) return;
     const w = mcRef.current;
+    if (mcPlayingRef.current) archivePauseIsSwitch();
     safely(() => w.pause());
   }, [pauseSignal]);
 
@@ -211,13 +234,33 @@ export default function CloudPlayer() {
       const w = window.Mixcloud.PlayerWidget(iframe);
       await w.ready;
       mcRef.current = w;
-      w.events.play.on(() => setMcPlaying(true));
-      w.events.pause.on(() => setMcPlaying(false));
-      w.events.ended.on(() => setMcPlaying(false));
+      // Listening statistics: this widget's own play state (a late progress
+      // event after a pause must not count as playing on)
+      const listen = `mc:${showKey}`;
+      let paused = false;
+      w.events.play.on(() => {
+        setMcPlaying(true);
+        paused = false;
+        archiveSounding(listen);
+      });
+      w.events.pause.on(() => {
+        setMcPlaying(false);
+        paused = true;
+        archivePaused(listen);
+      });
+      w.events.ended.on(() => {
+        setMcPlaying(false);
+        paused = true;
+        archiveEnded(listen);
+      });
       w.events.progress.on((pos, dur) => {
         setMcPosition(pos);
         if (dur) setMcDuration(dur);
         if (pos > 0.5 && !mcPlayingRef.current) setMcPlaying(true);
+        if (pos > 0.5 && !paused) {
+          archiveSounding(listen);
+          archivePosition(listen, pos);
+        }
       });
       setMcDuration(await w.getDuration());
       expectPlayback();

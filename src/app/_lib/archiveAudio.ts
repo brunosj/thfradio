@@ -7,6 +7,16 @@ import { create } from 'zustand';
 import { ActivePlayer, registerArchiveStarter, useGlobalStore } from '@/hooks/useStore';
 import { canDecodeAac } from './aacSupport';
 import { loadHls, playsHlsNatively, type HlsClass, type HlsInstance } from './hls';
+import {
+  archiveClosed,
+  archiveEnded,
+  archiveFailed,
+  archiveLoading,
+  archivePaused,
+  archivePauseIsSwitch,
+  archivePosition,
+  archiveSounding,
+} from './listenTracking';
 
 export interface ArchiveAudioState {
   trackId: string | null;
@@ -94,6 +104,20 @@ function element(): HTMLAudioElement {
   a.addEventListener('play', () => watchStall());
   a.addEventListener('pause', () => clearStall());
   a.addEventListener('pause', () => set({ playing: false, loading: false }));
+  // Listening statistics (lib/listenTracking): pause, end, sound, position
+  const current = () => useArchiveAudio.getState().trackId;
+  a.addEventListener('pause', () => {
+    const id = current();
+    if (id) archivePaused(id);
+  });
+  a.addEventListener('ended', () => {
+    const id = current();
+    if (id) archiveEnded(id);
+  });
+  a.addEventListener('playing', () => {
+    const id = current();
+    if (id && started) archiveSounding(id);
+  });
   a.addEventListener('waiting', () => set({ loading: !a.paused }));
   a.addEventListener('canplay', () => set({ loading: false }));
   a.addEventListener('ended', () => set({ playing: false, loading: false }));
@@ -101,6 +125,11 @@ function element(): HTMLAudioElement {
     if (!useArchiveAudio.getState().trackId) return;
     lastPosition = a.currentTime;
     if (!started && !a.paused && a.currentTime > loadStartAt + 0.25) onStarted();
+    const id = useArchiveAudio.getState().trackId;
+    if (id && started && !a.paused) {
+      archiveSounding(id);
+      archivePosition(id, a.currentTime);
+    }
     // Played on well past the last reload: allow another one later
     if (retriedAt !== null && lastPosition > retriedAt + 30) retriedAt = null;
     set({ position: a.currentTime });
@@ -248,6 +277,7 @@ function onLoadError() {
   }
   detach();
   set({ error: true, loading: false, playing: false });
+  archiveFailed(trackId);
 }
 
 /* ---------- controls ---------- */
@@ -264,6 +294,7 @@ export function playArchiveTrack(id: string) {
   retriedAt = null;
   durationHint = 0;
   meta = null;
+  archiveLoading(id);
   useArchiveAudio.setState({ ...initial, trackId: id, loading: true });
   load(id, 0, false);
   setupMediaSession();
@@ -302,7 +333,8 @@ export function skipArchive(delta: number) {
 }
 
 /** Stop and forget the track (player closed, live radio or Mixcloud took over). */
-export function stopArchive() {
+export function stopArchive(why: 'pause' | 'switch' = 'pause') {
+  archiveClosed(why);
   detach();
   if (audio) {
     audio.pause();
@@ -390,10 +422,13 @@ if (typeof window !== 'undefined') {
       state.activePlayer !== ActivePlayer.SOUNDCLOUD &&
       useArchiveAudio.getState().trackId
     ) {
-      stopArchive();
+      stopArchive('switch');
     }
     // A video with sound starts: pause, keep the bar
-    if (state.pauseSignal !== prev.pauseSignal) pauseArchive();
+    if (state.pauseSignal !== prev.pauseSignal) {
+      if (audio && !audio.paused) archivePauseIsSwitch();
+      pauseArchive();
+    }
   });
 
   // Ready before the first click, so playback can start inside it. Not after

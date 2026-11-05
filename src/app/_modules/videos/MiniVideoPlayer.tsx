@@ -84,7 +84,7 @@ function useLiveStream() {
 /** Pause the radio stream and the archive player (this player gets the sound). */
 function takeOverSound() {
   useGlobalStore.getState().requestPause();
-  void pauseLiveStream();
+  void pauseLiveStream('switch');
 }
 
 /** Did radio or archive audio just start? */

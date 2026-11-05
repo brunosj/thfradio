@@ -100,6 +100,7 @@ const CalendarSchedule = () => {
     <div
       // Not "schedule": the browser would jump to it for "/#schedule" links.
       id='week-schedule'
+      data-area='schedule'
       className={`grid bg-dark-blue text-white transition-[grid-template-rows] duration-500 ease-out ${
         open ? 'grid-rows-[1fr] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]' : 'grid-rows-[0fr]'
       }`}

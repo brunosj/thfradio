@@ -103,7 +103,7 @@ export default function ArchiveBrowser({
 
 
   return (
-    <div className='space-y-6 lg:space-y-8'>
+    <div data-area='archive' className='space-y-6 lg:space-y-8'>
       {showOptions.length > 0 && (
         <div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
           <span className='font-mono text-xs uppercase tracking-wider text-white/50'>{t('archiveShow')}</span>

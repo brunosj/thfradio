@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { LiveChannelId } from '@/app/_lib/liveChannels';
 import type { Video } from '@/lib/videos';
 import { EVENTS, track } from '@/app/_lib/analytics';
+import { archiveLoading } from '@/app/_lib/listenTracking';
 
 export enum ActivePlayer {
   MIXCLOUD,
@@ -92,6 +93,8 @@ export const useGlobalStore = create<GlobalStore>((set) => ({
   showKey: undefined,
   showKeySet: (showKey) => {
     if (showKey) track(EVENTS.playMixcloud);
+    // Listening statistics: a Mixcloud episode starts (inside the click, for "where from")
+    if (showKey) archiveLoading(`mc:${showKey}`);
     set({
       activePlayer: ActivePlayer.MIXCLOUD,
       showKey,

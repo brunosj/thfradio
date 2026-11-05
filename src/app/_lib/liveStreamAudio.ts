@@ -5,9 +5,35 @@ import {
 } from '@/app/_lib/liveChannels';
 import { ActivePlayer, useGlobalStore } from '@/hooks/useStore';
 import { EVENTS, track } from '@/app/_lib/analytics';
+import {
+  liveFlowing,
+  liveInterrupted,
+  liveStalled,
+  liveStarted,
+  liveStopped,
+  startOrigin,
+  type LiveStopReason,
+} from '@/app/_lib/listenTracking';
+import { useCalendarStore } from '@/hooks/useCalendarStore';
+import { findCurrentShow } from '@/modules/live-ticker/liveTickerUtils';
+import { entryTitle } from '@/modules/timetable_v2/utils';
 
 let audioElement: HTMLAudioElement | null = null;
 let sourceElement: HTMLSourceElement | null = null;
+/** We are (re)loading the stream ourselves: its pause events are not a listener stopping */
+let reloading = false;
+
+/** What is on air on a channel now (for the listening statistics). */
+function showOnAir(channelId: LiveChannelId): string {
+  try {
+    const { ch1, ch2 } = useCalendarStore.getState();
+    const entry = findCurrentShow(channelId === 2 ? ch2 : ch1);
+    if (!entry) return '';
+    return entry.showTitle || entryTitle(entry).title || entry.title || '';
+  } catch {
+    return '';
+  }
+}
 
 export function registerLiveStreamElements(
   audio: HTMLAudioElement,
@@ -21,19 +47,42 @@ export function bindLiveStreamAudioEvents(audio: HTMLAudioElement) {
   const setLiveStreamPlaying = useGlobalStore.getState().setLiveStreamPlaying;
 
   const onPlay = () => setLiveStreamPlaying(true);
-  const onPause = () => setLiveStreamPlaying(false);
+  const onPause = () => {
+    setLiveStreamPlaying(false);
+    // Paused by the phone (locked, call) or the browser, not by our controls
+    if (!reloading) liveInterrupted();
+  };
+  // A stream that ends or errors while playing is an interruption, not a choice
+  const onError = () => {
+    if (!reloading && audio.error && !audio.paused) liveStopped('error');
+  };
+  const onEnded = () => liveStopped('error');
+  const onWaiting = () => liveStalled();
+  const onPlaying = () => liveFlowing();
 
   audio.addEventListener('play', onPlay);
   audio.addEventListener('pause', onPause);
+  audio.addEventListener('error', onError);
+  audio.addEventListener('ended', onEnded);
+  audio.addEventListener('waiting', onWaiting);
+  audio.addEventListener('stalled', onWaiting);
+  audio.addEventListener('playing', onPlaying);
 
   return () => {
     audio.removeEventListener('play', onPlay);
     audio.removeEventListener('pause', onPause);
+    audio.removeEventListener('error', onError);
+    audio.removeEventListener('ended', onEnded);
+    audio.removeEventListener('waiting', onWaiting);
+    audio.removeEventListener('stalled', onWaiting);
+    audio.removeEventListener('playing', onPlaying);
   };
 }
 
-export async function pauseLiveStream() {
+/** Stop the live stream. `why`: the listener paused, or another player / a video took over. */
+export async function pauseLiveStream(why: LiveStopReason = 'pause') {
   const { setLiveStreamPlaying } = useGlobalStore.getState();
+  liveStopped(why);
 
   try {
     setLiveStreamPlaying(false);
@@ -76,6 +125,8 @@ export async function playLiveStream(channelId: LiveChannelId) {
   setLiveMediaSession(channelId);
 
   const url = getLiveChannelStreamUrl(channelId);
+  // Where the listener pressed play (before awaiting: the click is fresh now)
+  const from = startOrigin('player');
 
   try {
     activePlayerSet(ActivePlayer.AIRTIME);
@@ -85,10 +136,17 @@ export async function playLiveStream(channelId: LiveChannelId) {
       sourceElement.setAttribute('src', url);
     }
 
-    await audioElement.load();
+    reloading = true;
+    try {
+      await audioElement.load();
+    } finally {
+      reloading = false;
+    }
     await audioElement.play();
     track(EVENTS.playLive(channelId === 2 ? 2 : 1));
+    liveStarted(channelId === 2 ? 2 : 1, showOnAir(channelId), from);
   } catch (error) {
+    reloading = false;
     if (error instanceof DOMException && error.name === 'AbortError') {
       return;
     }
@@ -115,6 +173,6 @@ export function pauseLiveStreamIfOtherPlayerActive() {
     activePlayer === ActivePlayer.MIXCLOUD ||
     activePlayer === ActivePlayer.SOUNDCLOUD
   ) {
-    void pauseLiveStream();
+    void pauseLiveStream('switch');
   }
 }
