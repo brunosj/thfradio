@@ -45,25 +45,6 @@ export async function pauseLiveStream() {
   }
 }
 
-/**
- * Stream URL for one listen. radiocult sends Safari / iPhone browsers through
- * a redirect to plain http (blocked on our https site) unless the URL already
- * carries its `_ic2` marker, so we add it ourselves; the time also makes sure
- * a restart gets the live sound, not old buffered audio.
- */
-function freshStreamUrl(url: string): string {
-  try {
-    const u = new URL(url);
-    if (u.hostname.endsWith('radiocult.fm')) {
-      u.searchParams.set('_ic2', String(Date.now()));
-      return u.toString();
-    }
-  } catch {
-    // not a full URL: use as is
-  }
-  return url;
-}
-
 /** Lock screen / media keys while live radio plays. */
 function setLiveMediaSession(channelId: LiveChannelId) {
   if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
@@ -93,7 +74,7 @@ export async function playLiveStream(channelId: LiveChannelId) {
   setActiveStreamChannel(channelId);
   setLiveMediaSession(channelId);
 
-  const url = freshStreamUrl(getLiveChannelStreamUrl(channelId));
+  const url = getLiveChannelStreamUrl(channelId);
 
   try {
     activePlayerSet(ActivePlayer.AIRTIME);

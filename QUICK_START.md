@@ -86,8 +86,6 @@ NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
 
 # Keep these for development, can be removed in production
 LANGUAGE_DEFAULT=en
-LIVE_RADIO_STREAM=https://thf-radio-7ec0e6ee.radiocult.fm/stream
-NEXT_PUBLIC_LIVE_RADIO_STREAM=https://thf-radio-7ec0e6ee.radiocult.fm/stream
 ```
 
 ### Backend (.env.local)
