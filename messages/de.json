@@ -182,6 +182,7 @@
   "playerError": "Konnte nicht geladen werden – nochmal versuchen ↻",
   "playerBlocked": "Auf Play tippen zum Starten",
   "playerMixcloudUnsupported": "Mixcloud läuft in diesem Browser nicht – auf Mixcloud anhören ↗",
+  "playerArchiveUnsupported": "Läuft in diesem Browser nicht – auf Mixcloud anhören ↗",
   "playerOnMixcloud": "Auf Mixcloud anhören",
   "videosTitle": "Videos",
   "videoLabel": "Video",

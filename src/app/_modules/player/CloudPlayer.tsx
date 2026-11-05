@@ -2,10 +2,12 @@
 
 // Archive player: our own bar at the bottom of every page (cover, title,
 // play / pause, progress you can drag, link to the source, close).
-// - SoundCloud tracks play in our own <audio> (lib/archiveAudio), started
+// - SoundCloud tracks and the old Mixcloud shows from our own server
+//   (lib/ownArchive) play in our own <audio> (lib/archiveAudio), started
 //   right inside the click on a tile, so it works on iPhones and in strict
 //   browsers too. This bar shows its state and calls its controls.
-// - Mixcloud shows play in Mixcloud's widget (hidden iframe, official widget
+// - Mixcloud shows (only when ARCHIVE_SOURCE=mixcloud or our server is
+//   unreachable) play in Mixcloud's widget (hidden iframe, official widget
 //   API); if the browser blocks starting it, the widget shows above the bar
 //   to tap play there. Browsers without AAC (VS Code's preview) can't play
 //   Mixcloud at all: the bar says so and links to Mixcloud instead.
@@ -19,6 +21,7 @@ import { showMatcher } from '@/utils/guests';
 import { useData } from '@/context/DataContext';
 import { ActivePlayer, useGlobalStore } from '@/hooks/useStore';
 import {
+  isDirectTrack,
   seekArchive,
   setArchiveMeta,
   skipArchive,
@@ -94,6 +97,9 @@ export default function CloudPlayer() {
     void canDecodeAac().then(setAacOk);
   }, []);
   const mcUnsupported = isMixcloud && !aacOk;
+  /** An own .m4a in a browser without AAC: link to the show on Mixcloud instead */
+  const archiveUnsupported = isSoundcloud && sc.unsupported;
+  const unsupported = mcUnsupported || archiveUnsupported;
   const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const playing = isSoundcloud ? sc.playing : mcPlaying;
@@ -117,7 +123,8 @@ export default function CloudPlayer() {
   }, [cloudShows, currentShowUrl]);
   const [trackInfo, setTrackInfo] = useState<{ id: string; title: string; image: string | null; url: string | null; duration: number | null } | null>(null);
   useEffect(() => {
-    if (!isSoundcloud || !trackId || fromArchive || trackInfo?.id === trackId) return;
+    // Own archive files are always in the list; only SoundCloud has more to ask
+    if (!isSoundcloud || !trackId || isDirectTrack(trackId) || fromArchive || trackInfo?.id === trackId) return;
     let cancelled = false;
     fetch(`/api/soundcloud-stream/${trackId}`)
       .then((r) => (r.ok ? r.json() : null))
@@ -134,6 +141,7 @@ export default function CloudPlayer() {
   const title = fromArchive?.title || (info?.title ? cleanTitle(info.title) : '') || '…';
   const image = fromArchive?.image || info?.image || null;
   const sourceUrl = currentShowUrl || info?.url || '';
+  const sourceName = /mixcloud\.com/i.test(sourceUrl) ? 'Mixcloud' : 'SoundCloud';
 
   // Lock screen / media keys: title, cover, length
   useEffect(() => {
@@ -272,7 +280,7 @@ export default function CloudPlayer() {
 
   /* ---------- controls ---------- */
   const toggle = () => {
-    if (mcUnsupported) {
+    if (unsupported) {
       if (/^https:\/\//.test(sourceUrl)) window.open(sourceUrl, '_blank', 'noopener,noreferrer');
       return;
     }
@@ -313,7 +321,7 @@ export default function CloudPlayer() {
   const shownPos = scrub ?? position;
   const progress = duration ? Math.min(100, (shownPos / duration) * 100) : 0;
   const loading = isSoundcloud && sc.loading && !sc.error;
-  const failed = isSoundcloud && sc.error;
+  const failed = isSoundcloud && sc.error && !sc.unsupported;
   const blocked = isSoundcloud && sc.blocked && !sc.playing;
 
   return (
@@ -346,7 +354,7 @@ export default function CloudPlayer() {
                     {cover}
                   </Link>
                 ) : sourceUrl ? (
-                  <a href={sourceUrl} target='_blank' rel='noopener noreferrer' className='group hidden sm:block shrink-0' aria-label={isMixcloud ? 'Mixcloud' : 'SoundCloud'}>
+                  <a href={sourceUrl} target='_blank' rel='noopener noreferrer' className='group hidden sm:block shrink-0' aria-label={sourceName}>
                     {cover}
                   </a>
                 ) : (
@@ -367,14 +375,14 @@ export default function CloudPlayer() {
                 type='button'
                 onClick={toggle}
                 aria-label={
-                  mcUnsupported ? t('playerOnMixcloud') : failed ? t('playerRetry') : playing ? t('playerPause') : t('playerPlay')
+                  unsupported ? t('playerOnMixcloud') : failed ? t('playerRetry') : playing ? t('playerPause') : t('playerPlay')
                 }
                 data-player-toggle
                 className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-dark-blue transition-colors hover:bg-orange-500 hover:text-white ${
                   blocked ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-dark-blue animate-pulse' : ''
                 }`}
               >
-                {mcUnsupported ? (
+                {unsupported ? (
                   <FiArrowUpRight className='h-4 w-4' aria-hidden />
                 ) : failed ? (
                   <FiRotateCw className='h-4 w-4' aria-hidden />
@@ -413,7 +421,7 @@ export default function CloudPlayer() {
                     {title}
                   </p>
                 )}
-                {mcUnsupported ? (
+                {unsupported ? (
                   <a
                     href={sourceUrl}
                     target='_blank'
@@ -421,7 +429,7 @@ export default function CloudPlayer() {
                     className='mt-1.5 block truncate font-mono text-[11px] text-orange-400 hover:underline'
                     role='status'
                   >
-                    {t('playerMixcloudUnsupported')}
+                    {mcUnsupported ? t('playerMixcloudUnsupported') : t('playerArchiveUnsupported')}
                   </a>
                 ) : failed || blocked ? (
                   <p className='mt-1.5 font-mono text-[11px] text-orange-400' role='status'>
@@ -463,7 +471,7 @@ export default function CloudPlayer() {
                   rel='noopener noreferrer'
                   className='hidden md:inline-flex shrink-0 items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-white/60 hover:text-white'
                 >
-                  {isMixcloud ? 'Mixcloud' : 'SoundCloud'}
+                  {sourceName}
                   <FiArrowUpRight className='h-3.5 w-3.5' aria-hidden />
                 </a>
               )}

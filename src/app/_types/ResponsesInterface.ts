@@ -96,7 +96,12 @@ export interface CloudShowTypes {
   name?: string;
   url: string;
   key?: string;
-  platform?: "mixcloud" | "soundcloud";
+  /**
+   * "archive" = an old Mixcloud show served from our own server
+   * (thfradio.space /api/public/archive): `key` is its audio file URL and it
+   * plays in the site's own player like a SoundCloud track.
+   */
+  platform?: "mixcloud" | "soundcloud" | "archive";
   source?: "mixcloud" | "soundcloud";
   picture: string;
   pictures?: {

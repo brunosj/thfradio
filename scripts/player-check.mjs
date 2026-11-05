@@ -26,8 +26,8 @@ const BROWSERS = [
     context: { viewport: { width: 1400, height: 900 } },
   },
   {
-    // Normal Chrome settings: Mixcloud must start from one click here
-    name: 'chrome (normal settings, Mixcloud only)',
+    // Normal Chrome settings: an old Mixcloud show must start from one click here
+    name: 'chrome (normal settings, old Mixcloud show only)',
     type: chromium,
     launch: {},
     context: { viewport: { width: 1400, height: 900 } },
@@ -193,20 +193,27 @@ async function soundcloudAndLive(page, press, mobile, check) {
   }
 }
 
-/** Archive page → search a Mixcloud-only show → click its tile. Returns its title. */
+/**
+ * Archive page → search an old Mixcloud show (from our own server, or in
+ * Mixcloud's widget with ARCHIVE_SOURCE=mixcloud) → click its tile.
+ * Returns its title and platform.
+ */
 async function clickMixcloudTile(page, press) {
   await page.goto(`${base}/de/latest`, { waitUntil: 'domcontentloaded', timeout: 60000 });
-  // Newest Mixcloud show of a series that isn't on SoundCloud at all, so the search finds only it
-  const title = await page.evaluate(async () => {
-    const shows = await (await fetch('/api/cloudShows')).json();
+  // Newest old show (.m4a) of a series that isn't on SoundCloud at all, so the search finds only it
+  const found = await page.evaluate(async () => {
+    const res = await (await fetch('/api/cloudShows?v=2')).json();
+    const shows = Array.isArray(res) ? res : res.shows || [];
     const series = (n) => (n || '').split('//')[0].trim();
     const onSc = new Set(shows.filter((s) => s.platform === 'soundcloud').map((s) => series(s.name).toLowerCase()));
     const mc = shows
-      .filter((s) => s.platform === 'mixcloud' && !onSc.has(series(s.name).toLowerCase()))
+      .filter((s) => (s.platform === 'archive' || s.platform === 'mixcloud') && !onSc.has(series(s.name).toLowerCase()))
+      .filter((s) => s.platform !== 'archive' || /\.m4a$/.test(s.key || ''))
       .sort((a, z) => String(z.date).localeCompare(String(a.date)));
-    return mc[0] ? series(mc[0].name) : null;
+    return mc[0] ? { title: series(mc[0].name), platform: mc[0].platform } : null;
   });
-  if (!title) return null;
+  if (!found) return null;
+  const { title } = found;
   const search = page.getByPlaceholder('Sendungen oder Genres suchen');
   await search.waitFor({ timeout: 60000 });
   await page.waitForLoadState('load', { timeout: 60000 }).catch(() => {}); // page fully running before clicking
@@ -218,23 +225,41 @@ async function clickMixcloudTile(page, press) {
   await sleep(1500);
   await tile.scrollIntoViewIfNeeded();
   await press(tile);
-  return title;
+  return found;
 }
 
 /**
- * A Mixcloud show (older uploads): plays in Mixcloud's widget. Normal Chrome
+ * An old Mixcloud show. Normally it comes from our own server and plays in our
+ * own audio like SoundCloud (one click everywhere, seeking via Range requests).
+ * With ARCHIVE_SOURCE=mixcloud it plays in Mixcloud's widget: normal Chrome
  * starts it from one click; iPhones and strict browsers need one tap inside
  * the Mixcloud box that opens above the bar.
  */
 async function mixcloud(b, page, press, mobile, check) {
-  if (b.type === firefox) {
+  if (b.type === firefox && process.env.ARCHIVE_SOURCE === 'mixcloud') {
     // Mixcloud needs Google's DRM module (Widevine), which real Firefox has and
     // the test Firefox doesn't
     check('mixcloud', true, 'not testable here: test Firefox has no Widevine; try a real Firefox');
     return;
   }
-  const title = await clickMixcloudTile(page, press);
-  if (!title) return check('mixcloud show in the archive', false, 'none found');
+  const found = await clickMixcloudTile(page, press);
+  if (!found) return check('old mixcloud show in the archive', false, 'none found');
+  const { title } = found;
+  if (found.platform === 'archive') {
+    let s = await waitFor(page, (x) => x.archive?.playing && x.archive.t > 2);
+    const own = /\/archive\/mixcloud\//.test(s.archive?.src || '');
+    check('old show plays from our server, one click', s.archive?.playing && own, `"${title}" ${s.archive ? `t=${s.archive.t.toFixed(1)}s` : 'no audio'} ${own ? '' : s.archive?.src}`);
+    check('old show: no Mixcloud widget', (await page.locator('#mixcloud-player').count()) === 0);
+    if (!mobile) {
+      const before = (await snapshot(page)).archive?.t ?? 0;
+      await page.getByRole('button', { name: '30 Sekunden vor' }).click();
+      s = await waitFor(page, (x) => (x.archive?.t ?? 0) > before + 20 && x.archive?.playing, 10000);
+      check('old show: +30 s (server seeks)', (s.archive?.t ?? 0) > before + 20, `${before.toFixed(0)} → ${(s.archive?.t ?? 0).toFixed(0)}`);
+    }
+    check('old show: link says Mixcloud', /MIXCLOUD/i.test(s.bar || '') || mobile, (s.bar || '').slice(-40));
+    await press(page.getByRole('button', { name: 'Player schließen' }));
+    return;
+  }
   const counting = (x) => x.barTime && x.barTime !== '0:00';
   let s = await waitFor(page, (x) => counting(x) || /TIPPEN/i.test(x.bar || ''), 20000);
   const oneClick = counting(s);
@@ -331,13 +356,14 @@ async function runNoAac(mode) {
       check('first track already in MP3 (AAC check at page load)', aacRequests === 0, `aac requests: ${aacRequests}`);
       const press = (l) => l.click();
       await press(page.getByRole('button', { name: 'Player schließen' }));
-      const title = await clickMixcloudTile(page, press);
-      if (!title) check('mixcloud show in the archive', false, 'none found');
+      const found = await clickMixcloudTile(page, press);
+      if (!found) check('old mixcloud show in the archive', false, 'none found');
       else {
-        const note = page.getByText('Mixcloud läuft in diesem Browser nicht');
+        const own = found.platform === 'archive';
+        const note = page.getByText(own ? 'Läuft in diesem Browser nicht' : 'Mixcloud läuft in diesem Browser nicht');
         const shown = await note.waitFor({ timeout: 8000 }).then(() => true, () => false);
-        check('mixcloud: says it can\'t play here, links to Mixcloud', shown, `"${title}"`);
-        check('mixcloud: no endless loading widget', (await page.locator('#mixcloud-player').count()) === 0);
+        check('old show (.m4a): says it can\'t play here, links to Mixcloud', shown, `"${found.title}"`);
+        check('old show: no endless loading', (await page.locator('#mixcloud-player').count()) === 0);
       }
     }
     if (mode === 'decode') {

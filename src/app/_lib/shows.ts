@@ -1,5 +1,6 @@
 import type { CloudShowTypes, ShowTypes } from '@/types/ResponsesInterface';
 import { fetchMixcloudShows } from './mixcloud';
+import { fetchOwnArchiveShows, ownArchiveEnabled } from './ownArchive';
 import { fetchSoundcloudShows } from './soundcloud';
 import { showMatcher } from '@/utils/guests';
 import { tidyArchiveGenres } from '@/utils/genres';
@@ -25,17 +26,38 @@ function recordingDate(name: string | undefined): string | null {
 const episodeKey = (name: string | undefined) => `${recordingKey(name)}|${recordingDate(name) ?? ''}`;
 
 /**
- * Mixcloud + SoundCloud recordings. `complete` is false when SoundCloud (the
- * main archive) or part of Mixcloud couldn't be read, so callers don't cache
- * a short list.
+ * The old Mixcloud shows: from our own server (lib/ownArchive) unless
+ * ARCHIVE_SOURCE=mixcloud. If thfradio.space can't be reached, Mixcloud's API
+ * stands in (widget playback) and the list counts as incomplete, so the last
+ * good list stays and it's tried again soon.
+ */
+async function fetchOldShows(): Promise<{ shows: CloudShowTypes[]; complete: boolean }> {
+  if (ownArchiveEnabled()) {
+    try {
+      const own = await fetchOwnArchiveShows();
+      if (own.shows.length) return own;
+      console.error('Own archive: empty list, using Mixcloud for now');
+    } catch (error) {
+      console.error('Own archive failed, using Mixcloud for now:', error);
+    }
+    const mc = await fetchMixcloudShows();
+    return { shows: mc.shows, complete: false };
+  }
+  return fetchMixcloudShows();
+}
+
+/**
+ * Old Mixcloud shows + SoundCloud recordings. `complete` is false when
+ * SoundCloud (the main archive) or part of the old shows couldn't be read, so
+ * callers don't cache a short list.
  */
 export async function fetchCloudShowsWithStatus(): Promise<{
   shows: CloudShowTypes[];
   complete: boolean;
 }> {
   const [mixcloud, soundcloud] = await Promise.all([
-    fetchMixcloudShows().catch((error) => {
-      console.error('Error fetching Mixcloud shows:', error);
+    fetchOldShows().catch((error) => {
+      console.error('Error fetching the old Mixcloud shows:', error);
       return { shows: [] as CloudShowTypes[], complete: false };
     }),
     fetchSoundcloudShows()
@@ -47,8 +69,9 @@ export async function fetchCloudShowsWithStatus(): Promise<{
   ]);
 
   // The same episode uploaded to both: keep the SoundCloud one. Other
-  // episodes of that show that are only on Mixcloud stay. Without a date in
-  // the Mixcloud title we can't tell, so it goes if the show is on SoundCloud.
+  // episodes of that show that are only in the old Mixcloud archive stay.
+  // Without a date in the title we can't tell, so it goes if the show is on
+  // SoundCloud.
   const scEpisodes = new Set(soundcloud.shows.map((s) => episodeKey(s.name)));
   const scShows = new Set(soundcloud.shows.map((s) => recordingKey(s.name)));
   const mixcloudOnly = mixcloud.shows.filter((s) =>

@@ -85,6 +85,7 @@
   "playerError": "Couldn't load – try again ↻",
   "playerBlocked": "Tap play to start",
   "playerMixcloudUnsupported": "Mixcloud doesn't play in this browser – listen on Mixcloud ↗",
+  "playerArchiveUnsupported": "Doesn't play in this browser – listen on Mixcloud ↗",
   "playerOnMixcloud": "Listen on Mixcloud",
   "videosTitle": "Videos",
   "videoLabel": "Video",

@@ -1,5 +1,7 @@
 // Archive player engine: one shared <audio> element plays SoundCloud tracks
-// (HLS from /api/soundcloud-stream/[id]/hls). Playback starts right inside
+// (HLS from /api/soundcloud-stream/[id]/hls) and the old Mixcloud shows from
+// our own server (a plain .m4a / .mp3 URL as the track id, see lib/ownArchive).
+// Playback starts right inside
 // the click / tap (store.trackIdSet → playArchiveTrack), which is what iPhones
 // and strict browsers require; the player bar (modules/player/CloudPlayer)
 // only shows this state and calls the controls below.
@@ -27,6 +29,8 @@ export interface ArchiveAudioState {
   blocked: boolean;
   /** Couldn't be loaded, even after a fresh try */
   error: boolean;
+  /** This browser can't play the file at all (an .m4a without an AAC decoder) */
+  unsupported: boolean;
   /** seconds */
   position: number;
   duration: number;
@@ -38,6 +42,7 @@ const initial: ArchiveAudioState = {
   loading: false,
   blocked: false,
   error: false,
+  unsupported: false,
   position: 0,
   duration: 0,
 };
@@ -70,6 +75,11 @@ let started = false;
 /** No sound this long after a start: switch format or give up, no endless 0:00 */
 const STALL_MS = 12000;
 let stallTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Own archive files: the track id is the file's URL (no HLS, one format). */
+export const isDirectTrack = (id: string) => /^https?:\/\//.test(id);
+/** No AAC decoder here (known after the page's check) */
+let aacMissing = false;
 
 const playlistUrl = (id: string, fresh: boolean) => {
   const query = [format === 'mp3' && 'format=mp3', fresh && `fresh=${Date.now()}`].filter(Boolean).join('&');
@@ -211,9 +221,19 @@ function load(id: string, startAt: number, fresh: boolean) {
   const a = element();
   detach();
   const token = loadToken;
-  const url = playlistUrl(id, fresh);
   loadStartAt = startAt;
   started = false;
+
+  if (isDirectTrack(id)) {
+    // An .m4a can't play without AAC: say so instead of loading forever
+    if (aacMissing && !/\.mp3(\?|$)/i.test(id)) return markUnsupported();
+    a.src = id;
+    if (startAt > 0) a.addEventListener('loadedmetadata', () => (a.currentTime = startAt), { once: true });
+    play();
+    return;
+  }
+
+  const url = playlistUrl(id, fresh);
 
   const playNatively = () => {
     a.src = url;
@@ -257,6 +277,9 @@ function load(id: string, startAt: number, fresh: boolean) {
 function onFormatError(decodeFailed: boolean) {
   const { trackId } = useArchiveAudio.getState();
   if (!trackId) return;
+  // Own files come in one format only. A missing file (taken down) also reads
+  // as "not supported" in Chrome: only blame the browser when it lacks AAC.
+  if (isDirectTrack(trackId)) return decodeFailed && aacMissing ? markUnsupported() : onLoadError();
   if (format === 'aac') {
     format = 'mp3';
     rememberMp3 = decodeFailed;
@@ -264,6 +287,11 @@ function onFormatError(decodeFailed: boolean) {
     return;
   }
   onLoadError();
+}
+
+function markUnsupported() {
+  detach();
+  set({ unsupported: true, error: true, loading: false, playing: false });
 }
 
 /** Links expired (long pause) or the network dropped: fetch a fresh playlist once, go on where we were. */
@@ -301,8 +329,8 @@ export function playArchiveTrack(id: string) {
 }
 
 export function toggleArchive() {
-  const { trackId, error } = useArchiveAudio.getState();
-  if (!trackId || !audio) return;
+  const { trackId, error, unsupported } = useArchiveAudio.getState();
+  if (!trackId || !audio || unsupported) return;
   if (error) {
     retriedAt = null;
     set({ error: false });
@@ -410,7 +438,10 @@ if (typeof window !== 'undefined') {
   format = initialFormat();
   // No AAC decoder (VS Code's preview): MP3 from the first track on
   void canDecodeAac().then((ok) => {
-    if (!ok) format = 'mp3';
+    if (!ok) {
+      format = 'mp3';
+      aacMissing = true;
+    }
   });
   // trackIdSet in the store starts the track synchronously (inside the click)
   registerArchiveStarter(playArchiveTrack);
