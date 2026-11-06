@@ -140,8 +140,16 @@ export default function CloudPlayer() {
   const info = trackInfo && trackInfo.id === trackId ? trackInfo : null;
   const title = fromArchive?.title || (info?.title ? cleanTitle(info.title) : '') || '…';
   const image = fromArchive?.image || info?.image || null;
-  const sourceUrl = currentShowUrl || info?.url || '';
+  /** Where the recording is published (SoundCloud or Mixcloud) */
+  const publishedUrl = currentShowUrl || info?.url || '';
+  // Old shows from our own server play here: no link out to Mixcloud.
+  // Only a browser that can't play them gets the Mixcloud page (see `unsupported`).
+  const ownFile = isSoundcloud && !!trackId && isDirectTrack(trackId);
+  const sourceUrl = ownFile ? '' : publishedUrl;
   const sourceName = /mixcloud\.com/i.test(sourceUrl) ? 'Mixcloud' : 'SoundCloud';
+  // Mixcloud's widget script only while the list still has Mixcloud shows
+  // (ARCHIVE_SOURCE=mixcloud, or thfradio.space couldn't be reached)
+  const mixcloudInList = useMemo(() => !!cloudShows?.some((s) => s.platform === 'mixcloud'), [cloudShows]);
 
   // Lock screen / media keys: title, cover, length
   useEffect(() => {
@@ -281,7 +289,7 @@ export default function CloudPlayer() {
   /* ---------- controls ---------- */
   const toggle = () => {
     if (unsupported) {
-      if (/^https:\/\//.test(sourceUrl)) window.open(sourceUrl, '_blank', 'noopener,noreferrer');
+      if (/^https:\/\//.test(publishedUrl)) window.open(publishedUrl, '_blank', 'noopener,noreferrer');
       return;
     }
     if (isSoundcloud) toggleArchive();
@@ -326,7 +334,9 @@ export default function CloudPlayer() {
 
   return (
     <>
-      <Script src='https://widget.mixcloud.com/media/js/widgetApi.js' strategy='lazyOnload' onLoad={() => setMcReady(true)} onReady={() => setMcReady(true)} />
+      {(mixcloudInList || isMixcloud) && (
+        <Script src='https://widget.mixcloud.com/media/js/widgetApi.js' strategy='lazyOnload' onLoad={() => setMcReady(true)} onReady={() => setMcReady(true)} />
+      )}
 
       {visible && (
         <>
@@ -423,7 +433,7 @@ export default function CloudPlayer() {
                 )}
                 {unsupported ? (
                   <a
-                    href={sourceUrl}
+                    href={publishedUrl}
                     target='_blank'
                     rel='noopener noreferrer'
                     className='mt-1.5 block truncate font-mono text-[11px] text-orange-400 hover:underline'

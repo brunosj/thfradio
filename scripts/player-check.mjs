@@ -18,6 +18,9 @@ const args = process.argv.slice(2);
 const base = (args.find((a) => !a.startsWith('--')) || 'http://localhost:3005').replace(/\/$/, '');
 const only = args.find((a) => a.startsWith('--browsers='))?.split('=')[1]?.split(',');
 
+/** Requests to mixcloud.com in the current browser (none while our own archive is on) */
+let mixcloudRequests = [];
+
 const BROWSERS = [
   {
     name: 'chrome',
@@ -91,9 +94,11 @@ async function run(b) {
   const page = await context.newPage();
   const pageErrors = [];
   const insecure = [];
+  mixcloudRequests = [];
   page.on('pageerror', (e) => pageErrors.push(e.message.slice(0, 160)));
   page.on('request', (r) => {
     if (r.url().startsWith('http://') && !r.url().startsWith(base)) insecure.push(r.url().slice(0, 90));
+    if (/mixcloud\.com/.test(r.url())) mixcloudRequests.push(r.url().slice(0, 90));
   });
   const mobile = !!b.context.isMobile;
   const press = (locator) => (mobile ? locator.tap() : locator.click());
@@ -256,7 +261,8 @@ async function mixcloud(b, page, press, mobile, check) {
       s = await waitFor(page, (x) => (x.archive?.t ?? 0) > before + 20 && x.archive?.playing, 10000);
       check('old show: +30 s (server seeks)', (s.archive?.t ?? 0) > before + 20, `${before.toFixed(0)} → ${(s.archive?.t ?? 0).toFixed(0)}`);
     }
-    check('old show: link says Mixcloud', /MIXCLOUD/i.test(s.bar || '') || mobile, (s.bar || '').slice(-40));
+    check('old show: no Mixcloud link', !/MIXCLOUD/i.test(s.bar || ''), (s.bar || '').slice(-40));
+    check('no Mixcloud script loaded', !mixcloudRequests.length, mixcloudRequests[0] || '');
     await press(page.getByRole('button', { name: 'Player schließen' }));
     return;
   }
