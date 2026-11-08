@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { siteMetadata } from "@/utils/siteMetadata";
+import ErrorReporter from "@/common/ErrorReporter";
 import { LocaleLayoutChrome } from "./LocaleLayoutChrome";
 
 type Params = Promise<{ locale: string }>;
@@ -39,6 +40,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
+      <ErrorReporter />
       <LocaleLayoutChrome>{children}</LocaleLayoutChrome>
     </NextIntlClientProvider>
   );

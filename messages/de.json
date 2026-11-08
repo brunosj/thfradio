@@ -120,6 +120,12 @@
     "description": "Die Seite, die du suchst, existiert nicht oder wurde verschoben.",
     "backHome": "Zurück zur Hauptseite"
   },
+  "errorPage": {
+    "title": "Etwas ist schiefgelaufen",
+    "description": "Diese Seite konnte nicht geladen werden. Bitte versuch es noch einmal.",
+    "retry": "Nochmal versuchen",
+    "backHome": "Zurück zur Hauptseite"
+  },
   "Latest": {
     "pageTitle": "Neueste Shows | THF Radio",
     "pageDescription": "Entdecke die neuesten Shows von THF Radio",

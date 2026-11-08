@@ -1,6 +1,7 @@
 'use client';
 
 import { Component, type ReactNode } from 'react';
+import { reportClientError } from '@/lib/reportError';
 
 /**
  * A player error hides the player bar at most, never the whole page.
@@ -26,6 +27,8 @@ export default class PlayerErrorBoundary extends Component<
 
   componentDidCatch(error: unknown) {
     console.error('Player error:', error);
+    // Caught here, so it never reaches the page's error reporting: report it ourselves
+    reportClientError(error, { route: 'PlayerErrorBoundary' });
   }
 
   render() {
