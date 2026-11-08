@@ -70,8 +70,8 @@ All thfradio.space public APIs take `Authorization: Bearer <key>`; keys are crea
 
 ## Current state / in flight (as of 2026-11-08)
 - Redesign is live (since 2026-11-01). Live: shows from thfradio.space, fold-out programme, own live streams, own Mixcloud archive, Umami + listening stats.
-- A finished commit "Archive: no Mixcloud link for old shows from our own server, Mixcloud script only when needed" (also adds `ARCHIVE_SOURCE` to `env.sample`) exists only on the owner's Mac (branch `archive-own-files`). If it isn't on GitHub, ask before redoing it.
-- Channel 1 programme still comes from Teamup: the server's key only allows channel 2. Fix = a key for channels 1+2 on thfradio.space + `CALENDAR_1_KEY` on the server (owner, local-only).
+- Branch `archive-own-files` (71eca05, on GitHub, not merged): "Archive: no Mixcloud link for old shows from our own server, Mixcloud script only when needed" (also adds `ARCHIVE_SOURCE` to `env.sample`). Next: build + player test, then PR.
+- Channel 1 programme still comes from Teamup, and that is correct for now: the intranet's `/api/public/timetable/1` only serves ProgramSlot rows (on ch1 = reruns + manual booker slots), so a ch1 key today would show only reruns. First the intranet must serve Teamup's ch1 events from that endpoint; then a ch1+2 key + `CALENDAR_1_KEY` on the server (owner, local-only).
 - Known bugs: the Teamup fallback (`api/fetchCalendar`) ignores RRULE (series show only their first date); `metadataBase` is unset → share image resolves to localhost; unprefixed links always go to `/en`; every page downloads the full archive JSON (~2.8 MB); React hydration error #418 on iPhone WebKit (page still loads).
 - Proposals, not built: retention quick wins (live-now block, autoplay next, share fixes, sitemap…), newsletter sign-up popup (double opt-in, backend in THF_Space), supporting-member (Stripe) popup calling THF_Space's existing checkout endpoint, public listener login/favourites.
 - Retiring the old backend (news, pages, chat, uploads) needs a decision with the repo owner – see the table at the end of `INTRANET_SHOWS.md`.
@@ -87,7 +87,7 @@ All thfradio.space public APIs take `Authorization: Bearer <key>`; keys are crea
 - Works: `pnpm install`, `pnpm build` (with `NEXT_PUBLIC_BACKEND_URL` set; no other env needed – build-time fetches only warn), `tsc`, file-level lint, `pnpm dev`. Only 3 API routes prerender at build; all pages render on demand.
 - Real data in `pnpm dev` needs keys (`CALENDAR_2_KEY`/`INTRANET_API_KEY`, SoundCloud) in the cloud environment settings – never in a committed file. Without them: ch1 falls back to Teamup, shows to the old backend, archive SoundCloud part is empty.
 - `pnpm test:player` may work after `pnpm exec playwright install --with-deps chromium firefox webkit`; prefer localhost (runs against thfradio.de count as real plays in the stats).
-- No SSH keys, no server `.env`, no production logs. Pushing needs the Claude GitHub app to have access to this repo (granted by the repo owner); if a push is refused, say so instead of working around it.
+- No SSH keys, no server `.env`, no production logs. Pushing needs GitHub access to this repo (the Claude GitHub app installed by the repo owner, or the collaborator's own token via `/web-setup`); if a push is refused, say so instead of working around it. `gh pr`/`gh issue` fail in cloud sessions (GraphQL blocked): use the built-in GitHub tools or `gh api`, and the "Create PR" button.
 
 ## Working rules
 - One branch per task from `origin/main`; open a PR; the owner reviews/merges from the GitHub app. **Never commit or push to `main`** – it deploys the live site.
