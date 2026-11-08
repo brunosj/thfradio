@@ -73,13 +73,13 @@ Read `CLAUDE.md` first (stack, data sources, env, deploy, rules). This file cove
    - web app manifest for the phone home screen;
    - "N Leute im Chat" on the closed chat button;
    - the News footer link shows content from Nov 2025 → hide it or keep news current [owner].
-7. [cloud] **Error reporting** to the thfradio.space ErrorLog → daily digest → GitHub issues in the private intranet repo. Build after the intranet endpoint exists (THF_Space `docs/handover/errors-and-monitoring.md`); details below.
+7. **Error reporting – BUILT 2026-11-08** on branch `feat/error-reporting` (c85dab0): `/api/report-error` forwarder, `instrumentation.ts` `onRequestError`, `error.tsx` + `global-error.tsx`, client reporter (live site only). The intranet endpoint `/api/public/website-errors` is live on thfradio.space. [owner] Open + merge the PR; it needs no new server env (`INTRANET_API_KEY` is already set). Not yet run: `pnpm test:player` (one line added in `PlayerErrorBoundary`), a triggered `global-error`. After the merge: errors appear in the daily digest section "thfradio.de" with an "Open in Claude" link.
 8. [owner] Decisions/inputs, see "Proposals" below. Then [cloud] builds them.
 9. [owner+intranet] Ch1 switch: first make THF_Space `/api/public/timetable/1` return Teamup's ch1 events (reruns already exist there as Teamup events, so dedupe). Then [owner] create a ch1+2 key (thfradio.space admin → timetable API keys) and [local] set `CALENDAR_1_KEY` in the server `.env`. Then compare one week against Teamup.
 10. [cloud, agree with repo owner] Stale docs: rewrite `README.md` (says Vercel/Strapi/Airtime), drop or move `QUICK_START.md` and `MIGRATION_COMPLETE.md`/`MIGRATION_SUMMARY.md` (March 2026 migration) to `docs/history/`, check `SOUNDCLOUD_SETUP.md`, untrack `next.log` (a March 2026 dev log) and add it to `.gitignore`.
 11. [owner] Branch `video/mobile-player-buffering` (11d1276) is superseded: its `VideoStreamPopup.tsx` no longer exists, the live video now lives in `_modules/videos/`. Delete it once the owner OKs.
 
-## Error reporting – website side (design, not built)
+## Error reporting – website side (built on `feat/error-reporting`, original design notes)
 - Client hooks:
   - `src/app/[locale]/error.tsx` (segment boundary, EN/DE "reload" UI, sends `error.digest`);
   - `src/app/global-error.tsx` (own `<html><body>`);
