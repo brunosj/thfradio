@@ -197,6 +197,12 @@
     "description": "The page you are looking for doesn't exist or has been moved.",
     "backHome": "Back to Home"
   },
+  "errorPage": {
+    "title": "Something went wrong",
+    "description": "This page could not be loaded. Please try again.",
+    "retry": "Try again",
+    "backHome": "Back to Home"
+  },
   "pageTitle": "Latest Shows | THF Radio",
   "pageDescription": "Explore the latest shows from THF Radio",
   "title": "Latest Shows",

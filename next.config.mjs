@@ -1,9 +1,25 @@
+import { execSync } from 'node:child_process';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin();
 
+// Commit the site is built from, sent along with error reports ("does it still happen after
+// the fix went live?"). Empty when git isn't available.
+function gitRelease() {
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+  } catch {
+    return '';
+  }
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_RELEASE: process.env.NEXT_PUBLIC_RELEASE || gitRelease(),
+  },
   // isomorphic-dompurify loads jsdom on the server; bundling jsdom can break
   // createWindow in production. Keep these as runtime externals.
   serverExternalPackages: ['isomorphic-dompurify', 'jsdom', 'dompurify'],
