@@ -15,6 +15,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const article = await fetchNewsArticle(slug, locale);
+  if (!article) return {};
   const image = article.attributes.picture?.data?.attributes.url || '';
 
   return createMetadata({

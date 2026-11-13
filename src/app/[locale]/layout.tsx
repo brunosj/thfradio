@@ -13,6 +13,9 @@ type Props = {
 };
 
 export const metadata: Metadata = {
+  // Makes the share image (and other relative URLs) absolute – without it they pointed at
+  // localhost, so link previews and Google had no picture.
+  metadataBase: new URL(siteMetadata.siteUrl),
   title: siteMetadata.title,
   description: siteMetadata.description,
   icons: {

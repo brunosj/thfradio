@@ -45,7 +45,11 @@ export async function fetchNewsArticle(slug: string, locale: string) {
         next: { revalidate: 600 },
       },
     );
-    return await response.json();
+    // A missing article comes back as an error body ("Not Found"); treating that as an
+    // article made the page answer 200 OK with nothing in it (Google: "soft 404").
+    if (!response.ok) return null;
+    const article = await response.json();
+    return article?.attributes ? article : null;
   } catch (error) {
     console.error(`Error fetching news article ${slug}:`, error);
     return null;
