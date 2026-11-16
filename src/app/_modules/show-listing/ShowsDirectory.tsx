@@ -23,6 +23,7 @@ import { getMixcloudKey } from '@/utils/getMixcloudKey';
 import { compactTitle, guestName, isGuestTitle, isHiddenShow, showMatcher } from '@/utils/guests';
 import { formatShowDate, getShowGenres, getShowName, processShows } from '@/utils/showUtils';
 import { keepWithName } from '@/utils/titles';
+import { entryTitle } from '@/modules/timetable_v2/utils';
 
 type Tab = 'all' | 'residents' | 'guests';
 type ResidentFilter = 'all' | 'current' | 'archive';
@@ -199,6 +200,8 @@ function upcomingByShow(entries: CalendarEntry[]) {
     const iso = e.endTime ?? e.end;
     const startIso = e.startTime ?? e.start;
     if (!iso || !startIso || parseISO(iso).getTime() < now) continue;
+    // A rerun ("Show (R)") carries the show's slug but isn't the show's next date
+    if (entryTitle(e).rerun) continue;
     const start = parseISO(startIso);
     if (e.showSlug && (!bySlug.has(e.showSlug) || start < bySlug.get(e.showSlug)!)) bySlug.set(e.showSlug, start);
     byTitle.push({ key: compactTitle(e.showTitle || e.summary || e.title || ''), start });
