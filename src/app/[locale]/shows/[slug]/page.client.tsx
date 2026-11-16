@@ -25,6 +25,7 @@ import { compactTitle, showMatcher } from '@/utils/guests';
 import { formatShowDate, getShowGenres, getShowName, processShows } from '@/utils/showUtils';
 import type { ShowTypes } from '@/types/ResponsesInterface';
 import { keepWithName } from '@/utils/titles';
+import { entryTitle } from '@/modules/timetable_v2/utils';
 
 /** A recording this recent (or a slot on the schedule) makes the show current. */
 const CURRENT_DAYS = 120;
@@ -147,6 +148,8 @@ export default function ShowContent({
       const s = e.startTime ?? e.start;
       const end = e.endTime ?? e.end;
       if (!s || !end || parseISO(end).getTime() < now) continue;
+      // A rerun ("Show (R)") carries the show's slug but isn't the show's next date
+      if (entryTitle(e).rerun) continue;
       const hit = e.showSlug === content.slug || (key.length >= 3 && compactTitle(e.showTitle || e.summary || e.title || '').startsWith(key));
       if (!hit) continue;
       const start = parseISO(s);
