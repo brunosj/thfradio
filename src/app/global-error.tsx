@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { reportClientError } from '@/lib/reportError';
+import { reloadOnChunkError } from '@/lib/chunkReload';
 
 // Last resort when even the page frame (header, player) crashed. It replaces the root layout,
 // so it brings its own <html>/<body> and has neither translations nor the site's CSS:
@@ -9,7 +10,8 @@ import { reportClientError } from '@/lib/reportError';
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {
     // With a digest the error happened on the server and src/instrumentation.ts already reported it
-    if (!error.digest) reportClientError(error, { route: 'global-error.tsx' });
+    // A script piece that didn't load (old page after a deploy): one fresh load fixes it
+    if (!error.digest && !reloadOnChunkError(error)) reportClientError(error, { route: 'global-error.tsx' });
   }, [error]);
 
   return (

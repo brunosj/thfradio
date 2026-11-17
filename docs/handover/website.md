@@ -3,6 +3,7 @@ Goal: visitors press play at once and keep listening (live + archive), shared li
 Read `CLAUDE.md` first (stack, data sources, env, deploy, rules). This file covers only what is open. "Owner" = THF owner; "repo owner" = the original developer.
 
 ## State
+- **ChunkLoadError → one reload (2026-11-17):** a page open across a deploy (or on a slow line) can fail to load a script piece. `src/app/_lib/chunkReload.ts` reloads the page once instead (ErrorReporter, `[locale]/error.tsx`, `global-error.tsx`) – not while audio/video plays, at most once a minute per tab (sessionStorage); otherwise it is reported as before.
 - Live on `main` (eaffbbb, 2026-11-05): redesign, shows + ch2 programme from thfradio.space, own live streams, own Mixcloud archive, Umami + listening stats, player rebuild.
 - Player fix plan (2026-11-02) is **done** (4c98c9b + 7c096f1): own `<audio>` + HLS proxy `src/app/api/soundcloud-stream/[id]/hls/route.ts`, `src/app/_lib/archiveAudio.ts`, `src/app/_lib/hls.ts`, MediaSession (archive + live), `src/app/_modules/player/PlayerErrorBoundary.tsx`, `pnpm test:player`. The Radio Cult `?_ic2` part is obsolete (Radio Cult is gone). Only open bit: a check on a real iPhone (tested with Playwright WebKit only).
 - Branch `archive-own-files` (71eca05, on GitHub, 1 commit on top of eaffbbb, **no PR yet**). The owner asked for it on 2026-11-06 ("remove the Mixcloud link"). What it does:

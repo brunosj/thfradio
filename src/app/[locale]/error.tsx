@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { reportClientError } from '@/lib/reportError';
+import { reloadOnChunkError } from '@/lib/chunkReload';
 
 // Same look as the white-orange UIButton (which only works as a link)
 const BUTTON =
@@ -18,7 +19,8 @@ export default function LocaleError({ error, reset }: { error: Error & { digest?
   useEffect(() => {
     // With a digest the error happened on the server and src/instrumentation.ts already reported it
     // (in the browser it only reads "An error occurred in the Server Components render").
-    if (!error.digest) reportClientError(error, { route: '[locale]/error.tsx' });
+    // A script piece that didn't load (old page after a deploy): one fresh load fixes it
+    if (!error.digest && !reloadOnChunkError(error)) reportClientError(error, { route: '[locale]/error.tsx' });
   }, [error]);
 
   // Load the page's server data again too, not just re-render it
