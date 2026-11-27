@@ -16,7 +16,7 @@ const intlMiddleware = createMiddleware({
 const FILE_PATH = /\.[a-z0-9]+$/i;
 const LOCALE_PREFIX = /^\/(?:en|de)(?:\/|$)/;
 
-export default function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   if (FILE_PATH.test(pathname) && !LOCALE_PREFIX.test(pathname)) {

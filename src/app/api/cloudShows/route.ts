@@ -19,15 +19,15 @@ function pack(shows: CloudShowTypes[]) {
   return packed;
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const { json, gzip } = pack(await getCloudShows());
-    const zipped = /\bgzip\b/.test(request.headers.get('accept-encoding') ?? '');
-    return new NextResponse(zipped ? gzip : json, {
+    const { json } = pack(await getCloudShows());
+    // Next 16 drops Content-Encoding on pre-gzip bodies; send JSON and let
+    // the platform compress the response when the client accepts gzip.
+    return new NextResponse(json, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(zipped ? { 'Content-Encoding': 'gzip' } : {}),
         Vary: 'Accept-Encoding',
         // Not cached locally, so changes show right away
         'Cache-Control':

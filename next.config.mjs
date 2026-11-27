@@ -23,16 +23,13 @@ const nextConfig = {
   // isomorphic-dompurify loads jsdom on the server; bundling jsdom can break
   // createWindow in production. Keep these as runtime externals.
   serverExternalPackages: ['isomorphic-dompurify', 'jsdom', 'dompurify'],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   reactStrictMode: true,
   // Local dev only: lets phones in the same Wi-Fi open the dev server
   // (http://<this computer's IP>:3005) to test, e.g. playback on iOS.
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '*.local'],
   // These settings help prevent duplicate locale prefixes in URLs
   skipTrailingSlashRedirect: true,
-  skipMiddlewareUrlNormalize: true,
+  skipProxyUrlNormalize: true,
   async rewrites() {
     return {
       beforeFiles: [

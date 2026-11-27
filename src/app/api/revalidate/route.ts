@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         // Sent by thfradio.space when a host saves show info. Drop the cached
         // show data, then rebuild the list and show pages in every language
         // (real routes live under /[locale]/...).
-        revalidateTag(SHOWS_CACHE_TAG);
+        revalidateTag(SHOWS_CACHE_TAG, { expire: 0 });
         revalidatePath('/[locale]/shows', 'page');
         revalidatePath('/[locale]/shows/[slug]', 'page');
         break;
