@@ -1,10 +1,4 @@
-import type { NewsType } from "@/types/ResponsesInterface";
-
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-type NewsItemsType = {
-  data: NewsType[];
-};
 
 export async function fetchNews(locale: string) {
   try {

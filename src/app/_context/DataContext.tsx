@@ -61,12 +61,13 @@ export function DataProvider({ children, initialTagsList }: DataContextProps) {
     }
   };
 
-  // Load on mount only
+  // Load on mount only (hasLoadedOnce gate avoids Strict Mode double-fetch)
   useEffect(() => {
     if (!hasLoadedOnce) {
       setHasLoadedOnce(true);
       loadCloudShows();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
   }, []);
 
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { TimetableV2 } from '.';
 import MobileTimetable from './MobileTimetable';
@@ -32,15 +32,12 @@ const CalendarSchedule = () => {
   const activeTimetableChannel = useGlobalStore((state) => state.activeTimetableChannel);
   const setActiveTimetableChannel = useGlobalStore((state) => state.setActiveTimetableChannel);
   // The grid is mounted on first open (it measures itself when it mounts).
-  const [mounted, setMounted] = useState(false);
+  const hasOpened = useRef(false);
+  if (open) hasOpened.current = true;
   const pathname = usePathname();
 
   const channel2Available = isChannel2Available(ch2);
   const activeEntries = activeTimetableChannel === 2 ? ch2 : ch1;
-
-  useEffect(() => {
-    if (open) setMounted(true);
-  }, [open]);
 
   useEffect(() => {
     if (activeTimetableChannel === 2 && !channel2Available) {
@@ -108,7 +105,7 @@ const CalendarSchedule = () => {
       aria-hidden={!open}
     >
       <div className='overflow-hidden'>
-        {mounted && (
+        {hasOpened.current && (
           <div data-schedule-scroller className='max-h-[calc(100dvh-9rem)] overflow-y-auto overscroll-contain pt-4 pb-6 lg:pb-8'>
             {!isLoading && !error && channel2Available && (
               <ChannelToggle

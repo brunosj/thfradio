@@ -227,7 +227,7 @@ export async function fetchPageBySlug(
   }
 }
 
-function createDefaultHomepage(_locale: string): HomepageTypes {
+function createDefaultHomepage(): HomepageTypes {
   return {
     id: "default",
     meta: {
@@ -293,7 +293,7 @@ function normalizeLegacyHomepagePayload(
     return null;
   }
   const attrs = attributesRaw as Record<string, unknown>;
-  const d = createDefaultHomepage("en");
+  const d = createDefaultHomepage();
 
   const page = attrs.page as Record<string, unknown> | undefined;
   const heroPicturesNode = attrs.heroPictures as Record<string, unknown> | undefined;
@@ -360,7 +360,7 @@ function normalizeHomepagePayload(raw: unknown): HomepageTypes | null {
   }
   const m = metaRaw as Record<string, unknown>;
 
-  const d = createDefaultHomepage("en");
+  const d = createDefaultHomepage();
   const heroText = o.heroText == null ? "" : String(o.heroText);
   const heroPictures = Array.isArray(o.heroPictures)
     ? o.heroPictures.filter((u): u is string => typeof u === "string")
@@ -411,7 +411,7 @@ export async function fetchHomePage(
         `Homepage API response missing expected structure for locale ${locale}:`,
         raw,
       );
-      return createDefaultHomepage(locale);
+      return createDefaultHomepage();
     }
 
     return normalized;

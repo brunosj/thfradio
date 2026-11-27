@@ -5,10 +5,6 @@ import { fetchSoundcloudShows } from './soundcloud';
 import { showMatcher } from '@/utils/guests';
 import { tidyArchiveGenres } from '@/utils/genres';
 
-type ShowsType = {
-  data: ShowTypes[];
-};
-
 /** Letters and digits of a recording title without its "// date" part. */
 const recordingKey = (name: string | undefined) =>
   (name ?? '').split('//')[0].toLowerCase().replace(/[^a-z0-9]/g, '');

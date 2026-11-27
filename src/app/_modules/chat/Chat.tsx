@@ -38,17 +38,6 @@ export const Chat = ({ variant = 'overlay' }: ChatProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [pseudo, setPseudo] = useState('');
-  const [userId] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('chatUserId');
-      if (saved) return saved;
-      const newId = Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('chatUserId', newId);
-      return newId;
-    }
-    return Math.random().toString(36).substr(2, 9);
-  });
-
   const [lastSentTime, setLastSentTime] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -127,18 +116,18 @@ export const Chat = ({ variant = 'overlay' }: ChatProps) => {
           }
         });
 
-        socketRef.current.on('disconnect', (reason: string) => {
+        socketRef.current.on('disconnect', () => {
           if (!isActive) return;
           setIsConnected(false);
         });
 
-        socketRef.current.on('error', (error: any) => {
+        socketRef.current.on('error', (error: Error) => {
           if (!isActive) return;
           console.error('WebSocket error:', error);
           setError(t('chat.connectionError'));
         });
 
-        socketRef.current.on('connect_error', (error: any) => {
+        socketRef.current.on('connect_error', (error: Error) => {
           if (!isActive) return;
           console.error('Connection error:', error);
           setError(t('chat.connectionError'));

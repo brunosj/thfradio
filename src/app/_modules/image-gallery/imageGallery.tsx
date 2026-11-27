@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { CMS_URL } from "@/utils/constants";
 interface Props {
   items: Array<{
     url: string;

@@ -91,10 +91,16 @@ export default function ArchiveBrowser({
   useEffect(() => {
     if (!programme) return;
     const param = new URLSearchParams(window.location.search).get('show');
-    if (param) setShowKey(param === 'guests' ? GUESTS : param);
-  }, [programme]);
+    if (param) {
+      setTimeout(() => {
+        setShowKey(param === 'guests' ? GUESTS : param);
+        setShown(pageSize);
+      }, 0);
+    }
+  }, [programme, pageSize]);
   const pickShow = (key: string | null) => {
     setShowKey(key);
+    setShown(pageSize);
     const url = new URL(window.location.href);
     if (key) url.searchParams.set('show', key === GUESTS ? 'guests' : key);
     else url.searchParams.delete('show');
@@ -117,9 +123,6 @@ export default function ArchiveBrowser({
   const [shown, setShown] = useState(pageSize);
   const sentinel = useRef<HTMLDivElement | null>(null);
   const filtered = isFiltered(filter) || !!showKey;
-
-  // New search / genre → start at the top of the list again
-  useEffect(() => setShown(pageSize), [filter, showKey, pageSize]);
 
   const more = list.length > shown;
   useEffect(() => {
@@ -163,7 +166,10 @@ export default function ArchiveBrowser({
       <ArchiveFilterBar
         families={families}
         value={filter}
-        onChange={setFilter}
+        onChange={(f) => {
+          setFilter(f);
+          setShown(pageSize);
+        }}
       />
 
       {list.length ? (
