@@ -9,7 +9,13 @@ import { FiArrowRight } from 'react-icons/fi';
 import { Link } from '@/i18n/routing';
 import type { CloudShowTypes } from '@/types/ResponsesInterface';
 import { toArchiveShows } from '@/utils/showUtils';
-import { NO_GENRE_FILTER, applyGenreFilter, genreFamilies, isFiltered, type GenreFilter } from '@/utils/genres';
+import {
+  NO_GENRE_FILTER,
+  applyGenreFilter,
+  genreFamilies,
+  isFiltered,
+  type GenreFilter,
+} from '@/utils/genres';
 import BarsSpinner from '@/common/ui/BarsSpinner';
 import ArchiveFilterBar from './ArchiveFilterBar';
 import ShowPicker, { type ShowOption } from './ShowPicker';
@@ -55,13 +61,29 @@ export default function ArchiveBrowser({
   const showOptions = useMemo<ShowOption[]>(() => {
     if (!programme?.length) return [];
     const count = new Map<string, number>();
-    for (const key of showOf.values()) count.set(key, (count.get(key) ?? 0) + 1);
+    for (const key of showOf.values())
+      count.set(key, (count.get(key) ?? 0) + 1);
     const opts = programme
       .filter((p) => count.has(p.slug))
-      .map((p) => ({ key: p.slug, label: p.title.trim(), count: count.get(p.slug)! }))
-      .sort((a, b) => a.label.localeCompare(b.label, 'de', { sensitivity: 'base' }));
+      .map((p) => ({
+        key: p.slug,
+        label: p.title.trim(),
+        count: count.get(p.slug)!,
+      }))
+      .sort((a, b) =>
+        a.label.localeCompare(b.label, 'de', { sensitivity: 'base' }),
+      );
     const guests = count.get(GUESTS);
-    return guests ? [{ key: GUESTS, label: t('showsGuests') + ' · THF Presents & Takeovers', count: guests }, ...opts] : opts;
+    return guests
+      ? [
+          {
+            key: GUESTS,
+            label: t('showsGuests') + ' · THF Presents & Takeovers',
+            count: guests,
+          },
+          ...opts,
+        ]
+      : opts;
   }, [programme, showOf, t]);
 
   const [showKey, setShowKey] = useState<string | null>(null);
@@ -79,10 +101,19 @@ export default function ArchiveBrowser({
     window.history.replaceState(null, '', url.toString());
   };
 
-  const byShow = useMemo(() => (showKey ? all.filter((s) => showOf.get(s.id) === showKey) : all), [all, showKey, showOf]);
+  const byShow = useMemo(
+    () => (showKey ? all.filter((s) => showOf.get(s.id) === showKey) : all),
+    [all, showKey, showOf],
+  );
   const [filter, setFilter] = useState<GenreFilter>(NO_GENRE_FILTER);
-  const families = useMemo(() => genreFamilies(byShow, filter.subs), [byShow, filter.subs]);
-  const list = useMemo(() => applyGenreFilter(byShow, filter), [byShow, filter]);
+  const families = useMemo(
+    () => genreFamilies(byShow, filter.subs),
+    [byShow, filter.subs],
+  );
+  const list = useMemo(
+    () => applyGenreFilter(byShow, filter),
+    [byShow, filter],
+  );
   const [shown, setShown] = useState(pageSize);
   const sentinel = useRef<HTMLDivElement | null>(null);
   const filtered = isFiltered(filter) || !!showKey;
@@ -94,20 +125,28 @@ export default function ArchiveBrowser({
   useEffect(() => {
     const el = sentinel.current;
     if (!autoLoad || !el || !more) return;
-    const io = new IntersectionObserver((e) => e[0]?.isIntersecting && setShown((n) => n + pageSize), {
-      rootMargin: '800px 0px',
-    });
+    const io = new IntersectionObserver(
+      (e) => e[0]?.isIntersecting && setShown((n) => n + pageSize),
+      {
+        rootMargin: '800px 0px',
+      },
+    );
     io.observe(el);
     return () => io.disconnect();
   }, [autoLoad, more, list.length, pageSize, shown]);
-
 
   return (
     <div data-area='archive' className='space-y-6 lg:space-y-8'>
       {showOptions.length > 0 && (
         <div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
-          <span className='font-mono text-xs uppercase tracking-wider text-white/50'>{t('archiveShow')}</span>
-          <ShowPicker options={showOptions} value={showKey} onChange={pickShow} />
+          <span className='font-mono text-xs uppercase tracking-wider text-white/50'>
+            {t('archiveShow')}
+          </span>
+          <ShowPicker
+            options={showOptions}
+            value={showKey}
+            onChange={pickShow}
+          />
           {showKey && showKey !== GUESTS && (
             <Link
               href={`/shows/${showKey}`}
@@ -121,7 +160,11 @@ export default function ArchiveBrowser({
       )}
 
       {/* No counts anywhere: genre chips, tabs and the summary stay number-free */}
-      <ArchiveFilterBar families={families} value={filter} onChange={setFilter} />
+      <ArchiveFilterBar
+        families={families}
+        value={filter}
+        onChange={setFilter}
+      />
 
       {list.length ? (
         <ul
@@ -137,7 +180,9 @@ export default function ArchiveBrowser({
       ) : (
         <div className='rounded-xl border border-dashed border-white/20 px-6 py-16 text-center'>
           <p className='text-xl text-white'>{t('archiveNothingFound')}</p>
-          <p className='mt-2 font-mono text-sm text-white/60'>{t('archiveNothingFoundText')}</p>
+          <p className='mt-2 font-mono text-sm text-white/60'>
+            {t('archiveNothingFoundText')}
+          </p>
           {filtered && (
             <button
               type='button'
@@ -157,10 +202,13 @@ export default function ArchiveBrowser({
         <div className='flex justify-center pt-4'>
           <Link
             href={fullArchiveHref}
-            className='group inline-flex items-center gap-3 rounded-full bg-white px-7 py-3.5 font-sans font-bold text-dark-blue transition-colors duration-200 hover:bg-orange-500 hover:text-white'
+            className='group inline-flex items-center gap-3 rounded-full bg-white px-7 py-3.5 font-sans font-semibold text-dark-blue transition-colors duration-200 hover:bg-orange-500 hover:text-white'
           >
             {t('archiveBrowseAll')}
-            <FiArrowRight className='h-5 w-5 transition-transform duration-200 group-hover:translate-x-1' aria-hidden />
+            <FiArrowRight
+              className='h-5 w-5 transition-transform duration-200 group-hover:translate-x-1'
+              aria-hidden
+            />
           </Link>
         </div>
       )}

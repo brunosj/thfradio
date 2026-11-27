@@ -7,7 +7,7 @@ export const useSmoothScroll = () => {
   const { locale } = useParams();
 
   const handleAnchorLinkClick = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     href: string
   ) => {
     e.preventDefault();

@@ -3,7 +3,7 @@
 // One show as a card (archive, community picks, show pages): thin frame,
 // square photo inset with a play button on top, title and date | length in
 // mono caps, one line of outlined genre pills. Every card has the same
-// format, so rows line up.
+// format, so rows line up. The whole card is one play control.
 import { useState } from 'react';
 import { Play } from '@/common/assets/PlayIcon';
 import BarsSpinner from '@/common/ui/BarsSpinner';
@@ -35,8 +35,13 @@ export default function ShowCard({
   const src = broken ? null : image;
 
   return (
-    <article
-      className={`group flex h-full flex-col border p-2 sm:p-2.5 lg:p-3 text-white transition-colors duration-300
+    <button
+      type='button'
+      onClick={onPlay}
+      aria-label={playLabel}
+      aria-pressed={isCurrent}
+      className={`group flex h-full w-full flex-col border p-2 sm:p-2.5 lg:p-3 text-left text-white transition-colors duration-300
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-500
         ${isCurrent ? 'border-orange-500' : 'border-white/30 hover:border-white'}`}
     >
       <div className='relative aspect-square overflow-hidden bg-thf-blue-900'>
@@ -55,20 +60,17 @@ export default function ShowCard({
             <span className='font-mono uppercase text-sm leading-snug text-white/90 line-clamp-3'>{keepWithName(title)}</span>
           </div>
         )}
-        <button
-          type='button'
-          onClick={onPlay}
-          aria-label={playLabel}
-          aria-pressed={isCurrent}
-          className={`absolute inset-0 flex items-center justify-center transition-colors duration-300 focus-visible:outline-none
-            ${isCurrent ? 'bg-black/30' : 'bg-black/0 hover:bg-black/25 focus-visible:bg-black/25'}`}
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 flex items-center justify-center transition-colors duration-300
+            ${isCurrent ? 'bg-black/30' : 'bg-black/0 group-hover:bg-black/25 group-focus-visible:bg-black/25'}`}
         >
           <span
             className={`flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all duration-300
               ${
                 isCurrent
                   ? 'bg-orange-500 opacity-100 scale-100'
-                  : 'bg-white opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100'
+                  : 'bg-white opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100'
               }`}
           >
             {isCurrent ? (
@@ -79,7 +81,7 @@ export default function ShowCard({
               <Play className='h-5 w-5 translate-x-[1px]' fill='#100f2e' />
             )}
           </span>
-        </button>
+        </span>
       </div>
 
       <div className='flex flex-1 flex-col pt-3 lg:pt-4 px-0.5'>
@@ -115,6 +117,6 @@ export default function ShowCard({
           </div>
         )}
       </div>
-    </article>
+    </button>
   );
 }

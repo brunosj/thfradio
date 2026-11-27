@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
@@ -7,6 +9,7 @@ import { DotButton } from "./CarouselNavigation";
 import type { Pictures } from "@/types/ResponsesInterface";
 import { CMS_URL } from "@/utils/constants";
 import { ImageMedia } from "@/lib/image";
+import { useTranslations } from "next-intl";
 
 type PropType = {
   options?: CarouselProps;
@@ -27,6 +30,7 @@ type CarouselProps = {
 
 const ImageCarousel: React.FC<PropType> = (props) => {
   const { slides, options } = props;
+  const t = useTranslations();
   const autoplay = useRef(
     Autoplay(
       { delay: 3000, stopOnInteraction: false },
@@ -90,7 +94,7 @@ const ImageCarousel: React.FC<PropType> = (props) => {
                   <ImageMedia
                     imgClassName="object-cover"
                     src={imageByIndex(slides, index)}
-                    alt="Your alt text"
+                    alt=""
                     fill
                     priority={index === 0}
                     loading={index < 3 ? "eager" : "lazy"}
@@ -110,6 +114,7 @@ const ImageCarousel: React.FC<PropType> = (props) => {
                 key={index}
                 selected={index === selectedIndex}
                 onClick={() => scrollTo(index)}
+                ariaLabel={t('carouselGoToSlide', { n: index + 1 })}
               />
             ))}
         </div>

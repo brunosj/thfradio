@@ -28,7 +28,6 @@ export default function MobileDayTabs({
   const otherDays = days.filter((day) => !isSameDay(day, today));
   const isTodaySelected = isSameDay(selectedDay, today);
 
-  const todayDayName = today.toLocaleString(locale, { weekday: 'short' });
   const todayDayNumber = format(today, 'd');
 
   const handleToday = () => {
@@ -36,45 +35,34 @@ export default function MobileDayTabs({
   };
 
   useEffect(() => {
-    if (isSameDay(selectedDay, today)) return;
-
     const tab = tabRefs.current.get(selectedDay.toISOString());
     tab?.scrollIntoView({
       behavior: 'smooth',
       block: 'nearest',
       inline: 'center',
     });
-  }, [selectedDay, today]);
-
-  const todayGroupClass = isTodaySelected ? selectedTabClass : unselectedTabClass;
+  }, [selectedDay]);
 
   return (
     <div className='mb-0 flex items-center gap-2'>
       {todayInRange && (
-        <div className='flex shrink-0 min-h-11 rounded-lg overflow-hidden'>
-          <button
-            type='button'
-            onClick={handleToday}
-            aria-label={t('today')}
-            className={`px-3 py-2 text-xs font-mono uppercase transition-colors border-r border-white/10 ${todayGroupClass}`}
-          >
-            {t('today')}
-          </button>
-          <button
-            type='button'
-            role='tab'
-            id={`mobile-day-tab-${today.toISOString()}`}
-            aria-selected={isTodaySelected}
-            tabIndex={isTodaySelected ? 0 : -1}
-            onClick={handleToday}
-            className={`min-w-14 px-2.5 py-2 font-mono text-center transition-colors ${todayGroupClass}`}
-          >
-            <span className='block text-[10px] uppercase opacity-80'>
-              {todayDayName}
-            </span>
-            <span className='block text-sm font-bold'>{todayDayNumber}</span>
-          </button>
-        </div>
+        <button
+          type='button'
+          role='tab'
+          id={`mobile-day-tab-${today.toISOString()}`}
+          aria-selected={isTodaySelected}
+          tabIndex={isTodaySelected ? 0 : -1}
+          ref={(el) => {
+            if (el) tabRefs.current.set(today.toISOString(), el);
+            else tabRefs.current.delete(today.toISOString());
+          }}
+          onClick={handleToday}
+          className={`shrink-0 snap-start min-h-11 min-w-14 px-2.5 py-2 rounded-lg font-mono text-center transition-colors
+            ${isTodaySelected ? selectedTabClass : unselectedTabClass}`}
+        >
+          <span className='block text-[10px] uppercase opacity-80'>{t('today')}</span>
+          <span className='block text-sm font-bold'>{todayDayNumber}</span>
+        </button>
       )}
 
       {!todayInRange && (

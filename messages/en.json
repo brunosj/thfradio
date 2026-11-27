@@ -4,6 +4,13 @@
   "nextShow": "Next show",
   "nowPlaying": "Now playing",
   "archivePlaying": "THF Radio Archive",
+  "offAir": "Off air",
+  "liveNow": "Live now",
+  "followTitle": "Follow",
+  "legalTitle": "Legal",
+  "carouselPrevious": "Previous slide",
+  "carouselNext": "Next slide",
+  "carouselGoToSlide": "Go to slide {n}",
   "archiveSearchPlaceholder": "Search shows or genres",
   "archiveGenres": "Genres",
   "archiveSubgenres": "Subgenres of {family}",
@@ -221,6 +228,8 @@
     "join": "Join the chat!",
     "open": "Open Chat",
     "close": "Close Chat",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
     "backHome": "Back to home",
     "errors": {
       "sendFailed": "Failed to send message. Please try again."

@@ -50,7 +50,7 @@ function VideoTile({ video, onPlay }: { video: Video; onPlay: () => void }) {
           <span className='flex h-12 w-12 items-center justify-center rounded-full bg-white text-dark-blue shadow-lg transition-colors duration-300 group-hover:bg-orange-500 group-hover:text-white'>
             <Play className='h-5 w-5 translate-x-[1px]' fill='currentColor' />
           </span>
-          <span className='bg-black px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white'>
+          <span className='text-on-bg bg-black px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white'>
             {t('videoLabel')}
           </span>
         </span>

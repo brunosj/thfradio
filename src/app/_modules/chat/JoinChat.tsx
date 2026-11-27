@@ -45,7 +45,7 @@ export default function JoinChat() {
           <span className='hidden lg:inline'>
             {isChatOpen ? t('chat.close') : t('chat.join')}
           </span>
-          <span className='lg:hidden'>{isChatOpen ? 'X' : t('chat.join')}</span>
+          <span className='lg:hidden'>{isChatOpen ? t('chat.close') : t('chat.join')}</span>
         </button>
         )}
       </div>

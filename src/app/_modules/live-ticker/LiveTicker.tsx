@@ -24,7 +24,7 @@ export default function LiveTicker() {
       <div className='layout flex items-stretch py-2'>
         <div className='hidden lg:flex shrink-0 items-center pr-4 mr-2 border-r border-thf-blue-500'>
           <span className='text-[11px] font-medium uppercase tracking-widest leading-none text-thf-blue-500/70'>
-            Live Now
+            {t('liveNow')}
           </span>
         </div>
         <div className='flex flex-1 min-w-0 flex-col lg:flex-row lg:gap-1 lg:items-stretch'>

@@ -81,7 +81,7 @@ export default function PicksSection({ picks }: { picks: Picks }) {
                 className={`${arrowClass} absolute left-3 lg:left-6 top-1/2 z-10 -translate-y-1/2 hidden md:flex`}
                 onClick={() => by(-1)}
                 disabled={edges.start}
-                aria-label='←'
+                aria-label={t('carouselPrevious')}
               >
                 <FiArrowLeft className='h-5 w-5' />
               </button>
@@ -90,7 +90,7 @@ export default function PicksSection({ picks }: { picks: Picks }) {
                 className={`${arrowClass} absolute right-3 lg:right-6 top-1/2 z-10 -translate-y-1/2 hidden md:flex`}
                 onClick={() => by(1)}
                 disabled={edges.end}
-                aria-label='→'
+                aria-label={t('carouselNext')}
               >
                 <FiArrowRight className='h-5 w-5' />
               </button>

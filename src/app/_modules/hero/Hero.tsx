@@ -46,11 +46,7 @@ const Hero = ({
             <ReactMarkdown>{description}</ReactMarkdown>
           </div>
           <div className='pt-6 flex justify-center order-3 '>
-            <Button
-              path='/info'
-              color='white-orange'
-              ariaLabel={`Navigate to About page`}
-            >
+            <Button path='/info' color='white-orange'>
               {t('aboutUs')}
             </Button>
           </div>
@@ -62,11 +58,7 @@ const Hero = ({
       {showButtons && (
         <>
           <div className='hidden lg:flex justify-center order-3 pb-6 lg:pb-0'>
-            <Button
-              path='/info'
-              color='white-orange'
-              ariaLabel={`Navigate to About page`}
-            >
+            <Button path='/info' color='white-orange'>
               {t('aboutUs')}
             </Button>
           </div>
@@ -74,7 +66,6 @@ const Hero = ({
             <Button
               path='#latest'
               color='white-orange'
-              ariaLabel={`Navigate to Latest shows`}
               onClick={(e) => handleAnchorLinkClick(e, '#latest')}
             >
               {t('latestShows')}

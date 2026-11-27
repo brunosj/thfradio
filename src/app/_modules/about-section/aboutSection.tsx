@@ -42,7 +42,6 @@ const AboutSection = ({
                   path={button.path}
                   key={i}
                   color={button.color ?? 'white-orange'}
-                  ariaLabel={`Navigate to ${button.text}`}
                 >
                   {button.text}
                 </Button>

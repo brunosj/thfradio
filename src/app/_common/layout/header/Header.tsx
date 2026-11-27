@@ -18,7 +18,7 @@ interface HeaderProps {
 }
 
 // "shows" = Residents / Guests (/shows), "latest" = Archiv, every episode (/latest).
-// "shop" (Merch, SumUp store) is left out until the shop is ready: add it back here.
+// News is out of the nav (redesign). "shop" stays out until the merch shop is ready.
 const menuKeys = ['programme', 'shows', 'latest', 'info'] as const;
 
 const Header: React.FC<HeaderProps> = ({
@@ -87,8 +87,8 @@ const Header: React.FC<HeaderProps> = ({
       <div className='layout h-full flex items-center lg:items-stretch justify-between'>
         {/* Logo (left aligned) */}
         <div className='flex items-center gap-6 self-center'>
-          <Link className='block w-24 lg:w-32' href='/' aria-label='logo'>
-            <Image quality={75} src={logo} alt='THF Radio Logo' />
+          <Link className='block w-24 lg:w-32' href='/' aria-label='THF Radio'>
+            <Image quality={75} src={logo} alt='' />
           </Link>
           {/* <Link href='/chat' className='block lg:hidden'>
             <SlSpeech className='w-6 h-6 ' />
@@ -133,6 +133,7 @@ const Header: React.FC<HeaderProps> = ({
               onClick={handleToggleMenu}
               className='text-white'
               aria-label='Menu'
+              aria-expanded={isOpen}
             >
               {isOpen ? <XMarkIcon /> : <Bars3Icon />}
             </button>
@@ -144,6 +145,8 @@ const Header: React.FC<HeaderProps> = ({
       <div
         ref={menuRef}
         data-area='menu'
+        inert={!isOpen}
+        aria-hidden={!isOpen}
         style={{
           right: isOpen ? '0' : '-100%',
           visibility: isOpen ? 'visible' : 'hidden',
