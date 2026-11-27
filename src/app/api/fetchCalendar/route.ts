@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import nodeIcal from 'node-ical';
 import type { CalendarEntry } from '@/types/ResponsesInterface';
-import type { CalendarComponent, VEvent } from 'node-ical';
+import type { CalendarComponent, ParameterValue, VEvent } from 'node-ical';
 import {
   getTwoWeekBounds,
   isWithinTwoWeekBounds,
@@ -29,6 +29,12 @@ const CACHE_HEADERS = {
 };
 
 type CalendarEntries = { [key: string]: CalendarComponent };
+
+function icalText(value: ParameterValue | undefined): string | undefined {
+  if (value == null) return undefined;
+  if (typeof value === 'string') return value;
+  return value.val;
+}
 
 /** Returns null when the intranet can't be used, so the caller falls back to ICS. */
 async function fetchFromIntranet(
@@ -72,21 +78,20 @@ async function fetchFromTeamup(bounds: TwoWeekBounds): Promise<CalendarEntry[]> 
   return veventEntries
     .filter((entry: VEvent) => entry.type === 'VEVENT')
     .filter((show: VEvent) => {
-      const showStart = new Date(show.start);
-      const showEnd = new Date(show.end);
-      return isWithinTwoWeekBounds(showStart, showEnd, bounds);
+      if (!show.start || !show.end) return false;
+      return isWithinTwoWeekBounds(show.start, show.end, bounds);
     })
     .map((event: VEvent, index) => {
-      const startTime = new Date(event.start).toISOString();
-      const endTime = new Date(event.end).toISOString();
-      const title = event.summary ?? 'Show';
+      const startTime = event.start!.toISOString();
+      const endTime = event.end!.toISOString();
+      const title = icalText(event.summary) ?? 'Show';
       return {
         id: String(event.uid ?? `cal-${index}`),
         title,
         startTime,
         endTime,
-        summary: event.summary,
-        description: event.description,
+        summary: icalText(event.summary),
+        description: icalText(event.description),
       } satisfies CalendarEntry;
     })
     .sort(

@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -11,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -19,19 +23,45 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@/common/*": ["./src/app/_common/*"],
-      "@/assets/*": ["./src/app/_common/assets/*"],
-      "@/modules/*": ["./src/app/_modules/*"],
-      "@/utils/*": ["./src/app/_utils/*"],
-      "@/ui/*": ["./src/app/_common/ui/*"],
-      "@/context/*": ["./src/app/_context/*"],
-      "@/types/*": ["./src/app/_types/*"],
-      "@/layout/*": ["./src/app/_common/layout/*"],
-      "@/hooks/*": ["./src/app/_hooks/*"],
-      "@/i18n/*": ["./src/i18n/*"],
-      "@/styles/*": ["./src/app/_styles/*"],
-      "@/lib/*": ["./src/app/_lib/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@/common/*": [
+        "./src/app/_common/*"
+      ],
+      "@/assets/*": [
+        "./src/app/_common/assets/*"
+      ],
+      "@/modules/*": [
+        "./src/app/_modules/*"
+      ],
+      "@/utils/*": [
+        "./src/app/_utils/*"
+      ],
+      "@/ui/*": [
+        "./src/app/_common/ui/*"
+      ],
+      "@/context/*": [
+        "./src/app/_context/*"
+      ],
+      "@/types/*": [
+        "./src/app/_types/*"
+      ],
+      "@/layout/*": [
+        "./src/app/_common/layout/*"
+      ],
+      "@/hooks/*": [
+        "./src/app/_hooks/*"
+      ],
+      "@/i18n/*": [
+        "./src/i18n/*"
+      ],
+      "@/styles/*": [
+        "./src/app/_styles/*"
+      ],
+      "@/lib/*": [
+        "./src/app/_lib/*"
+      ]
     }
   },
   "include": [
@@ -39,7 +69,10 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "next.config.mjs"
+    "next.config.mjs",
+    ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
