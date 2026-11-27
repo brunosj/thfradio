@@ -92,7 +92,7 @@ export function StaffPickPoster({ pick }: { pick: Pick }) {
 
       <div className='absolute inset-x-0 bottom-0 p-[4cqw]'>
         <p
-          className='inline-block bg-black px-[1.2cqw] py-[0.3cqw] font-sans font-bold uppercase leading-none text-white'
+          className='text-on-bg inline-block bg-black px-[1.2cqw] py-[0.3cqw] font-sans font-bold uppercase leading-none text-white'
           style={{ fontSize: 'clamp(14px, 3.4cqw, 26px)' }}
         >
           {pickDate(pick.airDate, locale, 'poster')}
@@ -105,7 +105,7 @@ export function StaffPickPoster({ pick }: { pick: Pick }) {
           style={{ fontSize: 'clamp(20px, 5.6cqw, 52px)', lineHeight: 1.3 }}
         >
           {/* One white box per line */}
-          <span className='bg-white px-[1.2cqw] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]'>
+          <span className='text-on-bg bg-white px-[1.2cqw] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]'>
             {keepWithName(pick.title)}
           </span>
         </div>

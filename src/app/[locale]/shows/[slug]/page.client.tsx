@@ -230,7 +230,7 @@ export default function ShowContent({
             </div>
 
             <div className='min-w-0 flex-1 [container-type:inline-size]'>
-              <p className='inline-block bg-black px-2 py-1 font-sans font-bold uppercase leading-none text-white text-xs lg:text-sm'>
+              <p className='text-on-bg inline-block bg-black px-2 py-1 font-sans font-bold uppercase leading-none text-white text-xs lg:text-sm'>
                 {current ? t('showsCurrent') : t('showsArchiveShow')}
               </p>
               {/* div, not h1: the global h1 style would win over these classes */}
@@ -240,7 +240,7 @@ export default function ShowContent({
                 className='mt-1.5 font-sans font-bold uppercase text-black'
                 style={{ fontSize: 'clamp(26px, 5.5cqw, 52px)', lineHeight: 1.25 }}
               >
-                <span className='bg-white px-[0.18em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]'>
+                <span className='text-on-bg bg-white px-[0.18em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]'>
                   {keepWithName(content.title)}
                 </span>
               </div>

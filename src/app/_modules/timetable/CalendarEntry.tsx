@@ -32,7 +32,7 @@ const CalendarEntry = ({ entry }: { entry: CalendarEntryProps }) => {
     entryStartDate <= currentTime && entryEndDate >= currentTime;
 
   const summaryClass = isCurrentShow
-    ? 'bg-orange-500 text-white font-bold px-1'
+    ? 'text-on-bg bg-orange-500 text-white font-bold px-1'
     : '';
 
   return (

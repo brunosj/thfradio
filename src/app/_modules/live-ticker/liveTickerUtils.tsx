@@ -232,7 +232,7 @@ export function getChannelShowContent(
 
   return (
     <div className={tickerRow}>
-      <span className={tickerLabel}>{t('archivePlaying')}</span>
+      <span className={tickerLabel}>{t('offAir')}</span>
       {nextShow && (
         <>
           <span className={tickerLabel}>{t('nextShow')}</span>

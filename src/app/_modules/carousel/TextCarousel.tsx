@@ -1,4 +1,7 @@
+'use client';
+
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from 'embla-carousel-react';
@@ -17,6 +20,7 @@ type CarouselApi = UseEmblaCarouselType[1];
 //
 const TextCarousel: React.FC<PropType> = (props) => {
   const { slides } = props;
+  const t = useTranslations();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false }, [
     AutoHeight(),
   ]);
@@ -79,6 +83,7 @@ const TextCarousel: React.FC<PropType> = (props) => {
                 key={index}
                 selected={index === selectedIndex}
                 onClick={() => scrollTo(index)}
+                ariaLabel={t('carouselGoToSlide', { n: index + 1 })}
               />
             ))}
         </div>

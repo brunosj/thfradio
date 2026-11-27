@@ -43,7 +43,7 @@ export default function HomeNewsSection({
         )}
       </div>
       <div className='pt-12 flex justify-center'>
-        <Button path='/news' color='white-blue' ariaLabel={t('toNews')}>
+        <Button path='/news' color='white-blue'>
           {t('allNews')}
         </Button>
       </div>

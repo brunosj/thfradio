@@ -52,6 +52,7 @@ export const Chat = ({ variant = 'overlay' }: ChatProps) => {
   const [lastSentTime, setLastSentTime] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const pseudoInputRef = useRef<HTMLInputElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const t = useTranslations();
   const [error, setError] = useState<string | null>(null);
@@ -160,18 +161,9 @@ export const Chat = ({ variant = 'overlay' }: ChatProps) => {
   }, [shouldConnect, t]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const isInputField =
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement;
-
-      if ((isEmbedded || isOpen) && e.code === 'Space' && !isInputField) {
-        e.preventDefault();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    if (!isEmbedded && isOpen) {
+      pseudoInputRef.current?.focus();
+    }
   }, [isOpen, isEmbedded]);
 
   useEffect(() => {
@@ -238,8 +230,15 @@ export const Chat = ({ variant = 'overlay' }: ChatProps) => {
         md:inset-auto md:bottom-2 md:right-2 md:w-120 md:border md:border-gray-300 md:rounded-lg
         ${isOpen ? 'md:h-150 md:opacity-100 md:visible shadow-xl' : 'md:h-0 md:opacity-0 md:invisible'}`;
 
+  const overlayClosed = !isEmbedded && !isOpen;
+
   return (
-    <div data-area='chat' className={rootClassName}>
+    <div
+      data-area='chat'
+      className={rootClassName}
+      inert={overlayClosed}
+      aria-hidden={overlayClosed}
+    >
       {/* Header */}
       <div className='flex justify-between items-center bg-orange-500 text-white p-4 h-16 shrink-0'>
         <div className='flex items-center gap-2'>
@@ -250,7 +249,11 @@ export const Chat = ({ variant = 'overlay' }: ChatProps) => {
             className={`w-2 h-2 rounded-full ${
               isConnected ? 'bg-green-300' : 'bg-red-300'
             }`}
+            aria-hidden
           />
+          <span className='sr-only'>
+            {isConnected ? t('chat.connected') : t('chat.disconnected')}
+          </span>
         </div>
         {variant === 'inline' ? (
           <Link
@@ -276,6 +279,7 @@ export const Chat = ({ variant = 'overlay' }: ChatProps) => {
       {/* Pseudo Input */}
       <div className='flex justify-between items-center px-4 py-3 border-b border-gray-300 shrink-0'>
         <input
+          ref={pseudoInputRef}
           type='text'
           value={pseudo}
           onChange={(e: { target: { value: SetStateAction<string> } }) =>
@@ -283,7 +287,6 @@ export const Chat = ({ variant = 'overlay' }: ChatProps) => {
           }
           placeholder={t('chat.pseudo')}
           maxLength={20}
-          autoFocus
           className='grow px-2 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-500'
         />
       </div>
@@ -342,8 +345,12 @@ export const Chat = ({ variant = 'overlay' }: ChatProps) => {
       {error && (
         <div className='p-2 bg-red-100 text-red-800 text-xs border-t border-red-300 flex justify-between items-center shrink-0'>
           <span>{error}</span>
-          <button onClick={() => setError(null)} className='underline ml-2'>
-            Close
+          <button
+            type='button'
+            onClick={() => setError(null)}
+            className='underline ml-2'
+          >
+            {t('chat.fermer')}
           </button>
         </div>
       )}

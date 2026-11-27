@@ -3,32 +3,35 @@ import React from 'react';
 type DotButtonPropType = {
   selected: boolean;
   onClick: () => void;
+  ariaLabel: string;
 };
 
 export const DotButton: React.FC<DotButtonPropType> = (props) => {
-  const { selected, onClick } = props;
+  const { selected, onClick, ariaLabel } = props;
 
   return (
     <button
       className={'embla__dot'.concat(selected ? ' embla__dot--selected' : '')}
       type='button'
       onClick={onClick}
-      aria-label='Other slide'
+      aria-label={ariaLabel}
+      aria-current={selected ? 'true' : undefined}
     />
   );
 };
 
 export const DotButtonText: React.FC<DotButtonPropType> = (props) => {
-  const { selected, onClick } = props;
+  const { selected, onClick, ariaLabel } = props;
 
   return (
     <button
       className={'textEmbla__dot'.concat(
-        selected ? ' textEmbla__dot--selected' : ''
+        selected ? ' textEmbla__dot--selected' : '',
       )}
       type='button'
       onClick={onClick}
-      aria-label='Other slide'
+      aria-label={ariaLabel}
+      aria-current={selected ? 'true' : undefined}
     />
   );
 };
@@ -36,17 +39,19 @@ export const DotButtonText: React.FC<DotButtonPropType> = (props) => {
 type PrevNextButtonPropType = {
   enabled: boolean;
   onClick: () => void;
+  ariaLabel: string;
 };
 
 export const PrevButton: React.FC<PrevNextButtonPropType> = (props) => {
-  const { enabled, onClick } = props;
+  const { enabled, onClick, ariaLabel } = props;
 
   return (
     <button
       className='embla__button embla__button--prev'
       onClick={onClick}
       disabled={!enabled}
-      aria-label='Previous slide'
+      aria-label={ariaLabel}
+      type='button'
     >
       <svg className='embla__button__svg' viewBox='137.718 -1.001 366.563 644'>
         <path
@@ -59,14 +64,15 @@ export const PrevButton: React.FC<PrevNextButtonPropType> = (props) => {
 };
 
 export const NextButton: React.FC<PrevNextButtonPropType> = (props) => {
-  const { enabled, onClick } = props;
+  const { enabled, onClick, ariaLabel } = props;
 
   return (
     <button
       className='embla__button embla__button--next'
       onClick={onClick}
       disabled={!enabled}
-      aria-label='Next slide'
+      aria-label={ariaLabel}
+      type='button'
     >
       <svg className='embla__button__svg' viewBox='0 0 238.003 238.003'>
         <path

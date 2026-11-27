@@ -1,5 +1,22 @@
 @import 'tailwindcss';
 
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled),
+  [role='tab']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  [role='button']:focus-visible,
+  [role='tab']:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--color-orange-400);
+    outline-offset: 2px;
+  }
+}
+
 @theme {
   /* Custom Fonts */
   --font-sans: var(--neue-machina);
@@ -106,6 +123,13 @@ h5 {
 
 .textHover {
   @apply duration-300  hover:text-neutral-300 group-hover:text-neutral-300;
+}
+
+/* Caps sit near the top of Neue Machina's em box; pad the top to match
+   the empty space under the baseline so text looks vertically centered
+   on a solid background (date chips, title highlight bars, "Video" labels). */
+.text-on-bg {
+  padding-top: 0.2em;
 }
 
 .imageHover {

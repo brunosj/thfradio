@@ -7,8 +7,8 @@ import { Link } from '@/i18n/routing';
 
 // Define menu keys as const arrays for type safety
 // No 'shop' until the merch shop is ready
-const menuKeys = ['news', 'programme', 'latest', 'info'] as const;
-const followMenuKeys = ['Instagram', 'Facebook', 'Mixcloud', 'Soundcloud'] as const;
+const menuKeys = ['programme', 'shows', 'latest', 'info'] as const;
+const followMenuKeys = ['Instagram', 'Mixcloud', 'Soundcloud'] as const;
 const extraMenuKeys = ['privacy', 'imprint', 'awareness'] as const;
 
 type Item = { name: string; path: string };
@@ -58,10 +58,10 @@ const Footer = () => {
           title={t('menuTitle')}
           items={menuKeys.map((key) => ({ name: t(`menu.${key}.name`), path: t(`menu.${key}.path`) }))}
         />
-        <Column title='Follow' items={followMenuKeys.map((key) => follow.find((i) => i.name === key))} />
+        <Column title={t('followTitle')} items={followMenuKeys.map((key) => follow.find((i) => i.name === key))} />
         {/* All contact entries (the German one isn't called "support") */}
         <Column title={t('contactTitle')} items={contact} />
-        <Column title='Legal' items={extraMenuKeys.map((key) => extra.find((i) => i.path.includes(key)))} />
+        <Column title={t('legalTitle')} items={extraMenuKeys.map((key) => extra.find((i) => i.path.includes(key)))} />
       </nav>
     </footer>
   );
